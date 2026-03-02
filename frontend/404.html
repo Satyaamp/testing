@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 Not Found - Dhan₹ekha</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#22c55e">
+  <link rel="shortcut icon" href="assets/404.png" type="image/png">]
+  <link rel="stylesheet" href="css/nofnd.css">
+
+</head>
+<body>
+  <!-- Page Loader -->
+  <div id="page-loader"><div class="loader"></div><p class="loader-text"></p></div>
+  <script>
+    window.addEventListener('load', () => {
+      const loader = document.getElementById('page-loader');
+      const text = loader.querySelector('.loader-text');
+      if (text) text.innerText = "Searching for page...";
+      setTimeout(() => {
+        loader.style.opacity = '0';
+        setTimeout(() => loader.style.display = 'none', 500);
+      }, 1000);
+    });
+  </script>
+
+  <div class="weather-effects" id="weatherEffects"></div>
+
+  <div class="container">
+    <div class="scene-container">
+      <svg id="sceneSVG" width="300" height="250" viewBox="0 0 300 250" xmlns="http://www.w3.org/2000/svg">
+      </svg>
+    </div>
+
+    <div class="text-content">
+      <div class="season-tag" id="seasonTag">🌸 Summer Season</div>
+      <h1>404</h1>
+      <h2 id="seasonTitle">Page Lost in the Summer Heat</h2>
+      <p id="seasonMessage">
+        The page you're searching for has vanished like morning dew under the scorching sun. 
+        Even our best search couldn't track it down in this heat!
+      </p>
+      <a href="/" class="btn-home">Return Home</a>
+      <a href="/sitemap" class="btn-home" style="background: rgba(0, 0, 0, 0.727); border: 1px solid rgba(148, 37, 37, 0.3); margin-left: 10px;">View Sitemap</a>
+
+      <div class="precautions-card" id="precautionsCard">
+      </div>
+    </div>
+  </div>
+
+
+  <script src="js/nofnd.js"></script>
+</body>
+</html>

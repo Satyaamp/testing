@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dhan₹ekha – Site Map</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/sitemap.css">
+
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <div class="sitemap-container">
+    <h1>App Flow &amp; Sitemap</h1>
+    <p class="subtitle">Visualizing the structure</p>
+
+    <div class="tree">
+
+      <!-- LEVEL 1: LANDING -->
+      <div class="level">
+        <a href="/" class="node">
+          <div class="node-icon">🏠</div>
+          <div class="node-title">Landing Page</div>
+          <div class="node-desc">Welcome screen, features overview, and PWA install prompt.</div>
+          <span class="tag public">Public</span>
+        </a>
+      </div>
+
+      <!-- SPACER 1→2 -->
+      <div class="v-spacer"><div class="v-spacer-dot"></div></div>
+      <div class="h-spacer" aria-hidden="true">
+        <div class="h-spacer-line"><div class="h-spacer-dot"></div></div>
+      </div>
+
+      <!-- LEVEL 2: AUTH -->
+      <div class="level">
+        <div class="node-wrapper">
+          <div class="stub"></div>
+          <a href="/login" class="node">
+            <div class="node-icon">🔐</div>
+            <div class="node-title">Authentication</div>
+            <div class="node-desc">Login, Signup, and Forgot Password flows.</div>
+            <span class="tag gateway">Gateway</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- SPACER 2→3 -->
+      <div class="v-spacer"><div class="v-spacer-dot"></div></div>
+      <div class="h-spacer" aria-hidden="true">
+        <div class="h-spacer-line"><div class="h-spacer-dot"></div></div>
+      </div>
+
+      <!-- LEVEL 3: DASHBOARD -->
+      <div class="level">
+        <div class="node-wrapper">
+          <div class="stub"></div>
+          <a href="/dashboard" class="node core">
+            <div class="node-icon">📊</div>
+            <div class="node-title">Dashboard</div>
+            <div class="node-desc">Central hub. View balance, recent stats, and add expenses.</div>
+            <span class="tag secure">Core</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- SPACER 3→4 (with bracket on desktop) -->
+      <div class="v-spacer"><div class="v-spacer-dot"></div></div>
+      <div class="h-spacer bracket" aria-hidden="true">
+        <div class="v-branch"></div>
+      </div>
+
+      <!-- LEVEL 4: FEATURES -->
+      <div class="level">
+        <!-- Mobile horizontal bar -->
+        <div class="h-branch">
+          <div class="h-branch-line"></div>
+        </div>
+
+        <div class="node-wrapper">
+          <div class="stub"></div>
+          <a href="/monthly" class="node">
+            <div class="node-icon">📅</div>
+            <div class="node-title">Monthly Analytics</div>
+            <div class="node-desc">Calendar view, daily breakdown, and category charts.</div>
+            <span class="tag feature">Feature</span>
+          </a>
+        </div>
+
+        <div class="node-wrapper">
+          <div class="stub"></div>
+          <a href="/yearly" class="node">
+            <div class="node-icon">📈</div>
+            <div class="node-title">Yearly Overview</div>
+            <div class="node-desc">Long-term trends, savings analysis, and comparisons.</div>
+            <span class="tag feature">Feature</span>
+          </a>
+        </div>
+
+        <div class="node-wrapper">
+          <div class="stub"></div>
+          <a href="/profile" class="node">
+            <div class="node-icon">👤</div>
+            <div class="node-title">User Profile</div>
+            <div class="node-desc">Manage account, export data, and view membership badges.</div>
+            <span class="tag settings">Settings</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="margin-top: 80px;">
+      <button class="back-btn" onclick="history.back()">← go back</button>
+    </div>
+  </div>
+</body>
+</html>
