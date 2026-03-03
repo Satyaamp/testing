@@ -7,7 +7,6 @@ import { apiRequest } from "./api.js";
 const mobileDayScroll = document.getElementById("mobile-day-scroll");
 const mobileListContainer = document.getElementById("mobile-transaction-list");
 const mobileMonthText = document.getElementById("mobileMonthText");
-const mobileMonthSwipe = document.getElementById("mobileMonthSwipe");
 const pageMonthTitle = document.getElementById("pageMonthTitle");
 const calendarViewMonthTitle = document.getElementById("calendarViewMonthTitle");
 const backToTopBtn = document.getElementById("backToTopBtn");
@@ -104,8 +103,8 @@ if (monthTxCount) {
   monthTxCount.style.cursor = "pointer";
   monthTxCount.addEventListener("click", () => {
     const isMobile = window.innerWidth <= 768;
-    const target = isMobile 
-      ? document.querySelector(".mobile-date-view") 
+    const target = isMobile
+      ? document.querySelector(".mobile-date-view")
       : document.querySelector(".date-wise");
 
     if (target) {
@@ -140,20 +139,28 @@ async function loadMonthlyData() {
 
   // Calculate Liquid Fill Percentages (Income is baseline)
   const base = income > 0 ? income : (expense > 0 ? expense : 1);
-  
+
   // Visual Fill (Capped at 100%)
   const expenseFill = Math.min((expense / base) * 100, 100);
   const balanceFill = Math.min((balance / base) * 100, 100);
 
   // Apply Heights
-  document.getElementById("fillBudget").style.height = "100%"; // Budget is the limit (full)
-  document.getElementById("fillExpense").style.height = `${expenseFill}%`;
-  document.getElementById("fillBalance").style.height = `${Math.max(0, balanceFill)}%`;
+  const fillBudget = document.getElementById("fillBudget");
+  const fillExpense = document.getElementById("fillExpense");
+  const fillBalance = document.getElementById("fillBalance");
 
-  // Update Hover Percentages (Uncapped for text)
-  document.getElementById("pctIncome").innerText = "100%";
-  document.getElementById("pctExpense").innerText = `${((expense / base) * 100).toFixed(1)}%`;
-  document.getElementById("pctBalance").innerText = `${((balance / base) * 100).toFixed(1)}%`;
+  if (fillBudget) fillBudget.style.height = "100%";
+  if (fillExpense) fillExpense.style.height = `${expenseFill}%`;
+  if (fillBalance) fillBalance.style.height = `${Math.max(0, balanceFill)}%`;
+
+  // Update Hover Percentages
+  const pctIncome = document.getElementById("pctIncome");
+  const pctExpense = document.getElementById("pctExpense");
+  const pctBalance = document.getElementById("pctBalance");
+
+  if (pctIncome) pctIncome.innerText = "100%";
+  if (pctExpense) pctExpense.innerText = `${((expense / base) * 100).toFixed(1)}%`;
+  if (pctBalance) pctBalance.innerText = `${((balance / base) * 100).toFixed(1)}%`;
 
   renderDailyAverage(expense, year, month);
   renderTopCategory(res.data.categories);
@@ -172,8 +179,8 @@ function renderDailyAverage(totalExpense, year, month) {
   const avgElMobile = document.getElementById("dailyAvgIndicatorMobile");
 
   const now = new Date();
-  const isCurrentMonth = 
-    parseInt(year) === now.getFullYear() && 
+  const isCurrentMonth =
+    parseInt(year) === now.getFullYear() &&
     (parseInt(month) - 1) === now.getMonth();
 
   let dayCount = 0;
@@ -215,7 +222,7 @@ function renderTopCategory(categories) {
 
   // Find category with highest total
   const top = categories.reduce((prev, current) => (prev.total > current.total) ? prev : current);
-  
+
   const html = `<span class="daily-avg-badge" style="margin-top: 4px; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #fca5a5;">${top.category} (₹${formatINR(top.total)})</span>`;
 
   if (elDesktop) elDesktop.innerHTML = html;
@@ -280,22 +287,22 @@ function renderExpenseHistogram(categories) {
 
       if (isHidden) {
         list.style.display = "block";
-        
+
         // Filter transactions for this category from the global currentMonthExpenses
         const txs = currentMonthExpenses.filter(tx => tx.category === cat.category);
         // Sort by date descending (newest first)
         txs.sort((a, b) => new Date(b.date) - new Date(a.date));
-        
+
         if (txs.length === 0) {
-           list.innerHTML = `<div style="padding: 10px; text-align: center; opacity: 0.6; font-size: 0.85rem;">No transactions loaded yet.</div>`;
+          list.innerHTML = `<div style="padding: 10px; text-align: center; opacity: 0.6; font-size: 0.85rem;">No transactions loaded yet.</div>`;
         } else {
-           // Sort by date descending (newest first)
-           txs.sort((a, b) => new Date(b.date) - new Date(a.date));
-           
-           list.innerHTML = txs.map(t => `
+          // Sort by date descending (newest first)
+          txs.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+          list.innerHTML = txs.map(t => `
              <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
                <div>
-                 <div style="font-size: 0.9rem; color: #fff;">${new Date(t.date).toLocaleDateString('en-IN', {day: 'numeric', month: 'short'})}</div>
+                 <div style="font-size: 0.9rem; color: #fff;">${new Date(t.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</div>
                  <div style="font-size: 0.8rem; opacity: 0.6;">${t.description || 'No description'}</div>
                </div>
                <div style="font-weight: 600; color: #ff0000;">₹${formatINR(t.amount)}</div>
@@ -306,10 +313,16 @@ function renderExpenseHistogram(categories) {
       } else {
         list.style.display = "none";
       }
+
+      // Sync Carousel Height after expanding/collapsing
+      if (window.syncCarouselHeight) window.syncCarouselHeight();
     });
 
     container.appendChild(item);
   });
+
+  // Initial sync after rendering histogram
+  if (window.syncCarouselHeight) setTimeout(window.syncCarouselHeight, 100);
 }
 
 function renderPaginatedList(container, txs, page) {
@@ -328,7 +341,7 @@ function renderPaginatedList(container, txs, page) {
   let html = pageTxs.map(t => `
     <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
       <div>
-        <div style="font-size: 0.9rem; color: #fff;">${new Date(t.date).toLocaleDateString('en-IN', {day: 'numeric', month: 'short'})}</div>
+        <div style="font-size: 0.9rem; color: #fff;">${new Date(t.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</div>
         <div style="font-size: 0.8rem; opacity: 0.6;">${t.description || 'No description'}</div>
       </div>
       <div style="font-weight: 600; color: #ef4444;">₹${formatINR(t.amount)}</div>
@@ -350,17 +363,19 @@ function renderPaginatedList(container, txs, page) {
   if (totalPages > 1) {
     const prevBtn = container.querySelector('.pg-btn.prev');
     const nextBtn = container.querySelector('.pg-btn.next');
-    
+
     if (prevBtn && !prevBtn.disabled) {
       prevBtn.onclick = (e) => {
         e.stopPropagation();
         renderPaginatedList(container, txs, page - 1);
+        if (window.syncCarouselHeight) setTimeout(window.syncCarouselHeight, 50);
       };
     }
     if (nextBtn && !nextBtn.disabled) {
       nextBtn.onclick = (e) => {
         e.stopPropagation();
         renderPaginatedList(container, txs, page + 1);
+        if (window.syncCarouselHeight) setTimeout(window.syncCarouselHeight, 50);
       };
     }
   }
@@ -371,7 +386,7 @@ function renderPaginatedList(container, txs, page) {
 ================================ */
 function applyHistogramSort() {
   if (!currentMonthCategories) return;
-  
+
   const sortType = histogramSort ? histogramSort.value : "high-low";
   let sorted = [...currentMonthCategories];
 
@@ -390,23 +405,21 @@ function applyHistogramSort() {
    CATEGORY PIE CHART (NEW)
 ================================ */
 function renderCategoryPie(categories) {
-  const ctx = document.getElementById("categoryPieChart");
-  if (!ctx) return;
+  if (!categories || categories.length === 0) {
+    showPlaceholder("categoryPieChartContainer", "🍕", "No categorical data yet. Your spending breakdown will appear here.");
+    return;
+  }
+
+  const canvas = document.getElementById("categoryPieChart");
+  if (!canvas) return;
 
   if (categoryPieChart) categoryPieChart.destroy();
-  if (!categories || categories.length === 0) return;
 
   const labels = categories.map(c => c.category);
   const data = categories.map(c => c.total);
+  const colors = ["#7C7CFF", "#22C55E", "#FACC15", "#EF4444", "#38BDF8", "#A78BFA", "#FB923C", "#EC4899"];
 
-  // Vibrant colors
-  const colors = [
-    "#7C7CFF", "#22C55E", "#FACC15",
-    "#EF4444", "#38BDF8", "#A78BFA",
-    "#FB923C", "#EC4899"
-  ];
-
-  categoryPieChart = new Chart(ctx, {
+  categoryPieChart = new Chart(canvas, {
     type: "pie",
     data: {
       labels: labels,
@@ -496,16 +509,30 @@ async function loadDateWiseExpenses(month, year) {
     monthTxCount.innerHTML = `<span>📊</span> ${currentMonthExpenses.length} Txns`;
     setTimeout(() => monthTxCount.style.transform = "scale(1)", 200);
   }
-  
+
   if (monthTxCountMobile) {
     monthTxCountMobile.innerHTML = `<span class="daily-avg-badge" style="margin-top: 4px;">${currentMonthExpenses.length} Txns</span>`;
   }
 
-  renderCalendar(+year, +month - 1);
+  if (currentMonthExpenses.length === 0 && currentMonthIncomes.length === 0) {
+    showPlaceholder("dateWiseList", "📅", "Your daily transaction log is empty. Add a transaction to get started!");
+    const mobileList = document.getElementById("mobile-transaction-list");
+    if (mobileList) {
+      mobileList.innerHTML = `
+        <div class="empty-state-placeholder" style="margin: 20px;">
+          <div class="placeholder-icon">📅</div>
+          <div class="placeholder-text">Your daily transaction log is empty. Add a transaction to get started!</div>
+        </div>
+      `;
+    }
+  } else {
+    renderCalendar(+year, +month - 1);
+    autoSelectDay(+year, +month);
+  }
+
   renderDailyChart(currentMonthExpenses, +year, +month);
   renderCumulativeChart(currentMonthExpenses, +year, +month);
   setupMobileDaySearch();
-  autoSelectDay(+year, +month);
 }
 
 /* ===============================
@@ -559,7 +586,7 @@ function setupMobileDaySearch() {
 function autoSelectDay(year, month) {
   const today = new Date();
   const isCurrentMonth = today.getFullYear() === year && (today.getMonth() + 1) === month;
-  
+
   let targetDay = null;
 
   if (isCurrentMonth) {
@@ -576,7 +603,7 @@ function autoSelectDay(year, month) {
 
   if (targetDay) {
     const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(targetDay).padStart(2, "0")}`;
-    
+
     // 1. Update Mobile View
     const bubble = document.querySelector(`.day-bubble[data-day="${targetDay}"]`);
     if (bubble) {
@@ -606,7 +633,7 @@ function renderMobileTransactions(dateStr) {
 
   const incomes = tx.filter(t => t.type === 'income');
   const expenses = tx.filter(t => t.type === 'expense');
-  
+
   const totalIncome = incomes.reduce((sum, t) => sum + Number(t.amount), 0);
   const totalExpense = expenses.reduce((sum, t) => sum + Number(t.amount), 0);
   const dateText = new Date(dateStr).toDateString();
@@ -682,8 +709,8 @@ function renderMobileTransactions(dateStr) {
   // }
 
 
-    if (!tx.length) {
-      html += `
+  if (!tx.length) {
+    html += `
         <div class="empty-state">
           <div class="empty-icon">📭</div>
           <div class="empty-title">No transactions</div>
@@ -701,7 +728,7 @@ function renderMobileTransactions(dateStr) {
 
         </div>
       `;
-    } else {
+  } else {
     if (incomes.length > 0) {
 
       // show added budget (Currently not shown on phoen type screen)
@@ -780,7 +807,7 @@ function renderMobileTransactions(dateStr) {
 
 
 
-window.changeExpensePage = function(direction, dateStr) {
+window.changeExpensePage = function (direction, dateStr) {
   currentExpensePage += direction;
 
   if (currentExpensePage < 1) currentExpensePage = 1;
@@ -832,6 +859,18 @@ function getTransactionsForDate(dateStr) {
   return [...exps, ...incs];
 }
 
+function showPlaceholder(containerId, icon, text) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="empty-state-placeholder">
+      <div class="placeholder-icon">${icon}</div>
+      <div class="placeholder-text">${text}</div>
+    </div>
+  `;
+}
+
 /* ===============================
    DESKTOP CALENDAR
 ================================ */
@@ -843,8 +882,8 @@ function renderCalendar(year, month) {
   let html = `
     <div class="calendar-view">
       <div class="calendar-grid">
-        ${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
-          .map(d => `<div class="calendar-day-label">${d}</div>`).join("")}
+        ${["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+      .map(d => `<div class="calendar-day-label">${d}</div>`).join("")}
   `;
 
   for (let i = 0; i < firstDay; i++) {
@@ -852,12 +891,12 @@ function renderCalendar(year, month) {
   }
 
   for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
     const tx = getTransactionsForDate(dateStr);
     const hasTx = tx.length > 0;
     const hasIncome = tx.some(t => t.type === 'income');
-    
-    const disabled = new Date(year,month,d) > today ? "disabled" : "";
+
+    const disabled = new Date(year, month, d) > today ? "disabled" : "";
     const isDesktop = window.innerWidth > 768;
 
     html += `
@@ -919,9 +958,9 @@ function selectDate(dateStr, cell) {
   const totalIncome = incomes.reduce((sum, t) => sum + Number(t.amount), 0);
   const totalExpense = expenses.reduce((sum, t) => sum + Number(t.amount), 0);
 
-  const dateText = dateStr 
-  ? new Date(dateStr).toDateString()
-  : "Select Date";
+  const dateText = dateStr
+    ? new Date(dateStr).toDateString()
+    : "Select Date";
 
   const badgeStyle = `
     margin-left: 10px;
@@ -1001,15 +1040,15 @@ function selectDate(dateStr, cell) {
   //   `;
   // }
 
-    if (!tx.length) {
-      html += `
+  if (!tx.length) {
+    html += `
         <div class="empty-state">
           <div class="empty-icon">📭</div>
           <div class="empty-title">No transactions</div>
           <div class="empty-sub">Start by adding your expense.</div><br>
         </div>
       `;
-    }  else {
+  } else {
     // Render Income Section
     if (incomes.length > 0) {
 
@@ -1026,8 +1065,7 @@ function selectDate(dateStr, cell) {
         <div class="income-header-row">
           <div class="income-title">Income</div>
           <div class="income-line"></div>
-          ${
-            totalIncomePages > 1 ? `
+          ${totalIncomePages > 1 ? `
             <div class="income-pagination">
               <button 
                 onclick="changeIncomePage(-1, '${dateStr}')"
@@ -1042,7 +1080,7 @@ function selectDate(dateStr, cell) {
               >▶</button>
             </div>
             ` : ""
-          }
+        }
         </div>
       `;
 
@@ -1051,7 +1089,7 @@ function selectDate(dateStr, cell) {
 
 
 
-// Render Expense Section
+    // Render Expense Section
     if (expenses.length > 0) {
 
       const totalPages = Math.ceil(expenses.length / SELECT_PER_PAGE);
@@ -1133,7 +1171,7 @@ window.changeIncomePage = function (step, dateStr) {
 };
 
 
-window.changeSelectPage = function(direction, dateStr) {
+window.changeSelectPage = function (direction, dateStr) {
   currentSelectPage += direction;
 
   if (currentSelectPage < 1) currentSelectPage = 1;
@@ -1149,9 +1187,9 @@ function updateMobileMonthText() {
   const [year, month] = currentMonth.split("-");
   const date = new Date(year, month - 1);
   const text = date.toLocaleString("default", {
-      month: "long",
-      year: "numeric"
-    });
+    month: "long",
+    year: "numeric"
+  });
 
   if (mobileMonthText) mobileMonthText.innerText = text;
   if (pageMonthTitle) pageMonthTitle.innerText = text;
@@ -1161,39 +1199,13 @@ function updateMobileMonthText() {
   document.documentElement.style.setProperty('--watermark-text', `"${text}"`);
 }
 
-let touchStartX = 0;
-let touchEndX = 0;
-
-if (mobileMonthSwipe) {
-  mobileMonthSwipe.addEventListener("touchstart", e => {
-    touchStartX = e.changedTouches[0].screenX;
-  });
-
-  mobileMonthSwipe.addEventListener("touchend", e => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleMonthSwipe();
-  });
-}
-
-function handleMonthSwipe() {
-  const diff = touchEndX - touchStartX;
-
-  // Minimum swipe distance
-  if (Math.abs(diff) < 50) return;
-
-  if (diff < 0) {
-    changeMonth(1);   // swipe left → next month
-  } else {
-    changeMonth(-1);  // swipe right → previous month
-  }
-}
 
 function changeMonth(delta) {
   const [year, month] = currentMonth.split("-").map(Number);
-  
+
   // Create Date object for target month (using date 1 to avoid overflow)
   const newDate = new Date(year, month - 1 + delta, 1);
-  
+
   // Get current date to compare against (also set to day 1 for strict month comparison)
   const today = new Date();
   const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -1230,7 +1242,7 @@ function renderMonthModal() {
   modalMonthGrid.innerHTML = "";
 
   const months = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
   ];
 
@@ -1286,15 +1298,15 @@ function renderMonthModal() {
    DAILY CHART
 ================================ */
 function renderDailyChart(expenses, year, month) {
+  if (expenses.length === 0) {
+    showPlaceholder("dailyTrendChartContainer", "📉", "No expenses recorded this month. Start tracking to see your trend!");
+    return;
+  }
+
   const ctx = document.getElementById("dailyExpenseChart");
   if (!ctx) return;
 
-  // Destroy existing chart to avoid overlaps/errors
-  if (dailyChart) {
-    dailyChart.destroy();
-  }
-
-  // 1. Prepare Data
+  if (dailyChart) dailyChart.destroy();
   const daysInMonth = new Date(year, month, 0).getDate();
   const labels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const data = new Array(daysInMonth).fill(0);
@@ -1352,55 +1364,55 @@ function renderDailyChart(expenses, year, month) {
       },
       plugins: {
         legend: { display: false },
-      tooltip: {
-        backgroundColor: "rgba(0, 0, 0, 0.95)",
-        borderColor: "#34d399",
-        borderWidth: 2,
-        cornerRadius: 14,
-        padding: 16,
-        displayColors: false,
-        titleColor: "#34d399",
-        bodyColor: "#ffffff",
-        titleFont: {
-          size: 14,
-          weight: "bold"
-        },
-        bodyFont: {
-          size: 13
-        },
-        callbacks: {
-          title: (context) => {
-            const day = parseInt(context[0].label, 10);
-            const fullDate = new Date(year, month - 1, day);
-
-            return fullDate.toLocaleDateString("en-IN", {
-              day: "numeric",
-              month: "short",
-              year: "numeric"
-            });
+        tooltip: {
+          backgroundColor: "rgba(0, 0, 0, 0.95)",
+          borderColor: "#34d399",
+          borderWidth: 2,
+          cornerRadius: 14,
+          padding: 16,
+          displayColors: false,
+          titleColor: "#34d399",
+          bodyColor: "#ffffff",
+          titleFont: {
+            size: 14,
+            weight: "bold"
           },
-
-          label: (context) => {
-            return `Total: ₹${formatINR(context.raw)}`;
+          bodyFont: {
+            size: 13
           },
+          callbacks: {
+            title: (context) => {
+              const day = parseInt(context[0].label, 10);
+              const fullDate = new Date(year, month - 1, day);
 
-          afterBody: (context) => {
-            const index = context[0].dataIndex;
-            const transactions = details[index];
+              return fullDate.toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "short",
+                year: "numeric"
+              });
+            },
 
-            if (!transactions.length) {
-              return ["", "No transactions"];
+            label: (context) => {
+              return `Total: ₹${formatINR(context.raw)}`;
+            },
+
+            afterBody: (context) => {
+              const index = context[0].dataIndex;
+              const transactions = details[index];
+
+              if (!transactions.length) {
+                return ["", "No transactions"];
+              }
+
+              return [
+                "",
+                "Transactions:",
+                "-------------------------",
+                ...transactions
+              ];
             }
-
-            return [
-              "",
-              "Transactions:",
-              "-------------------------",
-              ...transactions
-            ];
           }
         }
-      }
       },
       scales: {
         y: {
@@ -1441,6 +1453,11 @@ function renderDailyChart(expenses, year, month) {
    CUMULATIVE CHART
 ================================ */
 function renderCumulativeChart(expenses, year, month) {
+  if (expenses.length === 0) {
+    showPlaceholder("cumulativeChartContainer", "📈", "Log your first expense to see your cumulative spending journey!");
+    return;
+  }
+
   const canvas = document.getElementById("cumulativeChart");
   if (!canvas) return;
 
@@ -1589,9 +1606,9 @@ function setupCarousel() {
   });
 
   // Touch + Mouse Support
-  track.addEventListener("touchstart", startDrag);
-  track.addEventListener("touchmove", drag);
-  track.addEventListener("touchend", endDrag);
+  track.addEventListener("touchstart", startDrag, { passive: true });
+  track.addEventListener("touchmove", drag, { passive: true });
+  track.addEventListener("touchend", endDrag, { passive: true });
 
   track.addEventListener("mousedown", startDrag);
   track.addEventListener("mousemove", drag);
@@ -1651,15 +1668,8 @@ function setupCarousel() {
       slide.classList.toggle("active-slide", i === currentSlide);
     });
 
-    // Re-render charts when active
-    const [year, month] = currentMonth.split("-");
-    if (currentSlide === 0 && currentMonthExpenses.length > 0) {
-      renderDailyChart(currentMonthExpenses, +year, +month);
-    } else if (currentSlide === 1 && currentMonthCategories.length > 0) {
-      renderCategoryPie(currentMonthCategories);
-    } else if (currentSlide === 2 && currentMonthExpenses.length > 0) {
-      renderCumulativeChart(currentMonthExpenses, +year, +month);
-    }
+    // Charts are now only rendered once when data is loaded, 
+    // preventing re-animation on every swipe/touch.
 
     updateHeight();
   }
@@ -1670,6 +1680,9 @@ function setupCarousel() {
       container.style.height = activeSlide.offsetHeight + "px";
     }
   }
+
+  // Expose for dynamic content changes (like histogram expansion)
+  window.syncCarouselHeight = updateHeight;
 
   function goToSlide(index) {
     currentSlide = index;
@@ -1693,14 +1706,14 @@ function showToast(message, type = "error") {
       const ctx = new AudioContext();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      
+
       osc.type = "sine";
       osc.frequency.setValueAtTime(440, ctx.currentTime);
       gain.gain.setValueAtTime(0.05, ctx.currentTime); // Low volume
-      
+
       osc.connect(gain);
       gain.connect(ctx.destination);
-      
+
       osc.start();
       osc.stop(ctx.currentTime + 0.15); // 150ms duration
     }
@@ -1710,25 +1723,25 @@ function showToast(message, type = "error") {
 
   // 2. Create toast element if it doesn't exist
   let toast = document.getElementById("toast-notification");
-  
+
   if (!toast) {
     toast = document.createElement("div");
     toast.id = "toast-notification";
-    
+
     // Apply styling via JS so no CSS file edit is needed
     Object.assign(toast.style, {
       position: "fixed",
       bottom: "80px", // Just above bottom nav usually
       left: "50%",
       transform: "translateX(-50%) translateY(20px)",
-      
+
       // Glassy Red Warning Style
-      background: "rgba(220, 38, 38, 0.75)", 
+      background: "rgba(220, 38, 38, 0.75)",
       backdropFilter: "blur(12px)",
       webkitBackdropFilter: "blur(12px)",
       border: "1px solid rgba(255, 255, 255, 0.25)",
       boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
-      
+
       color: "#fff",
       padding: "12px 24px",
       borderRadius: "50px",
@@ -1740,7 +1753,7 @@ function showToast(message, type = "error") {
       pointerEvents: "none",
       whiteSpace: "nowrap"
     });
-    
+
     document.body.appendChild(toast);
   }
 
@@ -1785,22 +1798,171 @@ async function toDataURL(url) {
   });
 }
 
+/**
+ * Creates a circular version of an image URL
+ */
+async function toCircularDataURL(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const size = Math.min(img.width, img.height);
+      canvas.width = size;
+      canvas.height = size;
+
+      // Draw circular clip
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+      ctx.clip();
+
+      // Draw image centered
+      ctx.drawImage(img, (img.width - size) / 2, (img.height - size) / 2, size, size, 0, 0, size, size);
+
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
 async function downloadMonthlyReport() {
   if (!currentMonthExpenses || currentMonthExpenses.length === 0) {
     showToast("No transactions to download");
     return;
   }
 
-
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
-  /* ===============================
-     HELPERS
-  ================================ */
+  // 1. Fetch User Info for Cover
+  let userName = "User";
+  let avatarBase64 = null;
+  try {
+    const userRes = await apiRequest('/auth/me', 'GET', null, { skipLoader: true });
+    if (userRes.data) {
+      userName = userRes.data.name || "User";
+      const userAvatar = userRes.data.avatar || localStorage.getItem("userAvatar");
+      if (userAvatar) {
+        // Use circular converter
+        avatarBase64 = await toCircularDataURL(userAvatar);
+      }
+    }
+  } catch (err) {
+    console.warn("Could not fetch user info for PDF", err);
+  }
+
+  // 2. Prepare Data for Enhancements
+  const incomeVal = parseFloat(document.getElementById("monthlyIncome").innerText.replace(/₹|,/g, "")) || 0;
+  const expenseVal = parseFloat(document.getElementById("monthlyExpense").innerText.replace(/₹|,/g, "")) || 0;
+  const balanceVal = incomeVal - expenseVal;
+
+
+  // Top 5 Expenses
+  const topExpenses = [...currentMonthExpenses]
+    .sort((a, b) => b.amount - a.amount)
+    .slice(0, 5);
+
+  // Category Color Map (Match Pie Chart colors)
+  const colors = ["#7C7CFF", "#22C55E", "#FACC15", "#EF4444", "#38BDF8", "#A78BFA", "#FB923C", "#EC4899"];
+  const catColorMap = {};
+  currentMonthCategories.forEach((c, i) => {
+    catColorMap[c.category] = colors[i % colors.length];
+  });
+
+  const [year, month] = currentMonth.split("-");
+  const dateObj = new Date(year, month - 1);
+  const monthName = dateObj.toLocaleString("en-IN", { month: "long" });
+
+  // Watermark Helper
+  const addWatermark = (pDoc) => {
+    pDoc.saveGraphicsState();
+    pDoc.setFontSize(40);
+    pDoc.setTextColor(230, 230, 230);
+    pDoc.setFont("helvetica", "bold");
+    pDoc.setGState(new pDoc.GState({ opacity: 0.1 }));
+    pDoc.text("DHANREKHA VERIFIED", 105, 150, { align: "center", angle: 45 });
+    pDoc.restoreGraphicsState();
+  };
+
+  /* =========================================
+     PAGE 1: PREMIUM COVER PAGE (ENHANCED)
+  ========================================= */
+
+  // Background
+  doc.setFillColor(15, 32, 39);
+  doc.rect(0, 0, 210, 297, "F");
+
+  // Decorative Accent
+  doc.setFillColor(34, 197, 94);
+  doc.triangle(170, 297, 210, 297, 210, 250, "F");
+
+  // App Logo
+  try {
+    const logo = await toDataURL("assets/logo1.png");
+    doc.addImage(logo, "PNG", 85, 40, 40, 40);
+  } catch { }
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(40);
+  doc.text("DhanRekha", 105, 100, { align: "center" });
+
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(34, 197, 94);
+  doc.text("MONTHLY FINANCIAL STATEMENT", 105, 112, { align: "center" });
+
+  doc.setDrawColor(255, 255, 255, 0.2);
+  doc.setLineWidth(0.5);
+  doc.line(60, 120, 150, 120);
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(28);
+  doc.setFont("helvetica", "bold");
+  doc.text(`${monthName.toUpperCase()} ${year}`, 105, 140, { align: "center" });
+
+  // User Section
+  const avatarY = 195;
+  if (avatarBase64) {
+    // Outer white ring
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(1.5);
+    doc.circle(105, avatarY, 26, "S");
+    // Image 
+    try {
+      // Just add the image (it's already cropped to a circle by canvas)
+      doc.addImage(avatarBase64, "PNG", 81, avatarY - 24, 48, 48);
+    } catch (e) {
+      doc.setFontSize(50);
+      doc.text("👤", 105, avatarY + 15, { align: "center" });
+    }
+  } else {
+    doc.setFontSize(60);
+    doc.text("👤", 105, avatarY + 15, { align: "center" });
+  }
+
+  doc.setFontSize(22);
+  doc.setTextColor(255, 255, 255);
+  doc.text(userName, 105, avatarY + 45, { align: "center" });
+
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(160, 160, 160);
+  doc.text("Monthly Report", 105, avatarY + 55, { align: "center" });
+
+  // Footer on cover
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100);
+  doc.text(`Generated on ${new Date().toLocaleDateString("en-IN")}`, 105, 280, { align: "center" });
+  doc.text("DhanRekha • Where Your Money Tells a Story", 105, 287, { align: "center" });
+
+  // Start actual report on next page
+  doc.addPage();
 
   /* ===============================
-     HEADER / BANNER
+     PAGE 2+: REPORT CONTENT
   ================================ */
 
   doc.setFillColor(15, 32, 39);
@@ -1810,7 +1972,7 @@ async function downloadMonthlyReport() {
   try {
     const logo = await toDataURL("assets/logo1.png");
     doc.addImage(logo, "PNG", 14, 8, 24, 24);
-  } catch {}
+  } catch { }
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
@@ -1822,84 +1984,96 @@ async function downloadMonthlyReport() {
   doc.setTextColor(255);
   doc.text("Monthly Report", 44, 30);
 
-  const [year, month] = currentMonth.split("-");
-  const dateObj = new Date(year, month - 1);
-  const monthName = dateObj.toLocaleString("en-IN", { month: "long" });
-
   doc.setFontSize(16);
   doc.text(`${monthName} ${year}`, 196, 25, { align: "right" });
+
+  addWatermark(doc);
 
   /* ===============================
      SUMMARY
   ================================ */
 
-  const incomeText = document.getElementById("monthlyIncome").innerText.replace(/₹/g, "");
-  const expenseText = document.getElementById("monthlyExpense").innerText.replace(/₹/g, "");
-  const balanceText = document.getElementById("monthlyBalance").innerText.replace(/₹/g, "");
 
-  const balanceValue = parseFloat(balanceText);
+  const incomeText = formatINR(incomeVal);
+  const expenseText = formatINR(expenseVal);
+  const balanceText = formatINR(balanceVal);
 
   doc.setFontSize(11);
   doc.setTextColor(0);
+  doc.setFont("helvetica", "bold");
+  doc.text("PURSE SUMMARY", 14, 48);
+  doc.setFont("helvetica", "normal");
 
-  doc.text(`Total Income: Rs. ${incomeText}`, 14, 50);
-  doc.text(`Total Expense: Rs. ${expenseText}`, 80, 50);
+  doc.text(`Total Income: ${incomeText}`, 14, 54);
+  doc.text(`Total Expense: ${expenseText}`, 80, 54);
 
-  doc.setTextColor(balanceValue < 0 ? 220 : 22, balanceValue < 0 ? 38 : 163, balanceValue < 0 ? 38 : 74);
-  doc.text(`Balance: Rs. ${balanceText}`, 150, 50);
+  doc.setTextColor(balanceVal < 0 ? 220 : 22, balanceVal < 0 ? 38 : 163, balanceVal < 0 ? 38 : 74);
+  doc.text(`Balance: ${balanceText}`, 150, 54);
   doc.setTextColor(0);
 
   /* ===============================
-     PREPARED FOR (7)
+     PREPARED FOR 
   ================================ */
 
-  let userName = "User";
-  try {
-    const userRes = await apiRequest('/auth/me', 'GET', null, { skipLoader: true });
-    if (userRes.data && userRes.data.name) {
-      userName = userRes.data.name;
-    }
-  } catch (err) {
-    console.warn("Could not fetch user name for PDF report.", err);
-  }
   doc.setFontSize(10);
   doc.setTextColor(80);
-  doc.text(`Prepared for: ${userName}`, 14, 56);
+  doc.text(`Prepared for: ${userName}`, 14, 60);
   doc.setTextColor(0);
 
-  /* ===============================
-     HIGHEST & LOWEST EXPENSE (3)
-  ================================ */
-
-  let highest = null;
-  let lowest = null;
-
-  currentMonthExpenses.forEach(tx => {
-    if (!highest || tx.amount > highest.amount) highest = tx;
-    if (!lowest || tx.amount < lowest.amount) lowest = tx;
-  });
-
   doc.setFont("helvetica", "bold");
-  doc.text("Spending Highlights", 14, 64);
+  doc.text("TOP 5 EXPENSES", 14, 70);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
 
-  if (highest) {
-    doc.text(
-      `Highest: ${highest.category} – Rs. ${formatINR(highest.amount)} (${new Date(highest.date).toLocaleDateString("en-IN")})`,
-      14,
-      70
-    );
-  }
+  let txY = 76;
+  topExpenses.forEach((tx, i) => {
+    const color = catColorMap[tx.category] || "#9ca3af";
+    doc.setFillColor(color);
+    doc.circle(16, txY - 1, 1, "F"); // Category color dot
 
-  if (lowest) {
-    doc.text(
-      `Lowest: ${lowest.category} – Rs. ${formatINR(lowest.amount)} (${new Date(lowest.date).toLocaleDateString("en-IN")})`,
-      14,
-      76
-    );
-  }
+    doc.text(`${tx.description || tx.category}`, 20, txY);
+    doc.text(`${formatINR(tx.amount)}`, 130, txY, { align: "right" });
+    doc.setFontSize(8);
+    doc.setTextColor(100);
+    doc.text(`${tx.category} • ${new Date(tx.date).toLocaleDateString("en-IN")}`, 140, txY);
+    doc.setFontSize(10);
+    doc.setTextColor(0);
+    txY += 6;
+  });
+
+
+
+
+  /* ===============================
+     JOURNEY OF YOUR MONEY (Ledger)
+  =============================== */
+  let journeyY = 135;
+  doc.setFont("helvetica", "bold");
+  doc.text("JOURNEY OF YOUR MONEY", 14, journeyY);
+  doc.setFont("helvetica", "normal");
+  journeyY += 6;
+
+  const drawLedgerRow = (label, amount, symbol, color) => {
+    doc.setTextColor(100);
+    doc.text(label, 20, journeyY);
+    doc.setTextColor(...color);
+    doc.text(`${symbol} ${formatINR(Math.abs(amount))}`, 130, journeyY, { align: "right" });
+    journeyY += 6;
+  };
+
+  drawLedgerRow("Total Monthly Earnings", incomeVal, "(+)", [34, 197, 94]);
+  drawLedgerRow("Total Monthly Spending", expenseVal, "(-)", [239, 68, 68]);
+
+  doc.setDrawColor(200);
+  journeyY += 2; // Add a bit of space before the line
+  doc.line(20, journeyY, 130, journeyY);
+  journeyY += 6; // Add space after the line before the final row
+
+  doc.setFont("helvetica", "bold");
+  drawLedgerRow("Final Closing Balance", balanceVal, "(=)", balanceVal < 0 ? [239, 68, 68] : [34, 197, 94]);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(0);
 
   /* ===============================
      CATEGORY SUMMARY (8)
@@ -1923,7 +2097,7 @@ async function downloadMonthlyReport() {
     const ctx = canvas.getContext("2d");
 
     const sortedCats = Object.entries(categoryTotals).sort(([, a], [, b]) => b - a);
-    const chartLabels = sortedCats.map(([k, v]) => `${k} - Rs. ${formatINR(v)}`);
+    const chartLabels = sortedCats.map(([k, v]) => `${k} - ${formatINR(v)}`);
     const chartData = sortedCats.map(([, v]) => v);
 
     new Chart(ctx, {
@@ -1956,7 +2130,7 @@ async function downloadMonthlyReport() {
     chartImg = canvas.toDataURL("image/png");
   } catch (err) { console.warn("Chart generation failed:", err); }
 
-  let nextY = 85;
+  let nextY = journeyY + 10;
   if (chartImg) {
     const pageHeight = doc.internal.pageSize.getHeight();
     if (nextY + 80 > pageHeight - 20) { doc.addPage(); nextY = 20; }
@@ -2002,7 +2176,7 @@ async function downloadMonthlyReport() {
           title: { display: true, text: 'Spending by Day of the Week', color: '#111827', font: { size: 32, weight: 'bold', family: 'Helvetica' }, padding: { bottom: 30 } }
         },
         scales: {
-          x: { beginAtZero: true, ticks: { color: '#374151', font: { size: 20, family: 'Helvetica' }, callback: (value) => `Rs. ${formatINR(value)}` }, grid: { color: '#e5e7eb' } },
+          x: { beginAtZero: true, ticks: { color: '#374151', font: { size: 20, family: 'Helvetica' }, callback: (value) => `${formatINR(value)}` }, grid: { color: '#e5e7eb' } },
           y: { ticks: { color: '#1f2937', font: { size: 24, family: 'Helvetica' } }, grid: { display: false } }
         },
         layout: { padding: 40 }
@@ -2018,7 +2192,7 @@ async function downloadMonthlyReport() {
   if (barChartImg) {
     const pageHeight = doc.internal.pageSize.getHeight();
     if (nextY + 90 > pageHeight - 20) { doc.addPage(); nextY = 20; }
-    
+
     // Chart on Left (Reduced width to make room for text)
     doc.addImage(barChartImg, 'PNG', 15, nextY, 120, 70);
 
@@ -2027,24 +2201,22 @@ async function downloadMonthlyReport() {
     doc.setTextColor(0);
     doc.setFont("helvetica", "bold");
     doc.text("Weekly Breakdown", 145, nextY + 10);
-    
+
     doc.setFont("helvetica", "normal");
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     let textY = nextY + 20;
     days.forEach((day, index) => {
       const amount = dayOfWeekTotals[index];
-      doc.text(`${day}: Rs. ${formatINR(amount)}`, 145, textY);
+      doc.text(`${day}: ${formatINR(amount)}`, 145, textY);
       textY += 7;
     });
 
     nextY += 85;
   }
 
-  const pageHeight = doc.internal.pageSize.getHeight();
-  if (nextY > pageHeight - 40) {
-    doc.addPage();
-    nextY = 20;
-  }
+  // Always start Transactions Table on a new page
+  doc.addPage();
+  nextY = 20;
 
   /* ===============================
      TRANSACTIONS TABLE
@@ -2052,7 +2224,7 @@ async function downloadMonthlyReport() {
 
   const tableData = currentMonthExpenses.map(tx => [
     new Date(tx.date).toLocaleDateString("en-IN"),
-    `Rs. ${formatINR(tx.amount)}`,
+    `${formatINR(tx.amount)}`,
     tx.category
   ]);
 
@@ -2086,6 +2258,7 @@ async function downloadMonthlyReport() {
       );
 
       doc.text(`Page ${data.pageNumber}`, w - 14, h - 10, { align: "right" });
+      addWatermark(doc);
       doc.text(new Date().toLocaleString("en-IN"), 14, h - 10);
     }
   });
@@ -2122,34 +2295,34 @@ async function populateCategorySelect() {
   }
 }
 
-window.openAddExpenseModal = function(dateStr) {
+window.openAddExpenseModal = function (dateStr) {
   const modal = document.getElementById("expenseModal");
   const dateInput = document.getElementById("expenseDate");
-  
-  if(modal && dateInput) {
+
+  if (modal && dateInput) {
     dateInput.value = dateStr; // Pre-fill selected date
     modal.classList.remove("hidden");
     document.getElementById("expenseModalTitle").innerText = "Add Expense";
     document.getElementById("editExpenseId").value = "";
-    
+
     // Reset fields for Add (Enable all except date which is locked to selection)
     document.getElementById("expenseCategory").disabled = false;
     document.getElementById("expenseDesc").disabled = false;
-    dateInput.disabled = true; 
-    if(document.getElementById("saveExpenseBtn")) {
+    dateInput.disabled = true;
+    if (document.getElementById("saveExpenseBtn")) {
       const btn = document.getElementById("saveExpenseBtn");
       btn.innerText = "Save";
       btn.style.background = ""; // Reset to default CSS
       btn.style.color = "";
     }
-    
+
     document.body.classList.add("modal-open");
   }
 };
 
-window.closeExpenseModal = function() {
+window.closeExpenseModal = function () {
   const modal = document.getElementById("expenseModal");
-  if(modal) {
+  if (modal) {
     modal.classList.add("hidden");
     document.body.classList.remove("modal-open");
     // Reset fields
@@ -2157,7 +2330,7 @@ window.closeExpenseModal = function() {
     document.getElementById("expenseDesc").value = "";
     document.getElementById("expenseCategory").value = "";
     document.getElementById("editExpenseId").value = "";
-    if(document.getElementById("saveExpenseBtn")) {
+    if (document.getElementById("saveExpenseBtn")) {
       const btn = document.getElementById("saveExpenseBtn");
       btn.innerText = "Save";
       btn.style.background = ""; // Reset to default CSS
@@ -2169,20 +2342,20 @@ window.closeExpenseModal = function() {
 /* ===============================
    ADD INCOME LOGIC
 ================================ */
-window.openAddIncomeModal = function(dateStr) {
+window.openAddIncomeModal = function (dateStr) {
   const modal = document.getElementById("incomeModal");
   const dateInput = document.getElementById("incomeDate");
-  
-  if(modal && dateInput) {
+
+  if (modal && dateInput) {
     dateInput.value = dateStr;
     modal.classList.remove("hidden");
     document.body.classList.add("modal-open");
   }
 };
 
-window.closeIncomeModal = function() {
+window.closeIncomeModal = function () {
   const modal = document.getElementById("incomeModal");
-  if(modal) {
+  if (modal) {
     modal.classList.add("hidden");
     document.body.classList.remove("modal-open");
     document.getElementById("incomeAmount").value = "";
@@ -2190,7 +2363,7 @@ window.closeIncomeModal = function() {
   }
 };
 
-window.saveIncome = async function() {
+window.saveIncome = async function () {
   const amount = document.getElementById("incomeAmount").value;
   const source = document.getElementById("incomeSource").value;
   const date = document.getElementById("incomeDate").value;
@@ -2210,27 +2383,27 @@ window.saveIncome = async function() {
   }
 };
 
-window.openEditExpenseModal = function(id) {
+window.openEditExpenseModal = function (id) {
   const tx = currentMonthExpenses.find(e => e._id === id);
   if (!tx) return;
 
   const modal = document.getElementById("expenseModal");
-  
+
   document.getElementById("expenseAmount").value = tx.amount;
   document.getElementById("expenseCategory").value = tx.category;
   // Format date for input type="date" (YYYY-MM-DD)
   document.getElementById("expenseDate").value = new Date(tx.date).toISOString().split('T')[0];
   document.getElementById("expenseDesc").value = tx.description || "";
   document.getElementById("editExpenseId").value = tx._id;
-  
+
   document.getElementById("expenseModalTitle").innerText = "Edit Expense";
-  if(document.getElementById("saveExpenseBtn")) {
+  if (document.getElementById("saveExpenseBtn")) {
     const btn = document.getElementById("saveExpenseBtn");
     btn.innerText = "Update";
     btn.style.background = "#3b82f6"; // Blue color for Update
     btn.style.color = "white";
   }
-  
+
   // Edit Mode
   document.getElementById("expenseCategory").disabled = true;
   document.getElementById("expenseDate").disabled = true;
@@ -2241,7 +2414,7 @@ window.openEditExpenseModal = function(id) {
   document.body.classList.add("modal-open");
 };
 
-window.saveExpense = async function() {
+window.saveExpense = async function () {
   const amount = document.getElementById("expenseAmount").value;
   const category = document.getElementById("expenseCategory").value;
   const date = document.getElementById("expenseDate").value;
@@ -2273,7 +2446,7 @@ window.saveExpense = async function() {
     }
 
     closeExpenseModal();
-    loadMonthlyData(); 
+    loadMonthlyData();
   } catch (err) {
     showToast(err.message, "error");
   } finally {
@@ -2291,14 +2464,14 @@ window.saveExpense = async function() {
    DELETE TRANSACTION LOGIC
 ================================ */
 
-window.openDeleteConfirmation = function(id) {
+window.openDeleteConfirmation = function (id) {
   const tx = currentMonthExpenses.find(t => t._id === id);
   if (!tx) return;
 
   const modal = document.getElementById("deleteConfirmModal");
   const details = document.getElementById("deleteDetails");
   const confirmBtn = document.getElementById("confirmDeleteBtn");
-  
+
   // Calculate projected balance (Current + Expense Amount)
   const balanceText = document.getElementById("monthlyBalance").innerText.replace(/[^\d.-]/g, '');
   const currentBalance = parseFloat(balanceText) || 0;
@@ -2322,7 +2495,7 @@ async function executeDelete(id) {
     await apiRequest(`/expenses/${id}`, "DELETE");
     document.getElementById("deleteConfirmModal").classList.add("hidden");
     showToast("Transaction deleted successfully", "success");
-    loadMonthlyData(); 
+    loadMonthlyData();
   } catch (err) {
     showToast("Failed to delete: " + err.message, "error");
   }
@@ -2334,13 +2507,13 @@ async function executeDelete(id) {
 
 let draggedTxId = null;
 
-window.handleDragStart = function(e, id) {
+window.handleDragStart = function (e, id) {
   draggedTxId = id;
   e.dataTransfer.effectAllowed = "copy";
   e.dataTransfer.setData("text/plain", id);
 };
 
-window.allowDrop = function(e) {
+window.allowDrop = function (e) {
   e.preventDefault();
   const cell = e.target.closest('.calendar-day');
   if (cell && !cell.classList.contains('disabled')) {
@@ -2349,20 +2522,20 @@ window.allowDrop = function(e) {
   }
 };
 
-window.handleDragLeave = function(e) {
+window.handleDragLeave = function (e) {
   const cell = e.target.closest('.calendar-day');
   if (cell) {
     cell.classList.remove('drag-over');
   }
 };
 
-window.handleDrop = function(e) {
+window.handleDrop = function (e) {
   e.preventDefault();
   const cell = e.target.closest('.calendar-day');
   if (!cell) return;
-  
+
   cell.classList.remove('drag-over');
-  
+
   const targetDate = cell.dataset.date;
   if (!draggedTxId || !targetDate) return;
 
@@ -2381,7 +2554,7 @@ function openCopyConfirmation(tx, targetDate) {
   const modal = document.getElementById("copyConfirmModal");
   const details = document.getElementById("copyDetails");
   const confirmBtn = document.getElementById("confirmCopyBtn");
-  
+
   // Calculate remaining purse (Monthly Balance)
   // Note: Moving within the same month doesn't change the total balance, 
   // but we show it for validation/context.
@@ -2423,23 +2596,23 @@ async function executeCopy(tx, targetDate) {
 /* ===============================
    CARRY FORWARD LOGIC
 ================================ */
-window.openCarryForwardModal = function(amount) {
+window.openCarryForwardModal = function (amount) {
   const modal = document.getElementById("carryForwardModal");
   if (!modal) return;
-  
+
   document.getElementById("cfAmount").value = `₹${formatINR(amount)}`;
   document.getElementById("cfAmount").dataset.value = amount; // Store raw value
   document.getElementById("cfCategory").value = "Carry Forward";
-  
+
   modal.classList.remove("hidden");
   document.body.classList.add("modal-open");
 };
 
-window.executeCarryForward = async function() {
+window.executeCarryForward = async function () {
   const rawAmount = document.getElementById("cfAmount").dataset.value;
   const amount = parseFloat(rawAmount);
   const category = document.getElementById("cfCategory").value;
-  
+
   if (!amount || !category) {
     showToast("Invalid details", "error");
     return;
@@ -2447,7 +2620,7 @@ window.executeCarryForward = async function() {
 
   try {
     const [year, month] = currentMonth.split("-").map(Number);
-    
+
     // Calculate next month
     let nextYear = year;
     let nextMonth = month + 1;
@@ -2463,7 +2636,7 @@ window.executeCarryForward = async function() {
     // 1. Expense in Current Month (Last Day)
     const lastDay = new Date(year, month, 0).getDate();
     const expenseDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
-    
+
     await apiRequest("/expenses", "POST", {
       amount: amount,
       category: category,
@@ -2473,7 +2646,7 @@ window.executeCarryForward = async function() {
 
     // 2. Income in Next Month (1st Day)
     const incomeDate = `${nextYear}-${String(nextMonth).padStart(2, '0')}-01`;
-    
+
     await apiRequest("/income", "POST", {
       amount: amount,
       amount: rawAmount,
@@ -2484,7 +2657,7 @@ window.executeCarryForward = async function() {
     document.getElementById("carryForwardModal").classList.add("hidden");
     document.body.classList.remove("modal-open");
     showToast("Balance forward successfully!", "success");
-    
+
     // Auto-navigate to next month to show the moved funds
     // Check if next month is accessible (not in future)
     const today = new Date();
@@ -2496,7 +2669,7 @@ window.executeCarryForward = async function() {
     } else {
       loadMonthlyData(); // Stay on current month if next is future
     }
-    
+
   } catch (err) {
     showToast(err.message, "error");
   }

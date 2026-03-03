@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Expense = require('../models/expense.model');
 const Income = require('../models/income.model');
 const { extractMonthYear } = require('../utils/date.util');
-const { insertExpense, updateExpense, deleteExpense } = require('./sql.service');
+
 
 
 // ---------------- CREATE EXPENSE ----------------
@@ -49,7 +49,6 @@ exports.createExpense = async (userId, data) => {
     month,
     year
   });
-  await insertExpense(expense);
   return expense;
 };
 
@@ -77,8 +76,8 @@ exports.getWeekly = async (userId, startDate, endDate) => {
     userId: uid,
     date: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
   })
-  .sort({ date: -1 })   // latest first
-  .limit(3);            // ✅ only 3 transactions
+    .sort({ date: -1 })   // latest first
+    .limit(3);            // ✅ only 3 transactions
 };
 
 
@@ -169,14 +168,14 @@ exports.getMonthlySummary = async (userId, month, year) => {
   // 3. Calculate Category Breakdown
   const categoryAggregation = await Expense.aggregate([
     { $match: { userId: userObjectId, month: m, year: y } },
-    { 
-      $group: { 
-        _id: '$category', 
+    {
+      $group: {
+        _id: '$category',
         total: { $sum: '$amount' },
-        count: { $sum: 1 } 
-      } 
+        count: { $sum: 1 }
+      }
     },
-    { $sort: { total: -1 } } 
+    { $sort: { total: -1 } }
   ]);
 
   const totalExpense = expenseAggregation.length > 0 ? expenseAggregation[0].total : 0;
@@ -190,7 +189,7 @@ exports.getMonthlySummary = async (userId, month, year) => {
     totalIncome: Number(totalIncome.toFixed(2)),
     totalExpense: Number(totalExpense.toFixed(2)),
     balance: Number(balance.toFixed(2)),
-    
+
     categories: categoryAggregation.map(item => ({
       category: item._id,
       total: Number(item.total.toFixed(2)), // Round category totals too
@@ -202,7 +201,7 @@ exports.getMonthlySummary = async (userId, month, year) => {
 // ---------------- UPDATE EXPENSE ----------------
 exports.updateExpense = async (userId, expenseId, data) => {
   const { month, year } = extractMonthYear(data.date);
-  
+
   const expense = await Expense.findOneAndUpdate(
     { _id: expenseId, userId },
     { ...data, month, year },
@@ -210,7 +209,6 @@ exports.updateExpense = async (userId, expenseId, data) => {
   );
 
   if (!expense) throw new Error('Expense not found');
-  await updateExpense(expense); // Sync to SQL (Safe)
   return expense;
 };
 
@@ -222,7 +220,6 @@ exports.deleteExpense = async (userId, expenseId) => {
   });
 
   if (!expense) throw new Error('Expense not found');
-  await deleteExpense(expenseId); // Sync to SQL (Safe)
   return expense;
 };
 

@@ -25,6 +25,8 @@ let dayOfWeekChart = null;
 let scannedExpensesData = []; // Store parsed data temporarily
 let currentSlide = 0;
 let expenseCategories = [];
+let currentScanPage = 1;
+const SCAN_PER_PAGE = 3;
 
 
 function formatINR(amount) {
@@ -39,7 +41,7 @@ function setupCarousel() {
   const track = document.getElementById("analyticsTrack");
   const dotsContainer = document.getElementById("carouselDots");
   const slides = document.querySelectorAll(".carousel-slide");
-  
+
   if (!track || slides.length === 0) return;
 
   // Create dots
@@ -58,7 +60,7 @@ function setupCarousel() {
   track.addEventListener("touchstart", (e) => {
     // Prevent carousel swipe if user is scrolling a chart horizontally
     if (e.target.closest('.chart-scroll-wrapper')) {
-      return; 
+      return;
     }
 
     startX = e.touches[0].clientX;
@@ -100,6 +102,7 @@ function setupCarousel() {
     if (currentSlide < slides.length - 1) {
       currentSlide++;
       updateCarousel();
+      if (window.syncCarouselHeight) window.syncCarouselHeight();
     }
   }
 
@@ -107,6 +110,7 @@ function setupCarousel() {
     if (currentSlide > 0) {
       currentSlide--;
       updateCarousel();
+      if (window.syncCarouselHeight) window.syncCarouselHeight();
     }
   }
 
@@ -114,6 +118,14 @@ function setupCarousel() {
     currentSlide = index;
     updateCarousel();
   }
+
+  // Expose height sync globally
+  window.syncCarouselHeight = () => {
+    const activeSlide = slides[currentSlide];
+    if (activeSlide && container) {
+      container.style.height = activeSlide.offsetHeight + "px";
+    }
+  };
 }
 
 /* ===============================
@@ -123,7 +135,7 @@ function toggleChartLoading(canvasId, isLoading) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
   const parent = canvas.parentElement;
-  
+
   if (isLoading) {
     const loader = document.createElement("div");
     loader.className = "chart-loading";
@@ -136,27 +148,32 @@ function toggleChartLoading(canvasId, isLoading) {
 }
 
 /* ===============================
-   NO DATA HELPER
+   PREMIUM PLACEHOLDER UTILITY
 ================================ */
-function handleChartDataState(canvasId, hasData) {
+function showPlaceholder(containerId, icon, text) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="empty-state-placeholder">
+      <div class="placeholder-icon">${icon}</div>
+      <p class="placeholder-text">${text}</p>
+      <button onclick="openExpense()" class="placeholder-btn">Add Your First Record</button>
+    </div>
+  `;
+}
+
+function handleChartDataState(canvasId, hasData, containerId, icon = "📊", text = "No data to show yet") {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
-  
-  const wrapper = canvas.parentElement;
-  let noDataMsg = wrapper.querySelector(".no-data-message");
 
   if (!hasData) {
     canvas.style.display = "none";
-    if (!noDataMsg) {
-      noDataMsg = document.createElement("div");
-      noDataMsg.className = "no-data-message";
-      noDataMsg.style.cssText = "position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: rgba(255,255,255,0.6); width: 100%; pointer-events: none;";
-      noDataMsg.innerHTML = "<p style='font-size: 2rem; margin-bottom: 10px;'>📉</p><p>No data available</p>";
-      wrapper.appendChild(noDataMsg);
-    }
+    showPlaceholder(containerId || canvas.parentElement.id, icon, text);
   } else {
     canvas.style.display = "block";
-    if (noDataMsg) noDataMsg.remove();
+    const placeholder = canvas.parentElement.querySelector(".empty-state-placeholder");
+    if (placeholder) placeholder.remove();
   }
 }
 
@@ -165,14 +182,14 @@ function handleChartDataState(canvasId, hasData) {
 ================================ */
 async function populateCategorySelect() {
   const select = document.getElementById("expenseCategory");
-  
+
   try {
     const res = await apiRequest("/expenses/categories");
     expenseCategories = res.data || [];
 
     if (select) {
       select.innerHTML = '<option value="" disabled selected>Select Category</option>';
-      
+
       expenseCategories.forEach(cat => {
         const option = document.createElement("option");
         option.value = cat;
@@ -199,18 +216,18 @@ async function loadDashboard() {
     const balanceEl = document.getElementById("balance");
     if (balanceEl) balanceEl.innerText = `₹${balance}`;
     if (balanceEl) balanceEl.innerText = `₹${formatINR(balance)}`;
-    
+
     const incomeEl = document.getElementById("totalIncome");
     if (incomeEl) incomeEl.innerText = `₹${income}`;
     if (incomeEl) incomeEl.innerText = `₹${formatINR(income)}`;
-    
+
     const expenseEl = document.getElementById("totalExpense");
     if (expenseEl) expenseEl.innerText = `₹${expense}`;
     if (expenseEl) expenseEl.innerText = `₹${formatINR(expense)}`;
 
     // Calculate Liquid Fill Percentages (Income is baseline)
     const base = income > 0 ? income : (expense > 0 ? expense : 1);
-    
+
     // Visual Fill (Capped at 100%)
     const expenseFill = Math.min((expense / base) * 100, 100);
     const balanceFill = Math.min((balance / base) * 100, 100);
@@ -230,7 +247,7 @@ async function loadDashboard() {
       const el = document.getElementById(id);
       if (!el) return;
       // Map 0% -> 12s (Slow), 100% -> 3s (Fast)
-      const duration = 12 - (pct / 100 * 9); 
+      const duration = 12 - (pct / 100 * 9);
       el.style.setProperty('--wave-speed', `${duration}s`);
       el.style.setProperty('--wave-speed-reverse', `${duration * 1.6}s`);
     };
@@ -242,13 +259,13 @@ async function loadDashboard() {
     // Update Hover Percentages
     const pctIncome = document.getElementById("pctIncome");
     if (pctIncome) pctIncome.innerText = "100%";
-    
+
     const pctExpense = document.getElementById("pctExpense");
     if (pctExpense) pctExpense.innerText = `${((expense / base) * 100).toFixed(1)}%`;
-    
+
     const pctBalance = document.getElementById("pctBalance");
     if (pctBalance) pctBalance.innerText = `${((balance / base) * 100).toFixed(1)}%`;
-    
+
   } catch (err) {
     showToast(err.message, "error");
     console.error("Dashboard load error:", err);
@@ -273,7 +290,7 @@ window.openExpense = function () {
   const modal = document.getElementById("expenseModal");
 
   modal.classList.remove("hidden");
-  document.body.classList.add("modal-open"); 
+  document.body.classList.add("modal-open");
 };
 
 window.closeExpense = function () {
@@ -305,7 +322,7 @@ window.addExpense = async function () {
 
     closeExpense();
     loadDashboard();
-    loadRecentExpenses(); 
+    loadRecentExpenses();
     showToast("Expense added successfully", "success");
 
   } catch (err) {
@@ -359,32 +376,33 @@ window.addIncome = async function () {
 /* ===============================
    SCAN / PASTE MODAL LOGIC
 ================================ */
-window.openScanModal = function() {
+window.openScanModal = function () {
   document.getElementById("scanModal").classList.remove("hidden");
   document.body.classList.add("modal-open");
   resetScan();
 };
 
-window.closeScanModal = function() {
+window.closeScanModal = function () {
   document.getElementById("scanModal").classList.add("hidden");
   document.body.classList.remove("modal-open");
 };
 
-window.handleFileSelect = function(input) {
+window.handleFileSelect = function (input) {
   const fileName = input.files[0] ? input.files[0].name : "Tap to upload image";
   document.getElementById("fileNameDisplay").innerText = fileName;
 };
 
-window.resetScan = function() {
+window.resetScan = function () {
   document.getElementById("scanInputSection").classList.remove("hidden");
   document.getElementById("scanPreviewSection").classList.add("hidden");
   document.getElementById("scanImageInput").value = "";
   document.getElementById("scanTextInput").value = "";
   document.getElementById("fileNameDisplay").innerText = "Tap to upload image";
   scannedExpensesData = [];
+  currentScanPage = 1;
 };
 
-window.processScan = async function() {
+window.processScan = async function () {
   const textInput = document.getElementById("scanTextInput");
   const text = textInput.value.trim();
 
@@ -396,10 +414,10 @@ window.processScan = async function() {
   try {
     // Use apiRequest for JSON (Text Only)
     const res = await apiRequest("/expenses/parse", "POST", { text });
-    
+
     scannedExpensesData = res.data.expenses;
     renderScanPreview(false); // false = not yet validated
-    
+
     document.getElementById("scanInputSection").classList.add("hidden");
     document.getElementById("scanPreviewSection").classList.remove("hidden");
 
@@ -409,55 +427,84 @@ window.processScan = async function() {
 };
 
 function renderScanPreview(isValidated = false) {
-  const list = document.getElementById("scanPreviewList");
-  list.innerHTML = "";
+  const tbody = document.getElementById("scanPreviewTableBody");
+  const pagination = document.getElementById("scanPagination");
+  if (!tbody || !pagination) return;
+
+  tbody.innerHTML = "";
+  pagination.innerHTML = "";
 
   if (scannedExpensesData.length === 0) {
-    list.innerHTML = "<p style='text-align:center; color:rgba(255,255,255,0.6);'>No expenses detected.</p>";
+    tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding: 20px; color:rgba(255,255,255,0.6);'>No expenses detected.</td></tr>";
     renderScanButtons(false);
     return;
   }
 
-  scannedExpensesData.forEach((item, index) => {
-    // Default to 'Other' if the parsed category isn't in our valid list
+  // Calculate Pagination
+  const totalItems = scannedExpensesData.length;
+  const totalPages = Math.ceil(totalItems / SCAN_PER_PAGE);
+  if (currentScanPage > totalPages) currentScanPage = totalPages || 1;
+
+  const start = (currentScanPage - 1) * SCAN_PER_PAGE;
+  const end = Math.min(start + SCAN_PER_PAGE, totalItems);
+  const pageItems = scannedExpensesData.slice(start, end);
+
+  pageItems.forEach((item, pageIdx) => {
+    const globalIndex = start + pageIdx;
+
     let currentCat = item.category;
     if (!expenseCategories.includes(currentCat)) {
       currentCat = 'Other';
-      item.category = 'Other'; // Update data to match
+      item.category = 'Other';
     }
 
-    const options = expenseCategories.map(cat => 
+    const options = expenseCategories.map(cat =>
       `<option value="${cat}" ${cat === currentCat ? "selected" : ""} style="background: #333; color: white;">${cat}</option>`
     ).join("");
 
-    const div = document.createElement("div");
-    div.className = "preview-item";
-    div.innerHTML = `
-      <div class="preview-details">
-        <span>${item.description}</span>
-        <div class="preview-meta" style="display:flex; align-items:center; gap: 6px; margin-top:4px;">
-          <span>${item.date}</span> • 
-          <select onchange="updateScannedCategory(${index}, this.value)" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px; padding: 2px 8px; font-size: 0.8rem; outline: none; cursor: pointer;">${options}</select>
-        </div>
-      </div>
-      <div style="display:flex; align-items:center;">
-        <div class="preview-amount">₹${item.amount}</div>
-        <div class="preview-amount">₹${formatINR(item.amount)}</div>
-        <button class="delete-scan-btn" onclick="deleteScannedItem(${index})">✕</button>
-      </div>
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="white-space: nowrap;">${item.date}</td>
+      <td style="font-weight: 600; color: #34d399;">₹${formatINR(item.amount)}</td>
+      <td>
+        <select onchange="updateScannedCategory(${globalIndex}, this.value)" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px; padding: 2px 4px; font-size: 0.8rem; outline: none; cursor: pointer; width: 100%;">${options}</select>
+      </td>
+      <td style="text-align: center;">
+        <button class="delete-scan-btn" onclick="deleteScannedItem(${globalIndex})" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;">
+           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
+      </td>
     `;
-    list.appendChild(div);
+    tbody.appendChild(tr);
   });
+
+  // Render Pagination Buttons if needed
+  if (totalPages > 1) {
+    pagination.innerHTML = `
+      <button class="pagination-btn" onclick="changeScanPage(-1)" ${currentScanPage === 1 ? 'disabled' : ''}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <span style="font-size: 0.9rem; color: rgba(255,255,255,0.7); min-width: 60px;">${currentScanPage} / ${totalPages}</span>
+      <button class="pagination-btn" onclick="changeScanPage(1)" ${currentScanPage === totalPages ? 'disabled' : ''}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    `;
+  }
 
   renderScanButtons(isValidated);
 }
-window.updateScannedCategory = function(index, value) {
+
+window.changeScanPage = function (dir) {
+  currentScanPage += dir;
+  renderScanPreview(false); // Reset validation when navigating
+};
+window.updateScannedCategory = function (index, value) {
   if (scannedExpensesData[index]) {
     scannedExpensesData[index].category = value;
   }
 };
 
-window.deleteScannedItem = function(index) {
+window.deleteScannedItem = function (index) {
   scannedExpensesData.splice(index, 1);
   // If items change, require re-validation
   renderScanPreview(false);
@@ -479,7 +526,7 @@ function renderScanButtons(isValidated) {
   }
 }
 
-window.validateBudget = async function() {
+window.validateBudget = async function () {
   if (scannedExpensesData.length === 0) return;
 
   // Group expenses by Month-Year to check budget efficiently
@@ -498,15 +545,15 @@ window.validateBudget = async function() {
     for (const key of Object.keys(groups)) {
       const [year, month] = key.split('-');
       const totalAttempt = groups[key];
-      
+
       // Fetch monthly summary to get balance
       const res = await apiRequest(`/expenses/summary/monthly?month=${month}&year=${year}`);
       const balance = res.data.balance; // This is Income - Expense
-      
+
       if (totalAttempt > balance) {
         allValid = false;
         const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long' });
-        
+
         errorItems.push(`
           <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
             <div style="text-align: left;">
@@ -536,10 +583,10 @@ window.validateBudget = async function() {
   }
 };
 
-window.confirmScanUpload = async function() {
+window.confirmScanUpload = async function () {
   try {
     const res = await apiRequest("/expenses/bulk", "POST", scannedExpensesData);
-    
+
     // 1. Identify all unique months from the scanned data
     const uniqueMonths = new Set();
     scannedExpensesData.forEach(item => {
@@ -548,7 +595,7 @@ window.confirmScanUpload = async function() {
         uniqueMonths.add(`${d.getFullYear()}-${d.getMonth() + 1}`);
       }
     });
-    
+
     if (uniqueMonths.size === 0) {
       const now = new Date();
       uniqueMonths.add(`${now.getFullYear()}-${now.getMonth() + 1}`);
@@ -559,10 +606,10 @@ window.confirmScanUpload = async function() {
       const [year, month] = key.split('-');
       const balanceRes = await apiRequest(`/expenses/summary/monthly?month=${month}&year=${year}`);
       const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long' });
-      return { 
-        monthName, 
-        year, 
-        balance: balanceRes.data.balance 
+      return {
+        monthName,
+        year,
+        balance: balanceRes.data.balance
       };
     });
 
@@ -617,13 +664,20 @@ async function loadRecentExpenses() {
   try {
     const res = await apiRequest("/expenses/weekly");
     const tbody = document.getElementById("expenseTableBody");
-    tbody.innerHTML = "";
+    const container = document.getElementById("recentExpensesContainer");
 
     if (!res.data || res.data.length === 0) {
-      tbody.innerHTML = "<tr><td colspan='4' style='text-align:center; padding: 20px;'>No recent expenses</td></tr>";
+      tbody.innerHTML = "";
+      showPlaceholder("recentExpensesContainer", "📝", "No transactions recorded yet.");
+      if (window.syncCarouselHeight) window.syncCarouselHeight();
       return;
     }
 
+    // Remove placeholder if it exists
+    const placeholder = container.querySelector(".empty-state-placeholder");
+    if (placeholder) placeholder.remove();
+
+    tbody.innerHTML = "";
     res.data.forEach(exp => {
       const tr = document.createElement("tr");
 
@@ -632,7 +686,6 @@ async function loadRecentExpenses() {
 
       tr.innerHTML = `
         <td style="white-space: nowrap;">${date}</td>
-        <td style="font-weight: 600; color: #34d399;">₹${exp.amount}</td>
         <td style="font-weight: 600; color: #34d399;">₹${formatINR(exp.amount)}</td>
         <td>${exp.category}</td>
         <td style="opacity: 0.7;">${exp.description || "—"}</td>
@@ -641,9 +694,10 @@ async function loadRecentExpenses() {
       tbody.appendChild(tr);
     });
 
+    if (window.syncCarouselHeight) window.syncCarouselHeight();
+
   } catch (err) {
     showToast(err.message, "error");
-    // For background loading errors, toast is fine, but let's ensure it doesn't hide if it's critical
     console.error(err);
   }
 }
@@ -668,11 +722,11 @@ async function loadCategoryChart(startDate = "", endDate = "") {
     const res = await apiRequest(url, "GET", null, { skipLoader: true });
 
     if (!res.data || res.data.length === 0) {
-      handleChartDataState("categoryChart", false);
+      handleChartDataState("categoryChart", false, "categoryChartContainer", "🍕", "Ready to see where your money goes?");
       if (categoryChart) categoryChart.destroy();
       return;
     }
-    handleChartDataState("categoryChart", true);
+    handleChartDataState("categoryChart", true, "categoryChartContainer");
 
     const labels = res.data.map(i => i._id);
     const values = res.data.map(i => i.total);
@@ -740,15 +794,15 @@ async function loadWeeklyTrend(startDate = "", endDate = "") {
       start.setDate(start.getDate() - 7);
       url += `?startDate=${start.toISOString().split('T')[0]}&endDate=${end.toISOString().split('T')[0]}`;
     }
-    
+
     const res = await apiRequest(url, "GET", null, { skipLoader: true });
 
     if (!res.data || res.data.length === 0) {
-      handleChartDataState("weeklyChart", false);
+      handleChartDataState("weeklyChart", false, "weeklyChartContainer", "📈", "No spending trends detected this week.");
       if (weeklyChart) weeklyChart.destroy();
       return;
     }
-    handleChartDataState("weeklyChart", true);
+    handleChartDataState("weeklyChart", true, "weeklyChartContainer");
 
     const grouped = {};
     res.data.forEach(e => {
@@ -823,17 +877,18 @@ async function loadMonthlyHistogram() {
     const res = await apiRequest("/expenses", "GET", null, { skipLoader: true });
 
     if (!res.data || res.data.length === 0) {
-      handleChartDataState("monthlyChart", false);
+      handleChartDataState("monthlyChart", false, "monthlyChartContainer", "📊", "Ready to start your financial journey?");
       if (monthlyChart) monthlyChart.destroy();
-      
+
       // Clear range if no data
       const navRange = document.getElementById("navbarDateRange");
       const mobRange = document.getElementById("mobileDateRange");
       if (navRange) navRange.innerText = "";
       if (mobRange) mobRange.style.display = 'none';
-      
+
       return;
     }
+    handleChartDataState("monthlyChart", true, "monthlyChartContainer");
 
     // CALCULATE OVERALL DATE RANGE
     const dates = res.data.map(e => new Date(e.date).getTime());
@@ -843,10 +898,10 @@ async function loadMonthlyHistogram() {
     const startStr = minDate.toLocaleDateString('en-US', fmt);
     const endStr = maxDate.toLocaleDateString('en-US', fmt);
     const rangeText = startStr === endStr ? startStr : `${startStr} - ${endStr}`;
-    
+
     const navRange = document.getElementById("navbarDateRange");
     const mobRange = document.getElementById("mobileDateRange");
-    
+
     if (navRange) navRange.innerText = rangeText;
     if (mobRange) {
       mobRange.innerText = rangeText;
@@ -898,11 +953,11 @@ async function loadMonthlyHistogram() {
     if (totalEl) totalEl.innerText = `Total: ₹${formatINR(totalYearly)}`;
 
     if (filteredData.length === 0) {
-      handleChartDataState("monthlyChart", false);
+      handleChartDataState("monthlyChart", false, "monthlyChartContainer", "📊", "No data for this specific year.");
       if (monthlyChart) monthlyChart.destroy();
       return;
     }
-    handleChartDataState("monthlyChart", true);
+    handleChartDataState("monthlyChart", true, "monthlyChartContainer");
 
     // 4. Group by Month (Initialize all 12 months)
     const grouped = new Array(12).fill(0);
@@ -988,11 +1043,11 @@ async function loadYearlyChart(startDate = "", endDate = "") {
     const yearlyData = {};
 
     if (expenses.length === 0 && incomes.length === 0) {
-      handleChartDataState("yearlyChart", false);
+      handleChartDataState("yearlyChart", false, "yearlyChartContainer", "🏦", "Plan your future! Add some data to see yearly trends.");
       if (yearlyChart) yearlyChart.destroy();
       return;
     }
-    handleChartDataState("yearlyChart", true);
+    handleChartDataState("yearlyChart", true, "yearlyChartContainer");
 
     // Aggregate Income
     incomes.forEach(inc => {
@@ -1076,11 +1131,11 @@ async function loadDayOfWeekChart(startDate = "", endDate = "") {
     const res = await apiRequest(url, "GET", null, { skipLoader: true });
 
     if (!res.data || res.data.length === 0) {
-      handleChartDataState("dayOfWeekChart", false);
+      handleChartDataState("dayOfWeekChart", false, "dayOfWeekChartContainer", "📅", "Tracking your busy days...");
       if (dayOfWeekChart) dayOfWeekChart.destroy();
       return;
     }
-    handleChartDataState("dayOfWeekChart", true);
+    handleChartDataState("dayOfWeekChart", true, "dayOfWeekChartContainer");
 
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const totals = new Array(7).fill(0);
@@ -1140,10 +1195,10 @@ async function loadDayOfWeekChart(startDate = "", endDate = "") {
 /* ===============================
    FILTER LOGIC
 ================================ */
-window.filterCharts = function() {
+window.filterCharts = function () {
   const start = document.getElementById('startDate').value;
   const end = document.getElementById('endDate').value;
-  
+
   if (start && end && new Date(start) > new Date(end)) {
     showToast("Start date cannot be after end date", "error");
     return;
@@ -1155,7 +1210,7 @@ window.filterCharts = function() {
   loadDayOfWeekChart(start, end);
 };
 
-window.resetFilters = function() {
+window.resetFilters = function () {
   document.getElementById('startDate').value = '';
   document.getElementById('endDate').value = '';
   loadCategoryChart();
@@ -1195,14 +1250,14 @@ function showToast(message, type = "error", duration = 3000) {
       const ctx = new AudioContext();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      
+
       osc.type = "sine";
       osc.frequency.setValueAtTime(440, ctx.currentTime);
       gain.gain.setValueAtTime(0.05, ctx.currentTime); // Low volume
-      
+
       osc.connect(gain);
       gain.connect(ctx.destination);
-      
+
       osc.start();
       osc.stop(ctx.currentTime + 0.15); // 150ms duration
     }
@@ -1212,22 +1267,22 @@ function showToast(message, type = "error", duration = 3000) {
 
   // 2. Create toast element if it doesn't exist
   let toast = document.getElementById("toast-notification");
-  
+
   if (!toast) {
     toast = document.createElement("div");
     toast.id = "toast-notification";
-    
+
     // Apply styling via JS so no CSS file edit is needed
     Object.assign(toast.style, {
       position: "fixed",
       bottom: "80px", // Just above bottom nav usually
       left: "50%",
       transform: "translateX(-50%) translateY(20px)",
-      
+
       backdropFilter: "blur(12px)",
       webkitBackdropFilter: "blur(12px)",
       border: "1px solid rgba(255, 255, 255, 0.25)",
-      
+
       color: "#fff",
       padding: "12px 24px",
       borderRadius: "50px",
@@ -1240,7 +1295,7 @@ function showToast(message, type = "error", duration = 3000) {
       pointerEvents: "auto", // Ensure button is clickable
       whiteSpace: "nowrap"
     });
-    
+
     document.body.appendChild(toast);
   }
 
@@ -1268,13 +1323,13 @@ function showToast(message, type = "error", duration = 3000) {
   const okBtn = document.createElement("button");
   okBtn.innerText = "OK";
   okBtn.style.cssText = "margin-left: 12px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.5); color: white; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold;";
-  
+
   okBtn.onclick = () => {
     toast.style.opacity = "0";
     toast.style.transform = "translateX(-50%) translateY(20px)";
     if (toast.hideTimeout) clearTimeout(toast.hideTimeout);
   };
-  
+
   toast.appendChild(okBtn);
 
   toast.style.opacity = "1";
@@ -1303,7 +1358,7 @@ function showDialog(title, message, type = "info") {
 
   const overlay = document.createElement("div");
   overlay.id = "custom-dialog";
-  
+
   // Inline styles for the overlay
   overlay.style.cssText = `
     position: fixed;

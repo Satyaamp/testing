@@ -9,26 +9,29 @@ const jwt = require('jsonwebtoken');
 
 router.post('/register', limiter, ctrl.register);
 router.post('/login', limiter, ctrl.login);
-router.get('/me',protect , ctrl.me);
+router.get('/me', protect, ctrl.me);
+
+const avatarUpload = require('../middleware/avatarUpload.middleware');
+router.post('/upload-avatar', protect, avatarUpload.single('avatar'), ctrl.uploadAvatar);
 
 // POST /google - Google Login
 router.post('/google', async (req, res) => {
   try {
     const { token } = req.body;
     const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-    
+
     const ticket = await client.verifyIdToken({
       idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
-    
+
     const { name, email, picture } = ticket.getPayload();
 
     let user = await User.findOne({ email });
 
     if (!user) {
       // Create new user with random password
-      const randomPassword = Math.random().toString(36).slice(-8) + "1Aa!"; 
+      const randomPassword = Math.random().toString(36).slice(-8) + "1Aa!";
       user = await User.create({
         name,
         email,
@@ -38,7 +41,15 @@ router.post('/google', async (req, res) => {
     }
 
     const jwtToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
-    res.status(200).json({ token: jwtToken, message: "Login successful" });
+    res.status(200).json({
+      token: jwtToken,
+      user: {
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar
+      },
+      message: "Login successful"
+    });
   } catch (err) {
     console.error("Google Login Error:", err);
     res.status(400).json({ message: 'Google login failed' });
@@ -52,7 +63,7 @@ router.get("/export", protect, async (req, res) => {
     const Expense = require('../models/expense.model');
     // Try requiring Income model if it exists
     let Income;
-    try { Income = require('../models/income.model'); } catch(e) {}
+    try { Income = require('../models/income.model'); } catch (e) { }
 
     const expenses = await Expense.find({ userId: req.user.id });
     const incomes = Income ? await Income.find({ userId: req.user.id }) : [];
@@ -79,7 +90,7 @@ router.post("/import", protect, async (req, res) => {
     const Expense = require('../models/expense.model');
     // Try requiring Income model if it exists
     let Income;
-    try { Income = require('../models/income.model'); } catch(e) {}
+    try { Income = require('../models/income.model'); } catch (e) { }
 
     let count = 0;
 
@@ -109,9 +120,9 @@ router.delete("/me", protect, async (req, res) => {
   try {
     console.log("🗑️ DELETE /auth/me request received for user:", req.user.id);
     await User.findByIdAndDelete(req.user.id);
-    
+
     // Cleanup associated data
-    const Expense = require('../models/expense.model'); 
+    const Expense = require('../models/expense.model');
     await Expense.deleteMany({ userId: req.user.id });
     // const Income = require('../models/income.model');
     // await Income.deleteMany({ userId: req.user.id });

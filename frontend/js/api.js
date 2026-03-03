@@ -37,7 +37,16 @@ document.body.appendChild(loaderDiv);
 let activeRequests = 0;
 
 export async function apiRequest(endpoint, method = "GET", body = null, { skipLoader = false } = {}) {
-  const token = localStorage.getItem("token");
+  let token = localStorage.getItem("token");
+
+  // Validate token (Fix for [object Object] or malformed strings)
+  if (token && (token.startsWith('[object') || token === 'undefined' || token === 'null')) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userAvatar");
+    token = null;
+    window.location.href = "/login";
+    return;
+  }
 
   if (!skipLoader) {
     activeRequests++;
@@ -101,18 +110,21 @@ export function showToast(message, type = "error") {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (AudioContext) {
       const ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(440, ctx.currentTime);
-      gain.gain.setValueAtTime(0.05, ctx.currentTime); // Low volume
-      
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      
-      osc.start();
-      osc.stop(ctx.currentTime + 0.15); // 150ms duration
+      // Chrome requires user gesture or resumed state
+      if (ctx.state === 'running' || ctx.state === 'suspended') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        gain.gain.setValueAtTime(0.05, ctx.currentTime); // Low volume
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15); // 150ms duration
+      }
     }
   } catch (e) {
     // Ignore audio context errors
@@ -120,11 +132,11 @@ export function showToast(message, type = "error") {
 
   // 2. Create toast element if it doesn't exist
   let toast = document.getElementById("toast-notification");
-  
+
   if (!toast) {
     toast = document.createElement("div");
     toast.id = "toast-notification";
-    
+
     // Apply styling via JS so no CSS file edit is needed
     Object.assign(toast.style, {
       position: "fixed",
@@ -145,7 +157,7 @@ export function showToast(message, type = "error") {
       pointerEvents: "none",
       whiteSpace: "nowrap"
     });
-    
+
     document.body.appendChild(toast);
   }
 
