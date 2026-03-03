@@ -3,7 +3,7 @@ const API_BASE = window.location.hostname === "localhost" || window.location.hos
   : "https://dhanrekhabackend.onrender.com/api";
 
 
-export const APP_VERSION = "v1.0.19";
+export const APP_VERSION = "v1.0.20";
 
 // Inject Global Loader CSS
 const loaderStyle = document.createElement('style');
