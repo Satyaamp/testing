@@ -895,9 +895,17 @@
             const img = document.getElementById('avatarImg');
             if (defaultSvg && img) {
               defaultSvg.style.display = 'none';
-              img.src = userRes.data.avatar;
+              let fullAvatarUrl = userRes.data.avatar;
+              if (fullAvatarUrl && fullAvatarUrl.startsWith('/')) {
+                const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+                  ? "http://localhost:5000/api"
+                  : "https://dhanrekhabackend.onrender.com/api";
+                const baseUrl = API_BASE.replace('/api', '');
+                fullAvatarUrl = baseUrl + fullAvatarUrl;
+              }
+              img.src = fullAvatarUrl;
               img.style.display = 'block';
-              localStorage.setItem('userAvatar', userRes.data.avatar); // Sync across app
+              localStorage.setItem('userAvatar', fullAvatarUrl); // Sync across app
             }
           }
 
