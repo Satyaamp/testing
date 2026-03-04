@@ -211,14 +211,19 @@
     <!-- SCAN / PASTE MODAL -->
     <div id="scanModal" class="modal hidden">
       <div class="modal-content glass-card" style="max-width: 600px; width: 95%;">
-        <h3>
-          <abbr title="
-        Add multiple expenses once.
-        Format: Date Amount.
-        Example: 12/10/2023 500">
-            📄 Add Expenses
-          </abbr>
-        </h3>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <h3 style="margin-top: 0;">
+            <abbr title="
+          Add multiple expenses once.
+          Format: Date Amount.
+          Example: 12/10/2023 500">
+              📄 Add Expenses
+            </abbr>
+          </h3>
+          <button onclick="closeScanModal()"
+            style="background: transparent; border: none; color: rgba(255,255,255,0.6); font-size: 1.5rem; cursor: pointer; padding: 0; line-height: 1; margin-top: -5px;"
+            title="Close">×</button>
+        </div>
 
 
         <!-- Input Section -->
@@ -242,7 +247,7 @@
           </div>
 
           <div class="modal-actions">
-            <button class="cancel" onclick="closeScanModal()">Cancel</button>
+            <!-- <button class="cancel" onclick="closeScanModal()">Cancel</button> -->
             <button onclick="processScan()" style="background: #3b82f6; color: white;">Analyze</button>
           </div>
         </div>

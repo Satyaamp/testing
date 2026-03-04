@@ -462,7 +462,15 @@ function renderScanPreview(isValidated = false) {
       `<option value="${cat}" ${cat === currentCat ? "selected" : ""} style="background: #333; color: white;">${cat}</option>`
     ).join("");
 
+    let rowStyle = "";
+    if (item.isValid === true) {
+      rowStyle = "background: rgba(34, 197, 94, 0.15);";
+    } else if (item.isValid === false) {
+      rowStyle = "background: rgba(239, 68, 68, 0.15);";
+    }
+
     const tr = document.createElement("tr");
+    if (rowStyle) tr.style = rowStyle;
     tr.innerHTML = `
       <td style="white-space: nowrap;">${item.date}</td>
       <td style="font-weight: 600; color: #34d399;">₹${formatINR(item.amount)}</td>
@@ -506,6 +514,8 @@ window.updateScannedCategory = function (index, value) {
 
 window.deleteScannedItem = function (index) {
   scannedExpensesData.splice(index, 1);
+  // Reset validity tracking on items change to force re-validation
+  scannedExpensesData.forEach(item => delete item.isValid);
   // If items change, require re-validation
   renderScanPreview(false);
 };
@@ -516,7 +526,6 @@ function renderScanButtons(isValidated) {
 
   if (isValidated) {
     container.innerHTML = `
-      <button class="cancel" onclick="resetScan()">Back</button>
       <button onclick="confirmScanUpload()" style="background: #22c55e; color: black;">Confirm & Save</button>
     `;
   } else {
@@ -540,6 +549,7 @@ window.validateBudget = async function () {
 
   let allValid = true;
   let errorItems = [];
+  const invalidMonths = new Set();
 
   try {
     for (const key of Object.keys(groups)) {
@@ -552,17 +562,16 @@ window.validateBudget = async function () {
 
       if (totalAttempt > balance) {
         allValid = false;
+        invalidMonths.add(key);
         const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long' });
 
         errorItems.push(`
           <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
             <div style="text-align: left;">
               <div style="font-weight: bold; color: #fff; font-size: 1rem;">${monthName} ${year}</div>
-              <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">Available: ₹${balance}</div>
               <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">Available: ₹${formatINR(balance)}</div>
             </div>
             <div style="text-align: right;">
-              <div style="color: #ef4444; font-weight: bold;">Need ₹${totalAttempt}</div>
               <div style="color: #ef4444; font-weight: bold;">Need ₹${formatINR(totalAttempt)}</div>
             </div>
           </div>
@@ -570,13 +579,19 @@ window.validateBudget = async function () {
       }
     }
 
+    // Mark items as valid or invalid based on budget check
+    scannedExpensesData.forEach(item => {
+      const d = new Date(item.date);
+      const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+      item.isValid = !invalidMonths.has(key);
+    });
+
     if (allValid) {
-      showToast("Budget check passed! You can add these expenses.", "success");
       renderScanPreview(true); // Enable Confirm button
     } else {
       const listHtml = `<div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 0 15px; margin-top: 15px; max-height: 200px; overflow-y: auto;">${errorItems.join('')}</div>`;
       showDialog("Budget Exceeded", `The following months have insufficient funds:${listHtml}`, "warning");
-      // Stay on validate state
+      renderScanPreview(false); // Re-render to show colored rows
     }
   } catch (err) {
     showDialog("Validation Error", err.message, "error");
@@ -620,7 +635,6 @@ window.confirmScanUpload = async function () {
       return balances.map(b => `
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
           <span style="color: rgba(255,255,255,0.9);">${b.monthName} ${b.year}</span>
-          <span style="font-weight: bold; color: #34d399;">₹${b.balance}</span>
           <span style="font-weight: bold; color: #34d399;">₹${formatINR(b.balance)}</span>
         </div>
       `).join('');
