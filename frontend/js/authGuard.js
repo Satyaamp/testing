@@ -43,7 +43,18 @@ async function updateNavAvatars() {
   profileBtns.forEach(btn => {
     // 1. Mobile Icon replacement (SVG)
     const mobileIcon = btn.querySelector('.mobile-icon');
-    const imgHtml = `<img src="${avatarUrl}" alt="Profile" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.2); vertical-align: middle;" />`;
+
+    // Make avatar URL absolute if relative
+    let fullAvatarUrl = avatarUrl;
+    if (avatarUrl && avatarUrl.startsWith('/')) {
+      const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+        ? "http://localhost:5000/api"
+        : "https://dhanrekhabackend.onrender.com/api";
+      const baseUrl = API_BASE.replace('/api', '');
+      fullAvatarUrl = baseUrl + avatarUrl;
+    }
+
+    const imgHtml = `<img src="${fullAvatarUrl}" alt="Profile" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.2); vertical-align: middle;" />`;
 
     if (mobileIcon) {
       mobileIcon.innerHTML = imgHtml;
@@ -56,9 +67,9 @@ async function updateNavAvatars() {
       if (currentText.includes('👤') || currentText.toLowerCase().includes('profile')) {
         // If it has the emoji, replace it. Otherwise prepend.
         if (currentText.includes('👤')) {
-          desktopText.innerHTML = currentText.replace('👤', `<img src="${avatarUrl}" alt="" style="width: 18px; height: 18px; border-radius: 50%; object-fit: cover; margin-right: 6px; vertical-align: sub; border: 1px solid rgba(255,255,255,0.1);" />`);
+          desktopText.innerHTML = currentText.replace('👤', `<img src="${fullAvatarUrl}" alt="" style="width: 18px; height: 18px; border-radius: 50%; object-fit: cover; margin-right: 6px; vertical-align: sub; border: 1px solid rgba(255,255,255,0.1);" />`);
         } else {
-          desktopText.innerHTML = `<img src="${avatarUrl}" alt="" style="width: 18px; height: 18px; border-radius: 50%; object-fit: cover; margin-right: 6px; vertical-align: sub; border: 1px solid rgba(255,255,255,0.1);" /> ` + currentText;
+          desktopText.innerHTML = `<img src="${fullAvatarUrl}" alt="" style="width: 18px; height: 18px; border-radius: 50%; object-fit: cover; margin-right: 6px; vertical-align: sub; border: 1px solid rgba(255,255,255,0.1);" /> ` + currentText;
         }
       }
     }
