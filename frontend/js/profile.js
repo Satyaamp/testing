@@ -210,7 +210,16 @@ if (avatarContainer && avatarInput) {
         defaultSvg.style.display = 'none';
 
         // Cache bust the image URL if replacing identically named image
-        img.src = `${data.avatarUrl}?t=${new Date().getTime()}`;
+        let fullAvatarUrl = data.avatarUrl;
+        if (fullAvatarUrl && fullAvatarUrl.startsWith('/')) {
+          const API_BASE = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+            ? "http://localhost:5000/api"
+            : "https://dhanrekhabackend.onrender.com/api";
+          const baseUrl = API_BASE.replace('/api', '');
+          fullAvatarUrl = baseUrl + fullAvatarUrl;
+        }
+
+        img.src = `${fullAvatarUrl}?t=${new Date().getTime()}`;
         img.style.display = 'block';
       }
 

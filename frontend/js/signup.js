@@ -35,7 +35,7 @@ form.addEventListener("submit", async (e) => {
 
     showToast("Registration successful. Redirecting...", "success");
     setTimeout(() => {
-      window.location.href = "/";
+      window.location.href = "login.html";
     }, 1000);
   } catch (err) {
     // Also wait on error for consistent experience
@@ -43,7 +43,7 @@ form.addEventListener("submit", async (e) => {
     if (elapsed < MIN_DELAY) {
       await new Promise(resolve => setTimeout(resolve, MIN_DELAY - elapsed));
     }
-    
+
     if (overlay) overlay.style.display = 'none';
     showToast(err.message, "error");
     btn.disabled = false;

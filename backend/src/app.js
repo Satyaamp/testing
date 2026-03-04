@@ -12,6 +12,9 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, "../../frontend")));
 
+// Serve backend uploads statically for decoupled deployments
+app.use('/api/uploads/avatars', express.static(path.join(__dirname, 'uploads/avatars')));
+
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', service: 'DhanRekha API' });
 });

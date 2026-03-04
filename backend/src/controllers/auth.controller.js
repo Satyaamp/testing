@@ -26,17 +26,21 @@ exports.uploadAvatar = async (req, res, next) => {
     const oldAvatar = user.avatar;
 
     // 2. Construct the new avatar URL path
-    const avatarUrl = `/assets/avatars/${req.file.filename}`;
+    const avatarUrl = `/api/uploads/avatars/${req.file.filename}`;
 
     // 3. Update user in database
     await authService.updateUser(req.user.id, { avatar: avatarUrl });
 
     // 4. Cleanup old local avatar file if it exists
-    if (oldAvatar && oldAvatar.startsWith('/assets/avatars/')) {
-      const oldPath = path.join(__dirname, '../../../frontend', oldAvatar);
-      fs.unlink(oldPath, (err) => {
-        if (err) console.error("Failed to delete old avatar:", err);
-      });
+    if (oldAvatar) {
+      if (oldAvatar.startsWith('/api/uploads/avatars/')) {
+        const oldFilename = oldAvatar.split('/').pop();
+        const oldPath = path.join(__dirname, '../uploads/avatars', oldFilename);
+        fs.unlink(oldPath, (err) => { if (err) console.log("Failed to delete old backend avatar:", err); });
+      } else if (oldAvatar.startsWith('/assets/avatars/')) {
+        const oldPath = path.join(__dirname, '../../../frontend', oldAvatar);
+        fs.unlink(oldPath, (err) => { if (err) console.log("Failed to delete old frontend avatar:", err); });
+      }
     }
 
     res.status(200).json({

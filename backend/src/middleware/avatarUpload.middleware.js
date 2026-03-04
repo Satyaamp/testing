@@ -2,15 +2,15 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Ensure the directory exists
-const uploadDir = path.join(__dirname, '../../../frontend/assets/avatars');
+// Ensure the directory exists internally
+const uploadDir = path.join(__dirname, '../uploads/avatars');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, uploadDir); // Save in frontend/assets/avatars
+        cb(null, uploadDir); // Save in backend/src/uploads/avatars
     },
     filename: function (req, file, cb) {
         // e.g., avatar-userId-16327382.png
