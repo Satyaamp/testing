@@ -161,13 +161,13 @@ exports.processMessage = async (from, messageBody) => {
             const totalIncome = incomeAggr[0]?.total || 0;
             const totalExpense = expenseAggr[0]?.total || 0;
 
-            const balance = totalIncome - totalExpense;
+            const balance = (totalIncome - totalExpense).toFixed(2);
 
             const reply =
-                `🗓️ Snapshot for ${parsedDate.toLocaleString('default', { month: 'long' }).toUpperCase()} ${year}\n` +
-                `Income: ₹${totalIncome}\n` +
-                `Expenses: ₹${totalExpense}\n` +
-                `Balance: ₹${balance}`;
+                `🗓️ Snapshot for ${parsedDate.toLocaleString('default', { month: 'long' }).toUpperCase()} ${year}
+            Income: ₹${totalIncome.toFixed(2)}
+            Expenses: ₹${totalExpense.toFixed(2)}
+            Balance: ₹${balance}`;
 
             return whatsappService.sendTextMessage(from, reply);
         }
