@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Dhan₹ekha – Where Your Money Tells a Story</title>
@@ -10,12 +11,13 @@
   <link rel="stylesheet" href="css/index.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/home.css">
- 
+
 
 </head>
+
 <body>
 
-<!-- Page Loader
+  <!-- Page Loader
 <div id="page-loader"><div class="loader"></div></div>
 <script>
   window.addEventListener('load', () => {
@@ -27,521 +29,658 @@
   });
 </script> -->
 
-<!-- HEADER -->
-<header class="header">
-  <div class="logo">
-    <img src="assets/logo1.png" alt="Dhan₹ekha Logo" loading="lazy" />
-    <span>
-      <abbr title="Where Your Money Tells a Story">Dhan₹ekha</abbr>
-    </span>
-  </div>
-
-  <nav>
-    <a href="login" class="btn-outline">Login</a>
-    <a href="signup" class="btn-primary">Register</a>
-  </nav>
-</header>
-
-<marquee class="announcement" behavior="scroll" direction="left" scrollamount="5" style="background: linear-gradient(90deg, #22c55e7e, #4ade804e); color: white; padding: 10px 0; font-weight: bold; font-size: 0.95rem; position:sticky" onmouseover="this.stop();" onmouseout="this.start();">
-  🚀 New Feature: AI Financial Assistant coming soon! Ask questions about your spending and get instant insights. Stay tuned! 🌟
-</marquee>
-
-
-<!-- HERO -->
-<section class="hero animate-enter">
-  <h1>Where Your Money Tells a Story</h1>
-  <p>
-    Track income, control expenses and understand your spending
-    with clean analytics — all in one secure place.
-  </p>
-
-  <div class="hero-actions">
-    <a href="signup" class="btn-primary">Get Started</a>
-    <a href="login" class="btn-outline">Login</a>
-  </div>
-</section>
-
-<!-- FEATURES -->
-<section class="features">
-  <div class="feature-card animate-enter delay-1">
-    <h3>
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 8px;"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-      Smart Analytics
-    </h3>
-    <p>Get detailed insights with category-wise breakdowns, weekly trends, and monthly summaries to understand your financial patterns.</p>
-    <a href="#" onclick="openPdfModal('assets/DhanRekha_Monthly_Report.pdf'); return false;" style="display: inline-flex; align-items: center; margin-top: 12px; color: #4ade80; font-size: 0.9rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> See Sample Report
-    </a>
-  </div>
-
-  <div class="feature-card animate-enter delay-2">
-    <h3>
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 8px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-      Secure & Private
-    </h3>
-    <p>Your data is protected with JWT authentication and user-scoped access. Your financial information stays private and secure.</p>
-  </div>
-
-  <div class="feature-card animate-enter delay-3">
-    <h3>
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 8px;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-      PWA Enabled
-    </h3>
-    <p>Install Dhan₹ekha like a native app on any device. Works seamlessly on mobile, tablet, and desktop.</p>
-  </div>
-
-  <div class="feature-card animate-enter delay-4">
-    <h3>
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-      Yearly Reports
-    </h3>
-    <p>View comprehensive yearly analytics with charts and download detailed PDF reports for your records.</p>
-    <a href="#" onclick="openPdfModal('assets/DhanRekha_Yearly_Report_2025.pdf'); return false;" style="display: inline-flex; align-items: center; margin-top: 12px; color: #4ade80; font-size: 0.9rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> See Sample Report
-    </a>
-  </div>
-
-  <div class="feature-card animate-enter delay-5">
-    <h3>
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-right: 8px;">
-        <path d="M21 15V5a2 2 0 0 0-2-2H7l-4 4v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"></path>
-        <path d="M3 7h4V3"></path>
-        <line x1="9" y1="13" x2="15" y2="13"></line>
-        <line x1="9" y1="17" x2="15" y2="17"></line>
-      </svg>
-      Multiple Entry
-    </h3>
-    <p>Save time by adding multiple expenses at once. Simply paste a list and let our smart parser organize it for you.</p>
-    
-    <div style="margin-top: 15px;">
-      <!-- Desktop Preview -->
-      <div class="video-preview-wrapper desktop-video-wrapper" style="position: relative; cursor: pointer; border-radius: 8px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);" onclick="openVideoModal('assets/bulk-demo.mp4')">
-        <video src="https://go.screenpal.com/watch/cOnjbbn3RYF" poster="assets/bulk.png" muted loop playsinline style="width: 100%; height: auto; display: block;"></video>
-        <div class="play-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; transition: background 0.3s;">
-          <div style="width: 50px; height: 50px; background: rgba(34, 197, 94, 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 3px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          </div>
-        </div>
-      </div>
-
-      <!-- Mobile Preview -->
-      <div class="video-preview-wrapper mobile-video-wrapper" style="position: relative; cursor: pointer; border-radius: 8px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);" onclick="openVideoModal('assets/bulk-add.mp4')">
-        <!-- <video src="assets/bulk-add.mp4" poster="assets/bulk.png" muted loop playsinline style="width: 100%; height: auto; display: block; aspect-ratio: 720/1412; background: #000; object-fit: cover;"></video> -->
-        <video src="https://go.screenpal.com/watch/cOnjbbn3RYb" poster="assets/bulk.png" muted loop playsinline style="width: 100%; height: auto; display: block;"></video>
-        <div class="play-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; transition: background 0.3s;">
-          <div style="width: 40px; height: 40px; background: rgba(34, 197, 94, 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 2px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- HOW IT WORKS -->
-<section class="features" style="padding-top: 0;">
-  <div style="grid-column: 1 / -1; text-align: center; margin-bottom: 20px;">
-    <h2 style="font-size: 2rem; margin-bottom: 10px;">How It Works</h2>
-    <p style="opacity: 0.8;">Simple steps to financial freedom</p>
-  </div>
-  
-  <div class="feature-card animate-enter delay-1">
-    <div class="step-number">1</div>
-    <h3>Sign Up</h3>
-    <p>Create your secure account in seconds. It's free and private.</p>
-  </div>
-
-  <div class="feature-card animate-enter delay-2">
-    <div class="step-number">2</div>
-    <h3>Track</h3>
-    <p>Log your daily income and expenses with our intuitive interface.</p>
-  </div>
-
-  <div class="feature-card animate-enter delay-3">
-    <div class="step-number">3</div>
-    <h3>Analyze</h3>
-    <p>Visualize your spending habits and download detailed reports.</p>
-  </div>
-
-  <div class="feature-card animate-enter delay-4" style="grid-column: 1 / -1; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); text-align: center; display: flex; flex-direction: column; align-items: center;">
-    <h3>⚡ Explore with Demo Account</h3>
-    <p>Don't want to sign up yet? Experience the full power of Dhan₹ekha instantly.</p>
-    <div style="background: rgba(0,0,0,0.3); padding: 12px 20px; border-radius: 8px; margin: 15px 0; text-align: left;">
-      <div style="margin-bottom: 4px;">Email: <strong style="color: #4ade80; user-select: all;">demouser@mail.com</strong></div>
-      <div>Password: <strong style="color: #4ade80; user-select: all;">1234</strong></div>
-    </div>
-    <a href="login" class="btn-primary" style="padding: 8px 20px; font-size: 0.9rem; text-decoration: none;">Login & Explore</a>
-  </div>
-</section>
-
-<!-- APP PREVIEW -->
-<section class="app-preview">
-  <h2 class="animate-enter delay-2">See Dhan₹ekha in Action</h2>
-  <p class="preview-subtitle animate-enter delay-3">
-    A quick look at your dashboard after login — analytics, insights and complete financial control at your fingertips.
-  </p>
-
-  <div class="preview-grid">
-    <div class="preview-card animate-enter delay-4">
-      <img src="assets/dashboard.png" alt="Dashboard Overview">
-      <h4>Smart Dashboard</h4>
-      <p>View your current balance, total income and expenses at a glance with beautiful visualizations.</p>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo">
+      <img src="assets/logo1.png" alt="Dhan₹ekha Logo" loading="lazy" />
+      <span>
+        <abbr title="Where Your Money Tells a Story">Dhan₹ekha</abbr>
+      </span>
     </div>
 
+    <nav>
+      <a href="login" class="btn-outline">Login</a>
+      <a href="signup" class="btn-primary">Register</a>
+    </nav>
+  </header>
+
+  <marquee class="announcement" behavior="scroll" direction="left" scrollamount="5"
+    style="background: linear-gradient(90deg, #22c55e7e, #4ade804e); color: white; padding: 10px 0; font-weight: bold; font-size: 0.95rem; position:sticky"
+    onmouseover="this.stop();" onmouseout="this.start();">
+    🚀 New Feature: AI Financial Assistant coming soon! Ask questions about your spending and get instant insights. Stay
+    tuned! 🌟
+  </marquee>
 
 
-    <div class="preview-card animate-enter delay-6">
-      <div class="mini-carousel" id="monthlyCarousel">
-        <div class="mini-slides">
-          <div class="mini-slide">
-            <img src="assets/monthly.png" alt="Monthly Insights">
-            <div class="slide-caption">Monthly Insights</div>
-          </div>
-          <div class="mini-slide">
-            <img src="assets/monthly_cumulative.png" alt="Cumulative Spending">
-            <div class="slide-caption">Cumulative Spending</div>
-          </div>
+  <!-- HERO -->
+  <section class="hero animate-enter">
+    <h1>Where Your Money Tells a Story</h1>
+    <p>
+      Track income, control expenses and understand your spending
+      with clean analytics — all in one secure place.
+    </p>
 
-        </div>
-        <button class="mini-nav prev" onclick="moveMiniSlide(-1)">❮</button>
-        <button class="mini-nav next" onclick="moveMiniSlide(1)">❯</button>
-      </div>
-      <h4>Monthly Insights</h4>
-      <p>Track your monthly spending patterns with comprehensive summaries and trend analysis.</p>
-      <a href="#" onclick="openPdfModal('assets/DhanRekha_Monthly_Report.pdf'); return false;" style="display: inline-flex; align-items: center; margin-top: 12px; color: #4ade80; font-size: 0.9rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> See Sample Report
+    <div class="hero-actions">
+      <a href="signup" class="btn-primary">Get Started</a>
+      <a href="login" class="btn-outline">Login</a>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <div class="feature-card animate-enter delay-1">
+      <h3>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          style="vertical-align: text-bottom; margin-right: 8px;">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+        Smart Analytics
+      </h3>
+      <p>Get detailed insights with category-wise breakdowns, weekly trends, and monthly summaries to understand your
+        financial patterns.</p>
+      <a href="#" onclick="openPdfModal('assets/reports/DhanRekha_Monthly_Report.pdf'); return false;"
+        style="display: inline-flex; align-items: center; margin-top: 12px; color: #4ade80; font-size: 0.9rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s;"
+        onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          style="margin-right: 6px;">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg> See Sample Report
       </a>
     </div>
 
-    <div class="preview-card animate-enter delay-7">
-      <img src="assets/yearly.png" alt="Yearly Dashboard">
-      <h4>Yearly Overview</h4>
-      <p>Analyze your annual financial health with interactive graphs and exportable PDF reports.</p>
-      <a href="#" onclick="openPdfModal('assets/DhanRekha_Yearly_Report_2025.pdf'); return false;" style="display: inline-flex; align-items: center; margin-top: 12px; color: #4ade80; font-size: 0.9rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> See Sample Report
+    <div class="feature-card animate-enter delay-2">
+      <h3>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          style="vertical-align: text-bottom; margin-right: 8px;">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        Secure & Private
+      </h3>
+      <p>Your data is protected with JWT authentication and user-scoped access. Your financial information stays private
+        and secure.</p>
+    </div>
+
+    <div class="feature-card animate-enter delay-3">
+      <h3>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          style="vertical-align: text-bottom; margin-right: 8px;">
+          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+          <line x1="12" y1="18" x2="12.01" y2="18"></line>
+        </svg>
+        PWA Enabled
+      </h3>
+      <p>Install Dhan₹ekha like a native app on any device. Works seamlessly on mobile, tablet, and desktop.</p>
+    </div>
+
+    <div class="feature-card animate-enter delay-4">
+      <h3>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          style="vertical-align: text-bottom; margin-right: 8px;">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Yearly Reports
+      </h3>
+      <p>View comprehensive yearly analytics with charts and download detailed PDF reports for your records.</p>
+      <a href="#" onclick="openPdfModal('assets/reports/DhanRekha_Yearly_Report.pdf'); return false;"
+        style="display: inline-flex; align-items: center; margin-top: 12px; color: #4ade80; font-size: 0.9rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s;"
+        onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          style="margin-right: 6px;">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg> See Sample Report
       </a>
     </div>
 
-    <div class="preview-card animate-enter delay-8">
-      <img src="assets/profile-dashboard.png" alt="Profile Dashboard">
-      <h4>Profile & Stats</h4>
-      <p>Track your overall financial journey, view membership badges, export your data as backup, and delete your account forever so that no information remains with <b>Dhan₹ekha</b>.</p>
+    <div class="feature-card animate-enter delay-5">
+      <h3>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          style="vertical-align: text-bottom; margin-right: 8px;">
+          <path d="M21 15V5a2 2 0 0 0-2-2H7l-4 4v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"></path>
+          <path d="M3 7h4V3"></path>
+          <line x1="9" y1="13" x2="15" y2="13"></line>
+          <line x1="9" y1="17" x2="15" y2="17"></line>
+        </svg>
+        Multiple Entry
+      </h3>
+      <p>Save time by adding multiple expenses at once. Simply paste a list and let our smart parser organize it for
+        you.</p>
+
+      <div style="margin-top: 15px;">
+        <!-- Desktop Preview -->
+        <div class="video-preview-wrapper desktop-video-wrapper"
+          style="position: relative; cursor: pointer; border-radius: 8px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);"
+          onclick="openVideoModal('assets/bulk-demo.mp4')">
+          <video src="https://go.screenpal.com/watch/cOnjbbn3RYF" poster="assets/bulk.png" muted loop playsinline
+            style="width: 100%; height: auto; display: block;"></video>
+          <div class="play-overlay"
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; transition: background 0.3s;">
+            <div
+              style="width: 50px; height: 50px; background: rgba(34, 197, 94, 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="white"
+                stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                style="margin-left: 3px;">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Preview -->
+        <div class="video-preview-wrapper mobile-video-wrapper"
+          style="position: relative; cursor: pointer; border-radius: 8px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);"
+          onclick="openVideoModal('assets/bulk-add.mp4')">
+          <!-- <video src="assets/bulk-add.mp4" poster="assets/bulk.png" muted loop playsinline style="width: 100%; height: auto; display: block; aspect-ratio: 720/1412; background: #000; object-fit: cover;"></video> -->
+          <video src="https://go.screenpal.com/watch/cOnjbbn3RYb" poster="assets/bulk.png" muted loop playsinline
+            style="width: 100%; height: auto; display: block;"></video>
+          <div class="play-overlay"
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; transition: background 0.3s;">
+            <div
+              style="width: 40px; height: 40px; background: rgba(34, 197, 94, 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white"
+                stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                style="margin-left: 2px;">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 
-</section>
-
-<!-- FUTURE WORK: AI ASSISTANT -->
-<section class="future-work animate-enter">
-  <div class="future-content">
-    <div class="future-text">
-      <span class="badge-coming-soon">Feature in Progress</span>
-      <h2 style="font-size: 2.5rem; margin-bottom: 15px; line-height: 1.2;"><span id="aiTypingText"></span><span class="typing-cursor"></span> <img src="assets/Dhanrekha_AI_logo.png" alt="AI Logo" class="ai-logo-pulse" style="height: 55px; width: auto; vertical-align: middle; margin-left: 10px;"></h2>
-      <p style="font-size: 1.1rem; opacity: 0.9; margin-bottom: 25px;">
-        We are building an intelligent financial assistant. Just ask questions in plain English and get instant answers about your money.
-      </p>
-      
-      <ul class="ai-capabilities">
-        <li>
-          <span class="ai-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span>
-          <span>"Show category-wise expenses for October"</span>
-        </li>
-        <li>
-          <span class="ai-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
-          <span>"When did I pay 5000?"</span>
-        </li>
-        <li>
-          <span class="ai-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"></path><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"></path><path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"></path></svg></span>
-          <span>"What is my remaining purse balance?"</span>
-        </li>
-        <li>
-          <span class="ai-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></span>
-          <span>"Show expenses above 2000"</span>
-        </li>
-        <li>
-          <span class="ai-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M13 6h3a2 2 0 0 1 2 2v7"></path><path d="M11 18H8a2 2 0 0 1-2-2V9"></path></svg></span>
-          <span>"Compare spending: August vs September"</span>
-        </li>
-      </ul>
+  <!-- HOW IT WORKS -->
+  <section class="features" style="padding-top: 0;">
+    <div style="grid-column: 1 / -1; text-align: center; margin-bottom: 20px;">
+      <h2 style="font-size: 2rem; margin-bottom: 10px;">How It Works</h2>
+      <p style="opacity: 0.8;">Simple steps to financial freedom</p>
     </div>
-    
-    <div class="future-image">
-      <img src="assets/ai-chat1.png" alt="AI Chat Interface" class="ai-preview-img" id="aiGalleryTrigger" loading="lazy">
-      
+
+    <div class="feature-card animate-enter delay-1">
+      <div class="step-number">1</div>
+      <h3>Sign Up</h3>
+      <p>Create your secure account in seconds. It's free and private.</p>
     </div>
-  </div>
-</section>
 
-<!-- PWA SECTION -->
-<section class="pwa">
-  <h2>Install Dhan₹ekha on Your Device</h2>
-  <p>Fast, offline-ready, and built for everyday use. Get the app-like experience on any device.</p>
-  <button id="installBtn" class="btn-primary" style="display: none; margin-top: 20px;">Install App</button>
-</section>
+    <div class="feature-card animate-enter delay-2">
+      <div class="step-number">2</div>
+      <h3>Track</h3>
+      <p>Log your daily income and expenses with our intuitive interface.</p>
+    </div>
+
+    <div class="feature-card animate-enter delay-3">
+      <div class="step-number">3</div>
+      <h3>Analyze</h3>
+      <p>Visualize your spending habits and download detailed reports.</p>
+    </div>
+
+    <div class="feature-card animate-enter delay-4"
+      style="grid-column: 1 / -1; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); text-align: center; display: flex; flex-direction: column; align-items: center;">
+      <h3>⚡ Explore with Demo Account</h3>
+      <p>Don't want to sign up yet? Experience the full power of Dhan₹ekha instantly.</p>
+      <div
+        style="background: rgba(0,0,0,0.3); padding: 12px 20px; border-radius: 8px; margin: 15px 0; text-align: left;">
+        <div style="margin-bottom: 4px;">Email: <strong
+            style="color: #4ade80; user-select: all;">demouser@mail.com</strong></div>
+        <div>Password: <strong style="color: #4ade80; user-select: all;">1234</strong></div>
+      </div>
+      <a href="login" class="btn-primary" style="padding: 8px 20px; font-size: 0.9rem; text-decoration: none;">Login &
+        Explore</a>
+    </div>
+  </section>
+
+  <!-- APP PREVIEW -->
+  <section class="app-preview">
+    <h2 class="animate-enter delay-2">See Dhan₹ekha in Action</h2>
+    <p class="preview-subtitle animate-enter delay-3">
+      A quick look at your dashboard after login — analytics, insights and complete financial control at your
+      fingertips.
+    </p>
+
+    <div class="preview-grid">
+      <div class="preview-card animate-enter delay-4">
+        <img src="assets/dashboard.png" alt="Dashboard Overview">
+        <h4>Smart Dashboard</h4>
+        <p>View your current balance, total income and expenses at a glance with beautiful visualizations.</p>
+      </div>
 
 
-<!-- IMAGE MODAL -->
-<div id="imageModal" class="image-modal">
-  <span class="close-modal">&times;</span>
-  <img class="modal-content" id="expandedImg">
-  <a class="modal-prev" onclick="changeModalImage(-1)" style="display: none;">&#10094;</a>
-  <a class="modal-next" onclick="changeModalImage(1)" style="display: none;">&#10095;</a>
-  <div id="imgCaption"></div>
-</div>
 
-<!-- PDF MODAL -->
-<div id="pdfModal" class="image-modal">
-  <span class="close-modal" onclick="closePdfModal()">&times;</span>
-  <iframe id="pdfFrame" class="pdf-modal-content" src=""></iframe>
-</div>
+      <div class="preview-card animate-enter delay-6">
+        <div class="mini-carousel" id="monthlyCarousel">
+          <div class="mini-slides">
+            <div class="mini-slide">
+              <img src="assets/monthly.png" alt="Monthly Insights">
+              <div class="slide-caption">Monthly Insights</div>
+            </div>
+            <div class="mini-slide">
+              <img src="assets/daily-wise.png" alt="Daily Expenss">
+              <div class="slide-caption">Daily Expense</div>
+            </div>
+            <div class="mini-slide">
+              <img src="assets/monthly_cumulative.png" alt="Cumulative Spending">
+              <div class="slide-caption">Cumulative Spending</div>
+            </div>
+            <div class="mini-slide">
+              <img src="assets/monthly_category_wise_list.png" alt="Monthly category-wise list">
+              <div class="slide-caption">Monthly category-wise list</div>
+            </div>
 
-<!-- VIDEO MODAL -->
-<div id="videoModal" class="image-modal">
-  <span class="close-modal" onclick="closeVideoModal()">&times;</span>
-  <video class="modal-content" id="expandedVideo" controls autoplay muted style="background: black; outline: none;"></video>
-</div>
-
-<button id="backToTopBtn" title="Back to Top">↑</button>
-
-<!-- FOOTER -->
-<footer class="footer">
-  <div class="footer-content">
-    <div class="footer-text">
-      <p>© 2025 <strong>Dhan₹ekha</strong> <span style="opacity: 0.5; font-size: 0.8em; margin-left: 5px;">v1.0.13</span></p>
-      <p>Built with ❤️ in India</p>
-      <div class="developer-badge">
-        <span style="opacity: 0.7; font-size: 0.9rem;">Developed by</span>
-        <a href="https://github.com/Satyaamp" target="_blank" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: white; background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 20px; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.1);" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
-          <img src="https://github.com/Satyaamp.png" alt="Satyam" style="width: 24px; height: 24px; border-radius: 50%;" loading="lazy">
-          <span style="font-size: 0.9rem; font-weight: 500;">Satyam</span>
+          </div>
+          <button class="mini-nav prev" onclick="moveMiniSlide(-1)">❮</button>
+          <button class="mini-nav next" onclick="moveMiniSlide(1)">❯</button>
+        </div>
+        <h4>Monthly Insights</h4>
+        <p>Track your monthly spending patterns with comprehensive summaries and trend analysis.</p>
+        <a href="#" onclick="openPdfModal('assets/reports/DhanRekha_Monthly_Report.pdf'); return false;"
+          style="display: inline-flex; align-items: center; margin-top: 12px; color: #4ade80; font-size: 0.9rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s;"
+          onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            style="margin-right: 6px;">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg> See Sample Report
         </a>
       </div>
-      <div style="margin-top: 15px; font-size: 0.85rem; opacity: 0.7;">
-        <a href="#" style="color: inherit; text-decoration: none; margin-right: 15px;">Privacy Policy</a>
-        <a href="#" style="color: inherit; text-decoration: none; margin-right: 15px;">Terms of Service</a>
-        <a href="mailto:support@dhanrekha.com" style="color: inherit; text-decoration: none;">Contact Us</a>
+
+      <div class="preview-card animate-enter delay-7">
+        <img src="assets/yearly.png" alt="Yearly Dashboard">
+        <h4>Yearly Overview</h4>
+        <p>Analyze your annual financial health with interactive graphs and exportable PDF reports.</p>
+        <a href="#" onclick="openPdfModal('assets/reports/DhanRekha_Yearly_Report.pdf'); return false;"
+          style="display: inline-flex; align-items: center; margin-top: 12px; color: #4ade80; font-size: 0.9rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s;"
+          onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            style="margin-right: 6px;">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg> See Sample Report
+        </a>
+      </div>
+
+      <div class="preview-card animate-enter delay-8">
+        <img src="assets/profile-dashboard.png" alt="Profile Dashboard">
+        <h4>Profile & Stats</h4>
+        <p>Track your overall financial journey, view membership badges, export your data as backup, and delete your
+          account forever so that no information remains with <b>Dhan₹ekha</b>.</p>
       </div>
     </div>
 
-    <div class="footer-banner">
-      <img src="assets/banner.png" alt="Dhan₹ekha Banner" loading="lazy" />
+  </section>
+
+  <!-- FUTURE WORK: AI ASSISTANT -->
+  <section class="future-work animate-enter">
+    <div class="future-content">
+      <div class="future-text">
+        <span class="badge-coming-soon">Feature in Progress</span>
+        <h2 style="font-size: 2.5rem; margin-bottom: 15px; line-height: 1.2;"><span id="aiTypingText"></span><span
+            class="typing-cursor"></span> <img src="assets/Dhanrekha_AI_logo.png" alt="AI Logo" class="ai-logo-pulse"
+            style="height: 55px; width: auto; vertical-align: middle; margin-left: 10px;"></h2>
+        <p style="font-size: 1.1rem; opacity: 0.9; margin-bottom: 25px;">
+          We are building an intelligent financial assistant. Just ask questions in plain English and get instant
+          answers about your money.
+        </p>
+
+        <ul class="ai-capabilities">
+          <li>
+            <span class="ai-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+              </svg></span>
+            <span>"Show category-wise expenses for October"</span>
+          </li>
+          <li>
+            <span class="ai-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg></span>
+            <span>"When did I pay 5000?"</span>
+          </li>
+          <li>
+            <span class="ai-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"></path>
+                <path d="M4 6v12c0 1.1.9 2 2 2h14v-4"></path>
+                <path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z"></path>
+              </svg></span>
+            <span>"What is my remaining purse balance?"</span>
+          </li>
+          <li>
+            <span class="ai-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                fill="none" stroke="#f472b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                <polyline points="17 6 23 6 23 12"></polyline>
+              </svg></span>
+            <span>"Show expenses above 2000"</span>
+          </li>
+          <li>
+            <span class="ai-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="18" r="3"></circle>
+                <circle cx="6" cy="6" r="3"></circle>
+                <path d="M13 6h3a2 2 0 0 1 2 2v7"></path>
+                <path d="M11 18H8a2 2 0 0 1-2-2V9"></path>
+              </svg></span>
+            <span>"Compare spending: August vs September"</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="future-image">
+        <img src="assets/ai-chat1.png" alt="AI Chat Interface" class="ai-preview-img" id="aiGalleryTrigger"
+          loading="lazy">
+
+      </div>
     </div>
+  </section>
+
+  <!-- PWA SECTION -->
+  <section class="pwa">
+    <h2>Install Dhan₹ekha on Your Device</h2>
+    <p>Fast, offline-ready, and built for everyday use. Get the app-like experience on any device.</p>
+    <button id="installBtn" class="btn-primary" style="display: none; margin-top: 20px;">Install App</button>
+  </section>
+
+
+  <!-- IMAGE MODAL -->
+  <div id="imageModal" class="image-modal">
+    <span class="close-modal">&times;</span>
+    <img class="modal-content" id="expandedImg">
+    <a class="modal-prev" onclick="changeModalImage(-1)" style="display: none;">&#10094;</a>
+    <a class="modal-next" onclick="changeModalImage(1)" style="display: none;">&#10095;</a>
+    <div id="imgCaption"></div>
   </div>
-</footer>
 
-<script>
-  let deferredPrompt;
-  const installBtn = document.getElementById('installBtn');
+  <!-- PDF MODAL -->
+  <div id="pdfModal" class="image-modal">
+    <span class="close-modal" onclick="closePdfModal()">&times;</span>
+    <iframe id="pdfFrame" class="pdf-modal-content" src=""></iframe>
+  </div>
 
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
+  <!-- VIDEO MODAL -->
+  <div id="videoModal" class="image-modal">
+    <span class="close-modal" onclick="closeVideoModal()">&times;</span>
+    <video class="modal-content" id="expandedVideo" controls autoplay muted
+      style="background: black; outline: none;"></video>
+  </div>
 
-    deferredPrompt = e;
-   
-    installBtn.style.display = 'inline-block';
-  });
+  <button id="backToTopBtn" title="Back to Top">↑</button>
 
-  installBtn.addEventListener('click', async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`User response to the install prompt: ${outcome}`);
-      deferredPrompt = null;
-      installBtn.style.display = 'none';
-    }
-  });
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-text">
+        <p>© 2025 <strong>Dhan₹ekha</strong> <span
+            style="opacity: 0.5; font-size: 0.8em; margin-left: 5px;">v1.0.13</span></p>
+        <p>Built with ❤️ in India</p>
+        <div class="developer-badge">
+          <span style="opacity: 0.7; font-size: 0.9rem;">Developed by</span>
+          <a href="https://github.com/Satyaamp" target="_blank"
+            style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: white; background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 20px; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.1);"
+            onmouseover="this.style.background='rgba(255,255,255,0.2)'"
+            onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+            <img src="https://github.com/Satyaamp.png" alt="Satyam"
+              style="width: 24px; height: 24px; border-radius: 50%;" loading="lazy">
+            <span style="font-size: 0.9rem; font-weight: 500;">Satyam</span>
+          </a>
+        </div>
+        <div style="margin-top: 15px; font-size: 0.85rem; opacity: 0.7;">
+          <a href="#" style="color: inherit; text-decoration: none; margin-right: 15px;">Privacy Policy</a>
+          <a href="#" style="color: inherit; text-decoration: none; margin-right: 15px;">Terms of Service</a>
+          <a href="mailto:support@dhanrekha.com" style="color: inherit; text-decoration: none;">Contact Us</a>
+        </div>
+      </div>
 
-  if ('serviceWorker' in navigator) {
-    let refreshing = false;
+      <div class="footer-banner">
+        <img src="assets/banner.png" alt="Dhan₹ekha Banner" loading="lazy" />
+      </div>
+    </div>
+  </footer>
 
-    // 🔥 Listen for the new service worker taking control
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!refreshing) {
-        refreshing = true;
-        window.location.reload();
+  <script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+
+      deferredPrompt = e;
+
+      installBtn.style.display = 'inline-block';
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response to the install prompt: ${outcome}`);
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
       }
     });
 
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(reg => {
+    if ('serviceWorker' in navigator) {
+      let refreshing = false;
 
-          reg.onupdatefound = () => {
-            const newWorker = reg.installing;
+      // 🔥 Listen for the new service worker taking control
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
 
-            newWorker.onstatechange = () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // Optional: Log or show a toast. The reload happens automatically via controllerchange above.
-                console.log("🚀 New update installed. Refreshing...");
-              }
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(reg => {
+
+            reg.onupdatefound = () => {
+              const newWorker = reg.installing;
+
+              newWorker.onstatechange = () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // Optional: Log or show a toast. The reload happens automatically via controllerchange above.
+                  console.log("🚀 New update installed. Refreshing...");
+                }
+              };
             };
-          };
 
-        })
-        .catch(err => console.log('SW failed:', err));
+          })
+          .catch(err => console.log('SW failed:', err));
+      });
+    }
+
+
+    // Image Modal Logic
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("expandedImg");
+    const captionText = document.getElementById("imgCaption");
+    const closeBtn = document.querySelector(".close-modal");
+    const prevBtn = document.querySelector(".modal-prev");
+    const nextBtn = document.querySelector(".modal-next");
+
+    // AI Gallery Data
+    const aiGallery = [
+      { src: 'assets/ai-chat1.png', caption: 'AI Chat Interface' },
+      { src: 'assets/ai-chat2.png', caption: 'AI Chat Interface' },
+      { src: 'assets/ai-chat3.png', caption: 'AI Chat Interface' }
+    ];
+    let currentGalleryIndex = 0;
+    let isGalleryOpen = false;
+
+    document.querySelectorAll('.preview-card img, .ai-preview-img').forEach(img => {
+      img.addEventListener('click', function () {
+        modal.style.display = "block";
+
+        if (this.id === 'aiGalleryTrigger') {
+          isGalleryOpen = true;
+          currentGalleryIndex = 0;
+          updateModalImage();
+        } else {
+          isGalleryOpen = false;
+          showSingleImage(this.src, this.alt);
+        }
+        document.body.style.overflow = 'hidden'; // Prevent scrolling
+      });
     });
-  }
 
+    function closeModal() {
+      modal.style.display = "none";
+      document.body.style.overflow = 'auto';
+    }
 
-  // Image Modal Logic
-  const modal = document.getElementById("imageModal");
-  const modalImg = document.getElementById("expandedImg");
-  const captionText = document.getElementById("imgCaption");
-  const closeBtn = document.querySelector(".close-modal");
-  const prevBtn = document.querySelector(".modal-prev");
-  const nextBtn = document.querySelector(".modal-next");
+    function showSingleImage(src, alt) {
+      modalImg.src = src;
+      captionText.innerHTML = alt;
+      prevBtn.style.display = "none";
+      nextBtn.style.display = "none";
+    }
 
-  // AI Gallery Data
-  const aiGallery = [
-    { src: 'assets/ai-chat1.png', caption: 'AI Chat Interface' },
-    { src: 'assets/ai-chat2.png', caption: 'AI Chat Interface' },
-    { src: 'assets/ai-chat3.png', caption: 'AI Chat Interface' }
-  ];
-  let currentGalleryIndex = 0;
-  let isGalleryOpen = false;
+    window.changeModalImage = function (n) {
+      if (!isGalleryOpen) return;
+      currentGalleryIndex = (currentGalleryIndex + n + aiGallery.length) % aiGallery.length;
+      updateModalImage();
+    }
 
-  document.querySelectorAll('.preview-card img, .ai-preview-img').forEach(img => {
-    img.addEventListener('click', function() {
-      modal.style.display = "block";
-      
-      if (this.id === 'aiGalleryTrigger') {
-        isGalleryOpen = true;
-        currentGalleryIndex = 0;
-        updateModalImage();
+    function updateModalImage() {
+      const item = aiGallery[currentGalleryIndex];
+      modalImg.src = item.src;
+      captionText.innerHTML = `${item.caption} (${currentGalleryIndex + 1}/${aiGallery.length})`;
+      prevBtn.style.display = "block";
+      nextBtn.style.display = "block";
+    }
+
+    if (closeBtn) closeBtn.onclick = closeModal;
+    if (modal) modal.onclick = (e) => { if (e.target === modal) closeModal(); };
+    document.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
+
+    // PDF Modal Logic
+    const pdfModal = document.getElementById("pdfModal");
+    const pdfFrame = document.getElementById("pdfFrame");
+
+    window.openPdfModal = function (path) {
+      // On mobile, open PDF in new tab to avoid embed issues
+      if (window.innerWidth <= 768) {
+        window.open(path, '_blank');
+        return;
+      }
+      pdfModal.style.display = "block";
+      pdfFrame.src = path;
+      document.body.style.overflow = 'hidden';
+    }
+
+    window.closePdfModal = function () {
+      pdfModal.style.display = "none";
+      pdfFrame.src = "";
+      document.body.style.overflow = 'auto';
+    }
+    if (pdfModal) pdfModal.onclick = (e) => { if (e.target === pdfModal) closePdfModal(); };
+    document.addEventListener('keydown', (e) => {
+      if (modal.style.display === "block" && isGalleryOpen) {
+        if (e.key === "ArrowLeft") changeModalImage(-1);
+        if (e.key === "ArrowRight") changeModalImage(1);
+      }
+    });
+
+    // Video Modal Logic
+    const videoModal = document.getElementById("videoModal");
+    const expandedVideo = document.getElementById("expandedVideo");
+
+    window.openVideoModal = function (src) {
+      videoModal.style.display = "block";
+      expandedVideo.src = src;
+      document.body.style.overflow = 'hidden';
+    }
+
+    window.closeVideoModal = function () {
+      videoModal.style.display = "none";
+      expandedVideo.pause();
+      expandedVideo.src = "";
+      document.body.style.overflow = 'auto';
+    }
+    if (videoModal) videoModal.onclick = (e) => { if (e.target === videoModal) closeVideoModal(); };
+    document.addEventListener('keydown', (e) => { if (e.key === "Escape" && videoModal.style.display === "block") closeVideoModal(); });
+
+    // Mini Carousel Logic
+    let miniSlideIndex = 0;
+    function moveMiniSlide(n) {
+      const slides = document.querySelector('#monthlyCarousel .mini-slides');
+      const totalSlides = slides.children.length;
+      miniSlideIndex = (miniSlideIndex + n + totalSlides) % totalSlides;
+      slides.style.transform = `translateX(-${miniSlideIndex * 100}%)`;
+    }
+
+    // Back to Top Logic
+    const backToTopBtn = document.getElementById("backToTopBtn");
+    window.onscroll = function () {
+      if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+        backToTopBtn.classList.add("show");
       } else {
-        isGalleryOpen = false;
-        showSingleImage(this.src, this.alt);
+        backToTopBtn.classList.remove("show");
       }
-      document.body.style.overflow = 'hidden'; // Prevent scrolling
-    });
-  });
+    };
+    backToTopBtn.onclick = function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
-  function closeModal() {
-    modal.style.display = "none";
-    document.body.style.overflow = 'auto';
-  }
+    // AI Typing Effect
+    const aiText = "Ask Dhan₹ekha AI...";
+    const typingElement = document.getElementById("aiTypingText");
+    let charIndex = 0;
 
-  function showSingleImage(src, alt) {
-    modalImg.src = src;
-    captionText.innerHTML = alt;
-    prevBtn.style.display = "none";
-    nextBtn.style.display = "none";
-  }
-
-  window.changeModalImage = function(n) {
-    if (!isGalleryOpen) return;
-    currentGalleryIndex = (currentGalleryIndex + n + aiGallery.length) % aiGallery.length;
-    updateModalImage();
-  }
-
-  function updateModalImage() {
-    const item = aiGallery[currentGalleryIndex];
-    modalImg.src = item.src;
-    captionText.innerHTML = `${item.caption} (${currentGalleryIndex + 1}/${aiGallery.length})`;
-    prevBtn.style.display = "block";
-    nextBtn.style.display = "block";
-  }
-
-  if (closeBtn) closeBtn.onclick = closeModal;
-  if (modal) modal.onclick = (e) => { if(e.target === modal) closeModal(); };
-  document.addEventListener('keydown', (e) => { if(e.key === "Escape") closeModal(); });
-
-  // PDF Modal Logic
-  const pdfModal = document.getElementById("pdfModal");
-  const pdfFrame = document.getElementById("pdfFrame");
-
-  window.openPdfModal = function(path) {
-    // On mobile, open PDF in new tab to avoid embed issues
-    if (window.innerWidth <= 768) {
-      window.open(path, '_blank');
-      return;
-    }
-    pdfModal.style.display = "block";
-    pdfFrame.src = path;
-    document.body.style.overflow = 'hidden';
-  }
-
-  window.closePdfModal = function() {
-    pdfModal.style.display = "none";
-    pdfFrame.src = "";
-    document.body.style.overflow = 'auto';
-  }
-  if (pdfModal) pdfModal.onclick = (e) => { if(e.target === pdfModal) closePdfModal(); };
-  document.addEventListener('keydown', (e) => {
-    if (modal.style.display === "block" && isGalleryOpen) {
-      if (e.key === "ArrowLeft") changeModalImage(-1);
-      if (e.key === "ArrowRight") changeModalImage(1);
-    }
-  });
-
-  // Video Modal Logic
-  const videoModal = document.getElementById("videoModal");
-  const expandedVideo = document.getElementById("expandedVideo");
-
-  window.openVideoModal = function(src) {
-    videoModal.style.display = "block";
-    expandedVideo.src = src;
-    document.body.style.overflow = 'hidden';
-  }
-
-  window.closeVideoModal = function() {
-    videoModal.style.display = "none";
-    expandedVideo.pause();
-    expandedVideo.src = "";
-    document.body.style.overflow = 'auto';
-  }
-  if (videoModal) videoModal.onclick = (e) => { if(e.target === videoModal) closeVideoModal(); };
-  document.addEventListener('keydown', (e) => { if(e.key === "Escape" && videoModal.style.display === "block") closeVideoModal(); });
-
-  // Mini Carousel Logic
-  let miniSlideIndex = 0;
-  function moveMiniSlide(n) {
-    const slides = document.querySelector('#monthlyCarousel .mini-slides');
-    const totalSlides = slides.children.length;
-    miniSlideIndex = (miniSlideIndex + n + totalSlides) % totalSlides;
-    slides.style.transform = `translateX(-${miniSlideIndex * 100}%)`;
-  }
-
-  // Back to Top Logic
-  const backToTopBtn = document.getElementById("backToTopBtn");
-  window.onscroll = function() {
-    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
-      backToTopBtn.classList.add("show");
-    } else {
-      backToTopBtn.classList.remove("show");
-    }
-  };
-  backToTopBtn.onclick = function() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // AI Typing Effect
-  const aiText = "Ask Dhan₹ekha AI...";
-  const typingElement = document.getElementById("aiTypingText");
-  let charIndex = 0;
-
-  function typeAiText() {
-    if (charIndex < aiText.length) {
-      typingElement.innerHTML += aiText.charAt(charIndex);
-      charIndex++;
-      setTimeout(typeAiText, 100);
-    } else {
-      document.querySelector('.typing-cursor').style.display = 'none';
-    }
-  }
-
-  const aiObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        typeAiText();
-        aiObserver.disconnect();
+    function typeAiText() {
+      if (charIndex < aiText.length) {
+        typingElement.innerHTML += aiText.charAt(charIndex);
+        charIndex++;
+        setTimeout(typeAiText, 100);
+      } else {
+        document.querySelector('.typing-cursor').style.display = 'none';
       }
-    });
-  }, { threshold: 0.5 });
+    }
 
-  if(document.querySelector('.future-work')) {
-    aiObserver.observe(document.querySelector('.future-work'));
-  }
-</script>
+    const aiObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          typeAiText();
+          aiObserver.disconnect();
+        }
+      });
+    }, { threshold: 0.5 });
+
+    if (document.querySelector('.future-work')) {
+      aiObserver.observe(document.querySelector('.future-work'));
+    }
+  </script>
 </body>
+
 </html>

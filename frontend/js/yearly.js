@@ -286,6 +286,7 @@ function renderTablePage() {
             <td style="padding: 12px;">${new Date(tx.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
             <td style="padding: 12px; font-weight: 600; color: #ef4444;">₹${tx.amount.toLocaleString('en-IN')}</td>
             <td style="padding: 12px;"><span style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; font-size: 0.85rem;">${tx.category}</span></td>
+            <td style="padding: 12px; opacity: 0.7;">${tx.description || "—"}</td>
         </tr>
     `).join('');
 }
@@ -564,7 +565,11 @@ async function downloadYearlyReport() {
         doc.circle(105, avatarY, 26, "S");
         try { doc.addImage(avatarBase64, "PNG", 81, avatarY - 24, 48, 48); } catch { }
     } else {
-        doc.setFontSize(60); doc.text("👤", 105, avatarY + 15, { align: "center" });
+        doc.setDrawColor(255, 255, 255); doc.setLineWidth(1.5);
+        doc.circle(105, avatarY, 26, "S");
+        doc.setFillColor(200, 200, 200);
+        doc.circle(105, avatarY - 8, 8, "F");
+        doc.ellipse(105, avatarY + 12, 16, 10, "F");
     }
 
     doc.setFontSize(22);

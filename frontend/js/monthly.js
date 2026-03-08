@@ -1934,12 +1934,22 @@ async function downloadMonthlyReport() {
       // Just add the image (it's already cropped to a circle by canvas)
       doc.addImage(avatarBase64, "PNG", 81, avatarY - 24, 48, 48);
     } catch (e) {
-      doc.setFontSize(50);
-      doc.text("👤", 105, avatarY + 15, { align: "center" });
+      doc.setDrawColor(255, 255, 255);
+      doc.setLineWidth(1.5);
+      doc.circle(105, avatarY, 26, "S");
+      // Draw a manual vector silhouette 
+      doc.setFillColor(200, 200, 200);
+      doc.circle(105, avatarY - 8, 8, "F"); // Head
+      doc.ellipse(105, avatarY + 12, 16, 10, "F"); // Body
     }
   } else {
-    doc.setFontSize(60);
-    doc.text("👤", 105, avatarY + 15, { align: "center" });
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(1.5);
+    doc.circle(105, avatarY, 26, "S");
+    // Draw a manual vector silhouette 
+    doc.setFillColor(200, 200, 200);
+    doc.circle(105, avatarY - 8, 8, "F"); // Head
+    doc.ellipse(105, avatarY + 12, 16, 10, "F"); // Body
   }
 
   doc.setFontSize(22);
