@@ -154,7 +154,7 @@ exports.processMessage = async (from, messageBody) => {
             ]);
 
             const expenseAggr = await Expense.aggregate([
-                { $match: { user: user._id, date: { $gte: startOfMonth, $lte: endOfMonth } } },
+                { $match: { userId: user._id, date: { $gte: startOfMonth, $lte: endOfMonth } } },
                 { $group: { _id: null, total: { $sum: "$amount" } } }
             ]);
 
