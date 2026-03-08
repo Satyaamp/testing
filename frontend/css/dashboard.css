@@ -54,32 +54,53 @@
    }
 
    /* Glassy Icons for Navbar (Global) */
-   .navbar .nav-actions button,
-   .navbar .nav-btn-profile {
+   .navbar .nav-actions button {
      width: 42px;
      height: 42px;
      padding: 0 !important;
      display: flex !important;
      align-items: center;
      justify-content: center;
-     background: rgba(255, 255, 255, 0.08) !important;
+     background: rgba(255, 255, 255, 0.08);
      backdrop-filter: blur(12px);
      -webkit-backdrop-filter: blur(12px);
-     border: 1px solid rgba(255, 255, 255, 0.15) !important;
-     border-radius: 12px !important;
+     border: 1px solid rgba(255, 255, 255, 0.15);
+     border-radius: 12px;
      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-     font-size: 1.2rem !important;
+     font-size: 1.2rem;
      color: white;
      cursor: pointer;
      transition: all 0.3s ease;
    }
 
+
+   .nav-btn-monthly,
+   .nav-btn-notes,
+   .nav-btn-yearly {
+     background: linear-gradient(135deg, #9b6cff 0%, #7c3aed 60%, #5b21b6 100%) !important;
+   }
+
+   .navbar .nav-btn-profile {
+     background: transparent !important;
+     backdrop-filter: none !important;
+     -webkit-backdrop-filter: none !important;
+     border: none !important;
+     box-shadow: none !important;
+   }
+
+   .nav-btn-profile img {
+     width: 36px;
+     height: 36px;
+     border-radius: 50%;
+     object-fit: cover;
+   }
+
    .navbar .nav-actions button:hover,
    .navbar .nav-btn-profile:hover {
-     background: rgba(255, 255, 255, 0.25) !important;
+     background: rgba(255, 255, 255, 0.25);
      transform: translateY(-2px);
      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-     border-color: rgba(255, 255, 255, 0.3) !important;
+     border-color: rgba(255, 255, 255, 0.3);
    }
 
    .navbar .nav-actions button:active,

@@ -94,7 +94,7 @@
     <div id="navbarDateRange" class="navbar-date-range"></div>
 
     <div class="nav-actions">
-      <button onclick="location.href='monthly'" class="nav-btn-profile" title="Monthly Overview">
+      <button onclick="location.href='monthly'" class="nav-btn-monthly" title="Monthly Overview">
         <span class="desktop-text">📅 Monthly</span>
         <span class="mobile-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -105,8 +105,7 @@
           </svg></span>
       </button>
 
-      <button onclick="openScanModal()" class="nav-btn-profile"
-        style="background: rgba(139, 92, 246, 0.6); border: 1px solid rgba(139, 92, 246, 0.4);" title="Bulk Entry">
+      <button onclick="openScanModal()" class="nav-btn-notes" title="Bulk Entry">
         <span class="desktop-text">🗂️ Bulk Notes</span>
         <span class="mobile-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -119,7 +118,7 @@
         </span>
       </button>
 
-      <button onclick="location.href='yearly'" class="nav-btn-profile" title="Yearly Overview">
+      <button onclick="location.href='yearly'" class="nav-btn-yearly" title="Yearly Overview">
         <span class="desktop-text">📊 Yearly</span>
         <span class="mobile-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -128,13 +127,16 @@
             <line x1="6" y1="20" x2="6" y2="14"></line>
           </svg></span>
       </button>
+
       <button onclick="location.href='profile'" class="nav-btn-profile" title="Your Profile">
-        <span class="desktop-text">👤 Profile</span>
-        <span class="mobile-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <span class="desktop-text">Profile</span>
+        <span class="mobile-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
             <circle cx="12" cy="7" r="4" />
-          </svg></span>
+          </svg>
+        </span>
       </button>
     </div>
   </nav>

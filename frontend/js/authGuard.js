@@ -1,9 +1,9 @@
-// Check if JWT token exists
+// GLOBAL SCOPE: Runs once on page load to immediately kick unauthenticated users back to login
 const token = localStorage.getItem("token");
 
 if (!token) {
   // Not logged in → redirect to login
-  window.location.href = "/";
+  window.location.href = "/login";
 }
 
 // Global Avatar Sync
@@ -13,6 +13,7 @@ async function updateNavAvatars() {
     avatarUrl = null;
     localStorage.removeItem('userAvatar');
   }
+  // FUNCTION SCOPE: Fetches the freshest token at the exact moment this function runs (e.g. after an upload event)
   const token = localStorage.getItem("token");
 
   // If no avatar in storage, try fetching from server once
@@ -58,10 +59,10 @@ async function updateNavAvatars() {
       fullAvatarUrl = baseUrl + avatarUrl;
     }
 
-    const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>`;
-    const onErrorMobile = `this.outerHTML='${svgIcon}'`;
+    const svgIcon = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%2021v-2a4%204%200%200%200-4-4H8a4%204%200%200%200-4%204v2%22%20%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%227%22%20r%3D%224%22%20%2F%3E%3C%2Fsvg%3E";
+    const onErrorMobile = `this.onerror=null; this.src='${svgIcon}'; this.style.borderRadius='0'; this.style.border='none';`;
 
-    const imgHtml = `<img src="${fullAvatarUrl}" alt="Profile" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.2); vertical-align: middle;" onerror="${onErrorMobile}" />`;
+    const imgHtml = `<img src="${fullAvatarUrl}" alt="Profile" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.2); vertical-align: middle;" onerror="${onErrorMobile}" />`;
 
     if (mobileIcon) {
       mobileIcon.innerHTML = imgHtml;
@@ -72,7 +73,8 @@ async function updateNavAvatars() {
     if (desktopText) {
       const currentText = desktopText.innerText;
       if (currentText.includes('👤') || currentText.toLowerCase().includes('profile')) {
-        const onErrorDesktop = `this.outerHTML='👤'`;
+        const svgIconDesktop = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2218%22%20height%3D%2218%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M20%2021v-2a4%204%200%200%200-4-4H8a4%204%200%200%200-4%204v2%22%20%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%227%22%20r%3D%224%22%20%2F%3E%3C%2Fsvg%3E";
+        const onErrorDesktop = `this.onerror=null; this.src='${svgIconDesktop}'; this.style.borderRadius='0'; this.style.border='none';`;
 
         // If it has the emoji, replace it. Otherwise prepend.
         if (currentText.includes('👤')) {

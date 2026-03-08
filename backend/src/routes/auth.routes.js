@@ -11,8 +11,8 @@ router.post('/register', limiter, ctrl.register);
 router.post('/login', limiter, ctrl.login);
 router.get('/me', protect, ctrl.me);
 
-const avatarUpload = require('../middleware/avatarUpload.middleware');
-router.post('/upload-avatar', protect, avatarUpload.single('avatar'), ctrl.uploadAvatar);
+const uploadAvatar = require('../middleware/uploadAvatar');
+router.post('/upload-avatar', protect, uploadAvatar.single('avatar'), ctrl.uploadAvatar);
 
 // POST /google - Google Login
 router.post('/google', async (req, res) => {

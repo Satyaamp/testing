@@ -528,6 +528,36 @@
         gap: 12px;
       }
     }
+
+    .nav-btn-logout {
+      background: linear-gradient(135deg, #ff6b6b, #ff4d4d) !important;
+      border: 1px solid;
+      border-radius: 14px;
+      color: white;
+      transition: all 0.25s ease;
+    }
+
+    /* Hover state */
+    .nav-btn-logout:hover {
+      background: linear-gradient(135deg, #ff3b3b, #ff0000) !important;
+      box-shadow: 0 6px 14px rgba(255, 0, 0, 0.35) !important;
+      transform: translateY(-1px) !important;
+    }
+
+    .nav-btn-analytics {
+      background: linear-gradient(135deg, #3b82f6, #1e3a8a) !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      border-radius: 14px !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      box-shadow: 0 6px 14px rgba(37, 99, 235, 0.35);
+    }
+
+    .nav-btn-analytics:hover {
+      background: linear-gradient(135deg, #0ea5e9, #1d4ed8) !important;
+      box-shadow: 0 6px 14px rgba(37, 99, 235, 0.35) !important;
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 
@@ -565,7 +595,7 @@
             <polyline points="9 22 9 12 15 12 15 22" />
           </svg></span>
       </button>
-      <button onclick="location.href='monthly'" class="nav-btn-profile">
+      <button onclick="location.href='monthly'" class="nav-btn-monthly">
         <span class="desktop-text">📅 Monthly</span>
         <span class="mobile-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -576,8 +606,8 @@
           </svg></span>
       </button>
 
-      <button onclick="window.open('analytics', '_blank')" class="nav-btn-profile" disabled
-        style="opacity:0.5; cursor: not-allowed;">
+      <button onclick="window.open('analytics', '_blank')" class="nav-btn-analytics" disabled
+        style="opacity:0.5; cursor: not-allowed">
         <span class="desktop-text">📊 Analytics</span>
         <span class="mobile-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -588,7 +618,7 @@
         </span>
       </button>
 
-      <button onclick="logout()">
+      <button onclick="logout()" class="nav-btn-logout">
         <span class="desktop-text">Logout</span>
         <span class="mobile-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -905,6 +935,14 @@
               }
               img.src = fullAvatarUrl;
               img.style.display = 'block';
+
+              // If the backend ephemeral filesystem loses the image, fallback gracefully
+              img.onerror = function () {
+                this.style.display = 'none';
+                document.getElementById('avatarDefault').style.display = 'block';
+                localStorage.removeItem('userAvatar');
+              };
+
               localStorage.setItem('userAvatar', fullAvatarUrl); // Sync across app
             }
           }

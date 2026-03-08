@@ -527,12 +527,15 @@ async function loadDateWiseExpenses(month, year) {
     }
   } else {
     renderCalendar(+year, +month - 1);
-    autoSelectDay(+year, +month);
   }
 
   renderDailyChart(currentMonthExpenses, +year, +month);
   renderCumulativeChart(currentMonthExpenses, +year, +month);
+
   setupMobileDaySearch();
+  if (currentMonthExpenses.length > 0 || currentMonthIncomes.length > 0) {
+    autoSelectDay(+year, +month);
+  }
 }
 
 /* ===============================
@@ -607,12 +610,8 @@ function autoSelectDay(year, month) {
     // 1. Update Mobile View
     const bubble = document.querySelector(`.day-bubble[data-day="${targetDay}"]`);
     if (bubble) {
-      document.querySelectorAll(".day-bubble").forEach(b => b.classList.remove("active"));
-      bubble.classList.add("active");
-      renderMobileTransactions(dateStr);
-      setTimeout(() => {
-        bubble.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-      }, 100);
+      // Simulate a real user tap to load data, remove siblings' active states, and scroll into view automatically
+      bubble.click();
     }
 
     // 2. Update Desktop View
