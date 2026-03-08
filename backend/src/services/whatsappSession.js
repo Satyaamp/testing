@@ -55,7 +55,12 @@ exports.processMessage = async (from, messageBody) => {
 
             } catch (err) {
 
-                await whatsappService.sendTextMessage(from, "❌ Failed to save record.");
+                console.error("SAVE ERROR:", err);
+
+                await whatsappService.sendTextMessage(
+                    from,
+                    "❌ Failed to save record. Please try again."
+                );
             }
 
             pendingConfirmations.delete(from);
@@ -76,7 +81,7 @@ exports.processMessage = async (from, messageBody) => {
     if (text.startsWith('expenses')) {
 
         const parts = text.split(/\s+/);
-        let query = { user: user._id };
+        let query = { userId: user._id };
         let replyText = "";
 
         if (parts.length > 1) {
@@ -144,7 +149,7 @@ exports.processMessage = async (from, messageBody) => {
             const endOfMonth = new Date(year, monthIndex + 1, 0, 23, 59, 59);
 
             const incomeAggr = await Income.aggregate([
-                { $match: { user: user._id, date: { $gte: startOfMonth, $lte: endOfMonth } } },
+                { $match: { userId: user._id, date: { $gte: startOfMonth, $lte: endOfMonth } } },
                 { $group: { _id: null, total: { $sum: "$amount" } } }
             ]);
 
@@ -212,11 +217,13 @@ exports.processMessage = async (from, messageBody) => {
         pendingConfirmations.set(from, {
             type: 'expense',
             data: {
-                user: user._id,
+                userId: user._id,
                 amount: amount,
                 category: category,
                 description: desc,
-                date: new Date()
+                date: new Date(),
+                month: new Date().getMonth() + 1,
+                year: new Date().getFullYear()
             }
         });
 
