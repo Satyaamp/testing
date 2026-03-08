@@ -187,7 +187,7 @@ exports.processMessage = async (from, messageBody) => {
         pendingConfirmations.set(from, {
             type: 'income',
             data: {
-                user: user._id,
+                userId: user._id,
                 amount: amount,
                 source: desc,
                 date: new Date()
