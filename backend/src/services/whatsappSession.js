@@ -48,7 +48,7 @@ exports.processMessage = async (from, messageBody) => {
 
     // Command: "expenses [optional date]"
     if (text.startsWith('expenses')) {
-        const parts = text.split(' ');
+        const parts = text.split(/\s+/);
         let query = { user: user._id };
         let replyText = "";
 
@@ -87,7 +87,7 @@ exports.processMessage = async (from, messageBody) => {
 
     // Command: "monthly snapshot" or "march 2026"
     const months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december", "jan", "feb", "mar", "apr", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-    const textParts = text.split(' ');
+    const textParts = text.split(/\s+/);
     if (textParts.length === 2 && months.includes(textParts[0]) && !isNaN(textParts[1])) {
         let monthIndex = months.indexOf(textParts[0]);
         if (monthIndex > 11) monthIndex -= 12; // handle 3 letter abbreviations
