@@ -31,6 +31,7 @@ app.get('/api/expenses/categories', (req, res) => {
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/expenses', require('./routes/expense.routes'));
 app.use('/api/income', require('./routes/income.routes'));
+app.use('/api/whatsapp', require('./routes/whatsapp.routes'));
 app.use('/api', require('./routes/password.routes'));
 
 app.use(require('./middleware/error.middleware'));
