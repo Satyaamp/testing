@@ -58,3 +58,26 @@ exports.me = async (req, res, next) => {
     next(err);
   }
 };
+
+// Update Profile Route
+exports.updateProfile = async (req, res, next) => {
+  try {
+    const { phoneNumber } = req.body;
+    let data = {};
+    if (phoneNumber) {
+      // WhatsApp webhooks provide phone numbers as pure digit strings (e.g. 919876543210).
+      // We strip out +, -, spaces, and parentheses to ensure a flawless match.
+      data.phoneNumber = phoneNumber.replace(/\D/g, '');
+    }
+
+    // Only update if there are fields to update
+    if (Object.keys(data).length > 0) {
+      const user = await authService.updateUser(req.user.id, data);
+      success(res, user, 'User profile updated');
+    } else {
+      res.status(400).json({ message: "No data provided to update" });
+    }
+  } catch (err) {
+    next(err);
+  }
+};

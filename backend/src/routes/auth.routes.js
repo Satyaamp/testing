@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken');
 router.post('/register', limiter, ctrl.register);
 router.post('/login', limiter, ctrl.login);
 router.get('/me', protect, ctrl.me);
+router.put('/me', protect, ctrl.updateProfile);
 
 const uploadAvatar = require('../middleware/uploadAvatar');
 router.post('/upload-avatar', protect, uploadAvatar.single('avatar'), ctrl.uploadAvatar);
