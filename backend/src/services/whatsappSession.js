@@ -55,8 +55,8 @@ const sendGreeting = (from, userName) => {
         `_Where Your Money Tells a Story_\n\n` +
         `Track income, control expenses, and understand your spending.\n\n` +
         `*Reply with a number to begin:*\n\n` +
-        `1️⃣ Add Expense\n` +
-        `2️⃣ Add Income\n` +
+        `1️⃣ Add Today Expense\n` +
+        `2️⃣ Add Budget for Current Month\n` +
         `3️⃣ Monthly Snapshot\n` +
         `4️⃣ View Expenses List\n\n` +
         `Send *0* at anytime to cancel.`;
@@ -68,74 +68,54 @@ const sendGreeting = (from, userName) => {
 // REPORT VIEWERS (OPTIONS 3 & 4)
 // ==========================================
 
-const getExpensesList = async (from, user) => {
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
+const generateDayReport = async (from, user, queryDate, startOfDay, endOfDay) => {
     const expenses = await Expense.find({
         userId: user._id,
-        date: { $gte: startOfMonth, $lte: now }
+        date: { $gte: startOfDay, $lte: endOfDay }
     }).sort({ date: 1 });
 
-    let replyText = `📊 *${now.toLocaleString('default', { month: 'long' })} Expenses*\n\n`;
-
     if (expenses.length === 0) {
-        return whatsappService.sendTextMessage(from, replyText + "No expenses found this month.");
+        return whatsappService.sendTextMessage(from, "❌ No any expenses for that day.\n\n_Reply 0 to return to Menu._");
     }
 
-    let total = 0;
-    const grouped = {};
-
-    expenses.forEach(e => {
-        const d = new Date(e.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
-        if (!grouped[d]) grouped[d] = [];
-        grouped[d].push(e);
-        total += e.amount;
-    });
+    let replyText = `📅 *${queryDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}*\n`;
+    replyText += '```text\n';
 
     const catWidth = 13;
     const amtWidth = 10;
 
-    // Build the grid border lines
     const borderTop = `┌${'─'.repeat(catWidth + 2)}┬${'─'.repeat(amtWidth + 2)}┐\n`;
     const borderMid = `├${'─'.repeat(catWidth + 2)}┼${'─'.repeat(amtWidth + 2)}┤\n`;
     const borderBot = `└${'─'.repeat(catWidth + 2)}┴${'─'.repeat(amtWidth + 2)}┘\n`;
 
-    for (const [date, items] of Object.entries(grouped)) {
-        replyText += `📅 *${date}*\n`;
-        replyText += '```text\n'; // WhatsApp uses ``` for Monospace
-        replyText += borderTop;
-        replyText += `│ ${'Category'.padEnd(catWidth)} │ ${'Amount'.padStart(amtWidth)} │\n`;
+    replyText += borderTop;
+    replyText += `│ ${'Category'.padEnd(catWidth)} │ ${'Amount'.padStart(amtWidth)} │\n`;
+    replyText += borderMid;
+
+    let dailyTotal = 0;
+    expenses.forEach(item => {
+        let catName = item.category;
+        if (catName.length > catWidth) catName = catName.substring(0, catWidth - 1) + '…';
+
+        const amtStr = item.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        replyText += `│ ${catName.padEnd(catWidth)} │ ${amtStr.padStart(amtWidth)} │\n`;
+        dailyTotal += item.amount;
+    });
+
+    if (expenses.length > 1) {
         replyText += borderMid;
-
-        let dailyTotal = 0;
-        items.forEach(item => {
-            let catName = item.category;
-            if (catName.length > catWidth) catName = catName.substring(0, catWidth - 1) + '…';
-
-            const amtStr = item.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            replyText += `│ ${catName.padEnd(catWidth)} │ ${amtStr.padStart(amtWidth)} │\n`;
-            dailyTotal += item.amount;
-        });
-
-        if (items.length > 1) {
-            replyText += borderMid;
-            const totalStr = dailyTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            replyText += `│ ${'Daily Total'.padEnd(catWidth)} │ ${totalStr.padStart(amtWidth)} │\n`;
-        }
-
-        replyText += borderBot;
-        replyText += '```\n';
+        const totalStr = dailyTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        replyText += `│ ${'Daily Total'.padEnd(catWidth)} │ ${totalStr.padStart(amtWidth)} │\n`;
     }
 
-    replyText += `*Total: ₹${total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}*\n\n_Reply 0 to return to Menu._`;
+    replyText += borderBot;
+    replyText += '```\n';
+    replyText += `\n_Reply 0 to return to Menu._`;
+
     return whatsappService.sendTextMessage(from, replyText);
 };
 
-const getMonthlySnapshot = async (from, user) => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const monthIndex = now.getMonth();
+const generateMonthReport = async (from, user, year, monthIndex) => {
     const startOfMonth = new Date(year, monthIndex, 1);
     const endOfMonth = new Date(year, monthIndex + 1, 0, 23, 59, 59);
 
@@ -153,13 +133,59 @@ const getMonthlySnapshot = async (from, user) => {
     const totalExpense = expenseAggr[0]?.total || 0;
     const balance = totalIncome - totalExpense;
 
-    const reply = `📊 *Snapshot for ${now.toLocaleString('default', { month: 'long' }).toUpperCase()} ${year}*\n\n` +
+    const monthName = new Date(year, monthIndex).toLocaleString('default', { month: 'long' });
+    let replyText = `📊 *Snapshot for ${monthName.toUpperCase()} ${year}*\n\n` +
         `💰 Income: ₹${totalIncome.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n` +
         `💸 Expenses: ₹${totalExpense.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n` +
-        `📈 Balance: ₹${balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n\n` +
-        `_Reply 0 to return to Menu._`;
+        `📈 Balance: ₹${balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n\n`;
 
-    return whatsappService.sendTextMessage(from, reply);
+    const expenses = await Expense.find({
+        userId: user._id,
+        date: { $gte: startOfMonth, $lte: endOfMonth }
+    }).sort({ date: 1 });
+
+    if (expenses.length > 0) {
+        const grouped = {};
+        expenses.forEach(e => {
+            const d = new Date(e.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+            if (!grouped[d]) grouped[d] = [];
+            grouped[d].push(e);
+        });
+
+        const catWidth = 13;
+        const amtWidth = 10;
+        const borderTop = `┌${'─'.repeat(catWidth + 2)}┬${'─'.repeat(amtWidth + 2)}┐\n`;
+        const borderMid = `├${'─'.repeat(catWidth + 2)}┼${'─'.repeat(amtWidth + 2)}┤\n`;
+        const borderBot = `└${'─'.repeat(catWidth + 2)}┴${'─'.repeat(amtWidth + 2)}┘\n`;
+
+        for (const [date, items] of Object.entries(grouped)) {
+            replyText += `📅 *${date}*\n\`\`\`text\n`;
+            replyText += borderTop;
+            replyText += `│ ${'Category'.padEnd(catWidth)} │ ${'Amount'.padStart(amtWidth)} │\n`;
+            replyText += borderMid;
+
+            let dailyTotal = 0;
+            items.forEach(item => {
+                let catName = item.category;
+                if (catName.length > catWidth) catName = catName.substring(0, catWidth - 1) + '…';
+
+                const amtStr = item.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                replyText += `│ ${catName.padEnd(catWidth)} │ ${amtStr.padStart(amtWidth)} │\n`;
+                dailyTotal += item.amount;
+            });
+
+            if (items.length > 1) {
+                replyText += borderMid;
+                const totalStr = dailyTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                replyText += `│ ${'Daily Total'.padEnd(catWidth)} │ ${totalStr.padStart(amtWidth)} │\n`;
+            }
+            replyText += borderBot;
+            replyText += '```\n';
+        }
+    }
+
+    replyText += `_Reply 0 to return to Menu._`;
+    return whatsappService.sendTextMessage(from, replyText);
 };
 
 // ==========================================
@@ -303,6 +329,86 @@ exports.processMessage = async (from, messageBody) => {
             }
         }
 
+        // --- SNAPSHOT FLOW (Option 3) ---
+        if (session.type === 'snapshot') {
+            if (session.step === 'awaiting_year') {
+                const year = parseInt(text);
+                if (isNaN(year) || year < 2000 || year > 2100) {
+                    return whatsappService.sendTextMessage(from, "❌ Invalid year. Reply with a valid year (e.g. 2026), or send 0 to cancel.");
+                }
+
+                const startOfYear = new Date(year, 0, 1);
+                const endOfYear = new Date(year, 11, 31, 23, 59, 59);
+                const count = await Expense.countDocuments({
+                    userId: user._id,
+                    date: { $gte: startOfYear, $lte: endOfYear }
+                });
+
+                if (count === 0) {
+                    userSessions.delete(from);
+                    return whatsappService.sendTextMessage(from, `❌ You have no expenses recorded for the year ${year}.\n\n_Reply 0 to return to Menu._`);
+                }
+
+                session.data.year = year;
+                session.step = 'awaiting_month';
+                userSessions.set(from, session);
+
+                return whatsappService.sendTextMessage(from, `📅 Year: ${year}\n\n*Reply with the Month Number (1-12)*:`);
+            }
+
+            if (session.step === 'awaiting_month') {
+                const month = parseInt(text);
+                if (isNaN(month) || month < 1 || month > 12) {
+                    return whatsappService.sendTextMessage(from, "❌ Invalid month. Reply with a number from 1 to 12, or send 0 to cancel.");
+                }
+
+                const year = session.data.year;
+                const monthIndex = month - 1;
+
+                const startOfMonth = new Date(year, monthIndex, 1);
+                const endOfMonth = new Date(year, monthIndex + 1, 0, 23, 59, 59);
+
+                const count = await Expense.countDocuments({
+                    userId: user._id,
+                    date: { $gte: startOfMonth, $lte: endOfMonth }
+                });
+
+                if (count === 0) {
+                    userSessions.delete(from);
+                    const monthName = new Date(year, monthIndex).toLocaleString('default', { month: 'long' });
+                    return whatsappService.sendTextMessage(from, `❌ You have no expenses recorded for ${monthName} ${year}.\n\n_Reply 0 to return to Menu._`);
+                }
+
+                userSessions.delete(from); // Clear session
+                return generateMonthReport(from, user, year, monthIndex);
+            }
+        }
+
+        // --- EXPENSE LIST FLOW (Option 4) ---
+        if (session.type === 'expense_list') {
+            if (session.step === 'awaiting_date') {
+                const parts = text.split('-');
+                if (parts.length !== 3) {
+                    return whatsappService.sendTextMessage(from, "❌ Invalid format. Please use DD-MM-YYYY (e.g. 15-03-2026), or send 0 to cancel.");
+                }
+                const day = parseInt(parts[0]);
+                const month = parseInt(parts[1]) - 1;
+                const year = parseInt(parts[2]);
+
+                const queryDate = new Date(year, month, day);
+                if (isNaN(queryDate.getTime()) || queryDate.getDate() !== day) {
+                    return whatsappService.sendTextMessage(from, "❌ Invalid date. Please try again with format DD-MM-YYYY, or send 0 to cancel.");
+                }
+
+                // Make sure to query correctly for that day
+                const startOfDay = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
+                const endOfDay = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
+
+                userSessions.delete(from);
+                return generateDayReport(from, user, queryDate, startOfDay, endOfDay);
+            }
+        }
+
         // --- GLOBAL BUTTON CONFIRMATIONS ---
         if (session.step === 'awaiting_confirmation') {
             if (text === 'yes' || text === 'confirm' || text === 'confirm_expense' || text === 'confirm_income') {
@@ -361,11 +467,13 @@ exports.processMessage = async (from, messageBody) => {
         }
 
         if (text === '3') {
-            return getMonthlySnapshot(from, user);
+            userSessions.set(from, { type: 'snapshot', step: 'awaiting_year', data: {} });
+            return whatsappService.sendTextMessage(from, "Reply with the *Year* to view (e.g. 2026):");
         }
 
         if (text === '4') {
-            return getExpensesList(from, user);
+            userSessions.set(from, { type: 'expense_list', step: 'awaiting_date', data: {} });
+            return whatsappService.sendTextMessage(from, "Reply with the *Date* in DD-MM-YYYY format (e.g. 15-03-2026):");
         }
 
         // Fallback -> Show Menu
