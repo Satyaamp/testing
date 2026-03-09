@@ -93,12 +93,39 @@ const getExpensesList = async (from, user) => {
         total += e.amount;
     });
 
+    const catWidth = 13;
+    const amtWidth = 10;
+
+    // Build the grid border lines
+    const borderTop = `┌${'─'.repeat(catWidth + 2)}┬${'─'.repeat(amtWidth + 2)}┐\n`;
+    const borderMid = `├${'─'.repeat(catWidth + 2)}┼${'─'.repeat(amtWidth + 2)}┤\n`;
+    const borderBot = `└${'─'.repeat(catWidth + 2)}┴${'─'.repeat(amtWidth + 2)}┘\n`;
+
     for (const [date, items] of Object.entries(grouped)) {
         replyText += `📅 *${date}*\n`;
+        replyText += '```text\n'; // WhatsApp uses ``` for Monospace
+        replyText += borderTop;
+        replyText += `│ ${'Category'.padEnd(catWidth)} │ ${'Amount'.padStart(amtWidth)} │\n`;
+        replyText += borderMid;
+
+        let dailyTotal = 0;
         items.forEach(item => {
-            replyText += `${item.category} — ₹${item.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;
+            let catName = item.category;
+            if (catName.length > catWidth) catName = catName.substring(0, catWidth - 1) + '…';
+
+            const amtStr = item.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            replyText += `│ ${catName.padEnd(catWidth)} │ ${amtStr.padStart(amtWidth)} │\n`;
+            dailyTotal += item.amount;
         });
-        replyText += `\n`;
+
+        if (items.length > 1) {
+            replyText += borderMid;
+            const totalStr = dailyTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            replyText += `│ ${'Daily Total'.padEnd(catWidth)} │ ${totalStr.padStart(amtWidth)} │\n`;
+        }
+
+        replyText += borderBot;
+        replyText += '```\n';
     }
 
     replyText += `*Total: ₹${total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}*\n\n_Reply 0 to return to Menu._`;
