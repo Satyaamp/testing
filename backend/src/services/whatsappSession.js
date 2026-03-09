@@ -22,13 +22,22 @@ const EXPENSE_CATEGORIES = [
 // HELPER FUNCTIONS
 // ==========================================
 
-const calculateBalance = async (userId) => {
+const calculateBalance = async (userId, forCurrentMonth = false) => {
+    let matchQuery = { userId: userId };
+
+    if (forCurrentMonth) {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+        matchQuery.date = { $gte: startOfMonth, $lte: endOfMonth };
+    }
+
     const incomeAggr = await Income.aggregate([
-        { $match: { userId: userId } },
+        { $match: matchQuery },
         { $group: { _id: null, total: { $sum: "$amount" } } }
     ]);
     const expenseAggr = await Expense.aggregate([
-        { $match: { userId: userId } },
+        { $match: matchQuery },
         { $group: { _id: null, total: { $sum: "$amount" } } }
     ]);
 
@@ -168,14 +177,15 @@ exports.processMessage = async (from, messageBody) => {
                 }
 
                 // Balance Validation
-                const currentBalance = await calculateBalance(user._id);
+                const currentBalance = await calculateBalance(user._id, true);
+                const currentMonthName = new Date().toLocaleString('default', { month: 'long' });
                 if (amount > currentBalance) {
                     userSessions.delete(from); // Kill session
                     return whatsappService.sendTextMessage(
                         from,
                         `⚠️ *Insufficient Balance!*\n\n` +
                         `You are trying to add an expense of ₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}, ` +
-                        `but your current purse balance is only ₹${currentBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}.\n\n` +
+                        `but your remaining purse for ${currentMonthName} is only ₹${currentBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}.\n\n` +
                         `_Reply 'menu' to start over._`
                     );
                 }
@@ -279,8 +289,9 @@ exports.processMessage = async (from, messageBody) => {
                             year: new Date().getFullYear()
                         });
                         await newExpense.save();
-                        const remaining = await calculateBalance(user._id);
-                        await whatsappService.sendTextMessage(from, `✅ Expense recorded successfully!\n\n💼 Remaining purse: ₹${remaining.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+                        const remaining = await calculateBalance(user._id, true);
+                        const currentMonthName = new Date().toLocaleString('default', { month: 'long' });
+                        await whatsappService.sendTextMessage(from, `✅ Expense recorded successfully!\n\n💼 Remaining purse for ${currentMonthName}: ₹${remaining.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
                     } else if (session.type === 'income') {
                         const newIncome = new Income({
                             ...session.data,
@@ -288,8 +299,9 @@ exports.processMessage = async (from, messageBody) => {
                             date: new Date()
                         });
                         await newIncome.save();
-                        const current = await calculateBalance(user._id);
-                        await whatsappService.sendTextMessage(from, `✅ Income added successfully!\n\n💼 Current purse: ₹${current.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+                        const current = await calculateBalance(user._id, true);
+                        const currentMonthName = new Date().toLocaleString('default', { month: 'long' });
+                        await whatsappService.sendTextMessage(from, `✅ Income added successfully!\n\n💼 Remaining purse for ${currentMonthName}: ₹${current.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
                     }
                 } catch (err) {
                     console.error("SAVE ERROR:", err);
