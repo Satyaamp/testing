@@ -79,7 +79,7 @@ const generateDayReport = async (from, user, queryDate, startOfDay, endOfDay) =>
     }
 
     let replyText = `📅 *${queryDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}*\n`;
-    replyText += '```text\n';
+    replyText += '```\n';
 
     const catWidth = 13;
     const amtWidth = 10;
@@ -159,10 +159,10 @@ const generateMonthReport = async (from, user, year, monthIndex) => {
         const borderBot = `└${'─'.repeat(catWidth + 2)}┴${'─'.repeat(amtWidth + 2)}┘\n`;
 
         for (const [date, items] of Object.entries(grouped)) {
-            replyText += `📅 *${date}*\n\`\`\`text\n`;
-            replyText += borderTop;
-            replyText += `│ ${'Category'.padEnd(catWidth)} │ ${'Amount'.padStart(amtWidth)} │\n`;
-            replyText += borderMid;
+            let dayText = `📅 *${date}*\n\`\`\`text\n`;
+            dayText += borderTop;
+            dayText += `│ ${'Category'.padEnd(catWidth)} │ ${'Amount'.padStart(amtWidth)} │\n`;
+            dayText += borderMid;
 
             let dailyTotal = 0;
             items.forEach(item => {
@@ -170,17 +170,24 @@ const generateMonthReport = async (from, user, year, monthIndex) => {
                 if (catName.length > catWidth) catName = catName.substring(0, catWidth - 1) + '…';
 
                 const amtStr = item.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                replyText += `│ ${catName.padEnd(catWidth)} │ ${amtStr.padStart(amtWidth)} │\n`;
+                dayText += `│ ${catName.padEnd(catWidth)} │ ${amtStr.padStart(amtWidth)} │\n`;
                 dailyTotal += item.amount;
             });
 
             if (items.length > 1) {
-                replyText += borderMid;
+                dayText += borderMid;
                 const totalStr = dailyTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                replyText += `│ ${'Daily Total'.padEnd(catWidth)} │ ${totalStr.padStart(amtWidth)} │\n`;
+                dayText += `│ ${'Daily Total'.padEnd(catWidth)} │ ${totalStr.padStart(amtWidth)} │\n`;
             }
-            replyText += borderBot;
-            replyText += '```\n';
+            dayText += borderBot;
+            dayText += '```\n';
+
+            // WhatsApp sets a hard limit of 4096 characters per message.
+            if ((replyText.length + dayText.length) > 3800) {
+                await whatsappService.sendTextMessage(from, replyText);
+                replyText = ''; // Start a fresh chunk
+            }
+            replyText += dayText;
         }
     }
 
