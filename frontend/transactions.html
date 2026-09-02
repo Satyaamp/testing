@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Dhan₹ekha – Transaction Ledger</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#22c55e">
+
+  <link rel="shortcut icon" href="assets/icons/dashboard.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="css/glass.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+
+  <style>
+    /* =============================================================
+       PREMIUM DESIGN SYSTEM FOR TRANSACTIONS LEDGER
+    ============================================================= */
+    :root {
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --color-emerald: #22c55e;
+      --color-emerald-glow: rgba(34, 197, 94, 0.25);
+      --color-rose: #f43f5e;
+      --color-rose-glow: rgba(244, 63, 94, 0.25);
+      --color-amber: #f59e0b;
+      --color-sky: #38bdf8;
+      --glass-bg: rgba(18, 24, 38, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-hover-border: rgba(255, 255, 255, 0.18);
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.06) 0%, transparent 40%),
+        #0a0e17;
+      color: #f1f5f9;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .transactions-container {
+      max-width: 1280px;
+      margin: 24px auto;
+      padding: 0 20px 80px 20px;
+    }
+
+    /* Hero Header */
+    .hero-header {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 24px 30px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-title-area {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .month-nav-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .month-step-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--glass-border);
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .month-step-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      transform: scale(1.08);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin: 0;
+      color: #fff;
+    }
+
+    .hero-subtitle {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin: 0;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-hero-link {
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #4ade80;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-hero-link:hover {
+      background: rgba(34, 197, 94, 0.22);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px var(--color-emerald-glow);
+    }
+
+    /* KPI Cards Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 20px 22px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--glass-hover-border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .kpi-icon-bubble {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .kpi-bubble-inflow {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #4ade80;
+    }
+
+    .kpi-bubble-outflow {
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: #fb7185;
+    }
+
+    .kpi-bubble-balance {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8;
+    }
+
+    .kpi-bubble-count {
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      color: #c084fc;
+    }
+
+    .kpi-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .kpi-tag {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #94a3b8;
+    }
+
+    .kpi-number {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    /* Filter Toolbar Panel */
+    .toolbar-panel {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .toolbar-main-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .search-box-wrapper {
+      flex: 1;
+      min-width: 260px;
+      position: relative;
+    }
+
+    .search-input-field {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      color: white;
+      font-size: 0.95rem;
+      outline: none;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+      font-family: var(--font-body);
+    }
+
+    .search-input-field:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+      background: rgba(15, 23, 42, 0.85);
+    }
+
+    .search-icon-badge {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .type-segment-control {
+      display: inline-flex;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .type-tab-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      padding: 8px 18px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .type-tab-btn.active {
+      background: #22c55e;
+      color: #052e16;
+      box-shadow: 0 2px 10px rgba(34, 197, 94, 0.35);
+    }
+
+    .toolbar-sub-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+    }
+
+    .custom-select,
+    .custom-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: white;
+      font-size: 0.88rem;
+      outline: none;
+      font-family: var(--font-body);
+      transition: border-color 0.2s;
+    }
+
+    .custom-select:focus,
+    .custom-input:focus {
+      border-color: #38bdf8;
+    }
+
+    .custom-select option {
+      background: #0f172a;
+      color: white;
+    }
+
+    .toolbar-bottom-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .export-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-export {
+      padding: 9px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.84rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-export-excel {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.35);
+    }
+
+    .btn-export-excel:hover {
+      background: rgba(34, 197, 94, 0.28);
+      transform: translateY(-1px);
+    }
+
+    .btn-export-csv {
+      background: rgba(56, 189, 248, 0.14);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .btn-export-csv:hover {
+      background: rgba(56, 189, 248, 0.24);
+      transform: translateY(-1px);
+    }
+
+    .btn-export-pdf {
+      background: rgba(244, 63, 94, 0.14);
+      color: #fb7185;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .btn-export-pdf:hover {
+      background: rgba(244, 63, 94, 0.24);
+      transform: translateY(-1px);
+    }
+
+    .btn-reset-filters {
+      background: transparent;
+      color: #94a3b8;
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-reset-filters:hover {
+      color: white;
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Ledger Table Container */
+    .ledger-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .ledger-table-wrapper {
+      overflow-x: auto;
+      width: 100%;
+    }
+
+    .ledger-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.92rem;
+    }
+
+    .ledger-table th {
+      background: rgba(15, 23, 42, 0.7);
+      padding: 16px 20px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: #cbd5e1;
+      letter-spacing: 0.02em;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .ledger-table th.sortable {
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .ledger-table th.sortable:hover {
+      color: #38bdf8;
+    }
+
+    .ledger-table td {
+      padding: 15px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+      transition: background 0.15s;
+    }
+
+    .ledger-table tbody tr:hover td {
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    /* Pill Badges */
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .pill-inflow {
+      background: rgba(34, 197, 94, 0.12);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .pill-outflow {
+      background: rgba(244, 63, 94, 0.12);
+      color: #fb7185;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .pill-overbudget {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    .pill-normal {
+      background: rgba(255, 255, 255, 0.04);
+      color: #94a3b8;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .category-tag {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: #e2e8f0;
+    }
+
+    .amount-cell {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 1.05rem;
+      white-space: nowrap;
+      letter-spacing: -0.02em;
+    }
+
+    .amount-positive {
+      color: #4ade80;
+    }
+
+    .amount-negative {
+      color: #fb7185;
+    }
+
+    /* Mobile Cards View */
+    .ledger-mobile-cards {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .mobile-tx-card {
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    @media (max-width: 860px) {
+      .ledger-table-wrapper {
+        display: none;
+      }
+
+      .ledger-mobile-cards {
+        display: flex;
+      }
+
+      .hero-header {
+        padding: 20px;
+      }
+
+      .hero-title {
+        font-size: 1.6rem;
+      }
+    }
+
+    /* Pagination Bar */
+    .ledger-pagination-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 18px 24px;
+      background: rgba(15, 23, 42, 0.4);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .page-nav-btn {
+      padding: 7px 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      color: #e2e8f0;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .page-nav-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .page-nav-btn:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+
+    .page-nav-btn.active {
+      background: #22c55e;
+      color: #052e16;
+      border-color: #22c55e;
+      box-shadow: 0 2px 10px rgba(34, 197, 94, 0.35);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Page Loader -->
+  <div id="page-loader">
+    <div class="loader"></div>
+    <p class="loader-text">Loading transactions...</p>
+  </div>
+  <script>
+    window.addEventListener('load', () => {
+      const loader = document.getElementById('page-loader');
+      setTimeout(() => {
+        if (loader) {
+          loader.style.opacity = '0';
+          setTimeout(() => loader.style.display = 'none', 300);
+        }
+      }, 400);
+    });
+  </script>
+
+  <!-- Auth Guard -->
+  <script src="js/authGuard.js"></script>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar glass-card">
+    <div class="logo" onclick="location.href='dashboard'" style="cursor: pointer;">
+      <img src="assets/logo1.png" alt="Dhan₹ekha Logo" loading="lazy" />
+      <span>Dhan₹ekha</span>
+    </div>
+
+    <!-- <div class="nav-actions">
+      <button id="navMonthlyBtn" onclick="openTargetMonthlyDashboard()" class="nav-btn-monthly"
+        title="Monthly Analytics">
+        <span class="desktop-text">📊 Monthly Dashboard</span>
+        <span class="mobile-icon">📊</span>
+      </button>
+      <button onclick="location.href='yearly'" class="nav-btn" title="Yearly Overview">
+        <span class="desktop-text">📅 Yearly</span>
+        <span class="mobile-icon">📅</span>
+      </button>
+      <button onclick="location.href='dashboard'" class="nav-btn" title="Dashboard">
+        <span class="desktop-text">🏠 Home</span>
+        <span class="mobile-icon">🏠</span>
+      </button>
+
+      <div class="profile-btn" id="navbarProfileBtn" onclick="location.href='profile'" title="Profile">
+        <div id="navbarProfileIcon">👤</div>
+      </div>
+    </div> -->
+  </nav>
+
+  <main class="transactions-container">
+
+    <!-- Hero Header with Month Switcher -->
+    <header class="hero-header">
+      <div class="hero-title-area">
+        <div class="month-nav-group">
+          <button class="month-step-btn" onclick="stepMonth(-1)" title="Previous Month">❮</button>
+          <h1 class="hero-title" id="periodName">Transactions</h1>
+          <button class="month-step-btn" onclick="stepMonth(1)" title="Next Month">❯</button>
+        </div>
+        <p class="hero-subtitle" id="periodSubtext">
+          Detailed date-wise ledger with server-side pagination and instant CSV/PDF export.
+        </p>
+      </div>
+
+      <!-- <div class="hero-actions">
+        <a href="javascript:void(0)" onclick="openTargetMonthlyDashboard()" class="btn-hero-link" title="Open Monthly Visual Analytics">
+          <span>📊</span> Visual Analytics Dashboard ↗
+        </a>
+      </div> -->
+    </header>
+
+    <!-- KPI Metric Cards Grid -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon-bubble kpi-bubble-inflow">↑</div>
+        <div class="kpi-details">
+          <span class="kpi-tag">Total Inflow</span>
+          <span class="kpi-number" id="kpiIncome" style="color: #4ade80;">₹0</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-bubble kpi-bubble-outflow">↓</div>
+        <div class="kpi-details">
+          <span class="kpi-tag">Total Outflow</span>
+          <span class="kpi-number" id="kpiExpense" style="color: #fb7185;">₹0</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-bubble kpi-bubble-balance">₹</div>
+        <div class="kpi-details">
+          <span class="kpi-tag">Net Purse</span>
+          <span class="kpi-number" id="kpiBalance">₹0</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon-bubble kpi-bubble-count">📋</div>
+        <div class="kpi-details">
+          <span class="kpi-tag">Total Records</span>
+          <span class="kpi-number" id="kpiCount" style="color: #c084fc;">0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Toolbar & Multi-Filter Panel -->
+    <section class="toolbar-panel">
+      <!-- Search and Type Segment -->
+      <div class="toolbar-main-row">
+        <div class="search-box-wrapper">
+          <span class="search-icon-badge">🔍</span>
+          <input type="text" id="searchInput" class="search-input-field"
+            placeholder="Search by description, source, or notes..." />
+        </div>
+
+        <div class="type-segment-control">
+          <button class="type-tab-btn active" data-type="all" onclick="setTypeFilter('all')">All</button>
+          <button class="type-tab-btn" data-type="expense" onclick="setTypeFilter('expense')">Expenses</button>
+          <button class="type-tab-btn" data-type="income" onclick="setTypeFilter('income')">Inflow</button>
+        </div>
+      </div>
+
+      <!-- Secondary Filters Grid -->
+      <div class="toolbar-sub-row">
+        <div>
+          <select id="categoryFilter" class="custom-select" onchange="applyFilters()">
+            <option value="">All Categories</option>
+          </select>
+        </div>
+
+        <div>
+          <input type="date" id="dateFilter" class="custom-input" onchange="applyFilters()"
+            title="Filter specific date" />
+        </div>
+
+        <div>
+          <input type="number" id="minAmountFilter" class="custom-input" placeholder="Min Amount (₹)"
+            oninput="debouncedFilter()" />
+        </div>
+
+        <div>
+          <input type="number" id="maxAmountFilter" class="custom-input" placeholder="Max Amount (₹)"
+            oninput="debouncedFilter()" />
+        </div>
+
+        <div>
+          <select id="statusFilter" class="custom-select" onchange="applyFilters()">
+            <option value="all">All Status</option>
+            <option value="normal">Within Budget</option>
+            <option value="overBudget">Over Budget Only</option>
+          </select>
+        </div>
+
+        <div>
+          <select id="sortFilter" class="custom-select" onchange="applyFilters()">
+            <option value="date-desc">Date: Newest First</option>
+            <option value="date-asc">Date: Oldest First</option>
+            <option value="amount-desc">Amount: High to Low</option>
+            <option value="amount-asc">Amount: Low to High</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Action Row: CSV, PDF, Reset -->
+      <div class="toolbar-bottom-actions">
+        <div class="export-btn-group">
+          <button class="btn-export btn-export-excel" onclick="downloadExcel()"
+            title="Export professionally styled Excel spreadsheet (.xlsx) with colors, gradients, and auto-widths">
+            <span>📊</span> Download Excel (.xlsx)
+          </button>
+          <button class="btn-export btn-export-pdf" onclick="downloadPDF()"
+            title="Export statement report as formatted PDF">
+            <span>📄</span> Download PDF
+          </button>
+          <button class="btn-export btn-reset-filters" onclick="resetFilters()" title="Clear all search filters">
+            <span>↺</span> Reset Filters
+          </button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #94a3b8;">
+          <span>Show</span>
+          <select id="limitSelect" class="custom-select" style="width: auto; padding: 5px 10px;"
+            onchange="changeLimit(this.value)">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <span>per page</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Transactions Data Ledger Card -->
+    <section class="ledger-card">
+      <!-- Desktop Table View -->
+      <div class="ledger-table-wrapper">
+        <table class="ledger-table">
+          <thead>
+            <tr>
+              <th class="sortable" onclick="toggleSort('date')">Date <span id="sortIconDate">▼</span></th>
+              <th>Type</th>
+              <th>Category</th>
+              <th>Description / Source</th>
+              <th>Status</th>
+              <th class="sortable" style="text-align: right;" onclick="toggleSort('amount')">Amount <span
+                  id="sortIconAmount"></span></th>
+            </tr>
+          </thead>
+          <tbody id="transactionsTableBody">
+            <!-- Populated dynamically via JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Cards View -->
+      <div id="mobileCardsList" class="ledger-mobile-cards">
+        <!-- Populated dynamically via JS -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyPlaceholder" style="display: none; text-align: center; padding: 70px 20px;">
+        <div style="font-size: 3.5rem; margin-bottom: 12px; opacity: 0.5;">🔍</div>
+        <h3 style="margin: 0; color: white; font-family: var(--font-display); font-size: 1.4rem;">No matching
+          transactions</h3>
+        <p style="color: #94a3b8; margin-top: 6px; font-size: 0.92rem;">
+          Try adjusting your search criteria or resetting filters.
+        </p>
+        <button onclick="resetFilters()" class="btn-export btn-reset-filters"
+          style="margin-top: 14px; padding: 8px 20px;">
+          Reset All Filters
+        </button>
+      </div>
+
+      <!-- Pagination Footer -->
+      <div class="ledger-pagination-bar" id="paginationBar">
+        <div id="paginationInfo" style="font-size: 0.88rem; color: #94a3b8;">
+          Showing 0 of 0 transactions
+        </div>
+
+        <div style="display: flex; gap: 6px; align-items: center;" id="paginationButtons">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- External Libraries for PDF, Styled Excel & JS -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script type="module" src="js/transactions.js?v=3.0"></script>
+
+</body>
+
+</html>

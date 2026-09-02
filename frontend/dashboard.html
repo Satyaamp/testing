@@ -10,7 +10,7 @@
 
   <link rel="shortcut icon" href="assets/icons/dashboard.png" type="image/png">
   <link rel="stylesheet" href="css/glass.css" />
-  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/dashboard.css?v=2.5" />
   <link rel="stylesheet" href="css/animations.css" />
   <style>
     .pagination-controls {
@@ -148,10 +148,13 @@
   <main class="container">
 
     <!-- Balance Card -->
-    <section class="balance-card glass-card animate-enter">
+    <section class="balance-card glass-card animate-enter clickable-card" onclick="openBreakdownModal('balance')" title="Click to view Yearly & Monthly Balance Breakdown">
       <div class="liquid-bg liquid-green" id="fillBalance"></div>
       <div class="card-content">
-        <h3>Remaining Balance</h3>
+        <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+          <h3>Remaining Balance</h3>
+          <span style="font-size: 0.85rem; opacity: 0.6;">🔍</span>
+        </div>
         <p id="balance">₹0</p>
         <p class="hover-percentage" id="pctBalance">0%</p>
       </div>
@@ -165,18 +168,24 @@
 
     <!-- Summary Cards -->
     <section class="summary">
-      <div class="summary-card glass-card animate-enter delay-2">
+      <div class="summary-card glass-card animate-enter delay-2 clickable-card" onclick="openBreakdownModal('income')" title="Click to view Yearly & Monthly Income Breakdown">
         <div class="liquid-bg liquid-blue" id="fillIncome"></div>
         <div class="card-content">
-          <h4>Total Income</h4>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h4>Total Income</h4>
+            <span style="font-size: 0.8rem; opacity: 0.6;">🔍</span>
+          </div>
           <p id="totalIncome">₹0</p>
           <p class="hover-percentage" id="pctIncome">0%</p>
         </div>
       </div>
-      <div class="summary-card glass-card animate-enter delay-3">
+      <div class="summary-card glass-card animate-enter delay-3 clickable-card" onclick="openBreakdownModal('expense')" title="Click to view Yearly & Monthly Expense Breakdown">
         <div class="liquid-bg liquid-red" id="fillExpense"></div>
         <div class="card-content">
-          <h4>Total Expense</h4>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h4>Total Expense</h4>
+            <span style="font-size: 0.8rem; opacity: 0.6;">🔍</span>
+          </div>
           <p id="totalExpense">₹0</p>
           <p class="hover-percentage" id="pctExpense">0%</p>
         </div>
@@ -301,6 +310,30 @@
         <div class="modal-actions">
           <button onclick="addIncome()">Save</button>
           <button class="cancel" onclick="closeIncome()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Drill-Down Breakdown Modal -->
+    <div id="breakdownModal" class="modal hidden">
+      <div class="breakdown-modal-content glass-card">
+        <div class="modal-pull-handle"></div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; margin-bottom: 14px;">
+          <div>
+            <h3 id="breakdownModalTitle" style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #fff;">Financial Breakdown</h3>
+            <p id="breakdownModalSubtitle" style="margin: 4px 0 0 0; font-size: 0.82rem; opacity: 0.7;">Select a year or month to view detailed records</p>
+          </div>
+          <button onclick="closeBreakdownModal()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.8; transition: opacity 0.2s;" title="Close" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">&times;</button>
+        </div>
+
+        <div id="breakdownModalBody">
+          <!-- JavaScript populates breakdown items -->
+        </div>
+
+        <div style="margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+          <button onclick="closeBreakdownModal()" style="width: 100%; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #f1f5f9; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.14)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+            Close
+          </button>
         </div>
       </div>
     </div>
@@ -433,7 +466,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
-  <script type="module" src="js/dashboard.js"></script>
+  <script type="module" src="js/dashboard.js?v=2.5"></script>
   <script type="module">
     import { apiRequest } from './js/api.js';
 

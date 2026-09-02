@@ -45,8 +45,16 @@ const INCOME_PER_PAGE = 1;
 /* ===============================
    INIT
 ================================ */
-const now = new Date();
-currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+const urlParams = new URLSearchParams(window.location.search);
+const paramYear = urlParams.get("year");
+const paramMonth = urlParams.get("month");
+
+if (paramYear && paramMonth) {
+  currentMonth = `${paramYear}-${String(paramMonth).padStart(2, "0")}`;
+} else {
+  const now = new Date();
+  currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
 
 updateMobileMonthText();
 loadMonthlyData();
@@ -135,23 +143,57 @@ async function loadMonthlyData() {
 
   document.getElementById("monthlyIncome").innerText = `₹${formatINR(income)}`;
   document.getElementById("monthlyExpense").innerText = `₹${formatINR(expense)}`;
-  document.getElementById("monthlyBalance").innerText = `₹${formatINR(balance)}`;
+
+  const balanceEl = document.getElementById("monthlyBalance");
+  if (balanceEl) {
+    if (balance < 0) {
+      balanceEl.innerText = `-₹${formatINR(Math.abs(balance))}`;
+      balanceEl.style.color = "#ef4444";
+    } else {
+      balanceEl.innerText = `₹${formatINR(balance)}`;
+      balanceEl.style.color = "";
+    }
+  }
 
   // Calculate Liquid Fill Percentages (Income is baseline)
   const base = income > 0 ? income : (expense > 0 ? expense : 1);
 
   // Visual Fill (Capped at 100%)
   const expenseFill = Math.min((expense / base) * 100, 100);
-  const balanceFill = Math.min((balance / base) * 100, 100);
+  const balanceFill = balance > 0 ? Math.min((balance / base) * 100, 100) : 0;
 
-  // Apply Heights
+  // Apply Heights & Over-Budget Visual Indicator
   const fillBudget = document.getElementById("fillBudget");
   const fillExpense = document.getElementById("fillExpense");
   const fillBalance = document.getElementById("fillBalance");
+  const balanceCard = fillBalance ? fillBalance.closest(".summary-card") : null;
 
   if (fillBudget) fillBudget.style.height = "100%";
   if (fillExpense) fillExpense.style.height = `${expenseFill}%`;
-  if (fillBalance) fillBalance.style.height = `${Math.max(0, balanceFill)}%`;
+
+  if (balance < 0) {
+    if (balanceCard) {
+      balanceCard.classList.add("over-budget");
+      balanceCard.style.borderColor = "rgba(239, 68, 68, 0.5)";
+      balanceCard.style.boxShadow = "0 0 25px rgba(239, 68, 68, 0.25)";
+    }
+    if (fillBalance) {
+      fillBalance.classList.remove("liquid-green");
+      fillBalance.classList.add("liquid-red");
+      fillBalance.style.height = "25%";
+    }
+  } else {
+    if (balanceCard) {
+      balanceCard.classList.remove("over-budget");
+      balanceCard.style.borderColor = "";
+      balanceCard.style.boxShadow = "";
+    }
+    if (fillBalance) {
+      fillBalance.classList.remove("liquid-red");
+      fillBalance.classList.add("liquid-green");
+      fillBalance.style.height = `${balanceFill}%`;
+    }
+  }
 
   // Update Hover Percentages
   const pctIncome = document.getElementById("pctIncome");
@@ -160,7 +202,12 @@ async function loadMonthlyData() {
 
   if (pctIncome) pctIncome.innerText = "100%";
   if (pctExpense) pctExpense.innerText = `${((expense / base) * 100).toFixed(1)}%`;
-  if (pctBalance) pctBalance.innerText = `${((balance / base) * 100).toFixed(1)}%`;
+  if (pctBalance) {
+    pctBalance.innerText = balance < 0
+      ? `Over budget by ₹${formatINR(Math.abs(balance))}`
+      : `${((balance / base) * 100).toFixed(1)}%`;
+    pctBalance.style.color = balance < 0 ? "#fca5a5" : "";
+  }
 
   renderDailyAverage(expense, year, month);
   renderTopCategory(res.data.categories);
@@ -643,7 +690,7 @@ function renderMobileTransactions(dateStr) {
     <div class="day-header-card" style="position: relative;">
 
       <button 
-        onclick="event.stopPropagation(); openEmptyStateModal()" 
+        onclick="event.stopPropagation(); openEmptyStateModal('${dateStr}')" 
         title="Add Expense"
         style="
           position: absolute;
@@ -995,7 +1042,7 @@ function selectDate(dateStr, cell) {
       </div>
 
       <button 
-        onclick="event.stopPropagation(); openEmptyStateModal()" 
+        onclick="event.stopPropagation(); openEmptyStateModal('${dateStr}')" 
         title="Add Expense"
         style="
           background: rgba(11, 246, 86, 0.4);
@@ -1041,7 +1088,7 @@ function selectDate(dateStr, cell) {
 
   if (!tx.length) {
     html += `
-        <div class="empty-state">
+        <div class="empty-state" style="cursor: pointer;" onclick="openEmptyStateModal('${dateStr}')" title="Click to add expense for this day">
           <div class="empty-icon">📭</div>
           <div class="empty-title">No transactions</div>
           <div class="empty-sub">Start by adding your expense.</div><br>
@@ -2355,6 +2402,25 @@ window.openAddIncomeModal = function (dateStr) {
   const modal = document.getElementById("incomeModal");
   const dateInput = document.getElementById("incomeDate");
 
+  if (!dateStr) {
+    const title = document.getElementById("pageMonthTitle")?.innerText;
+    let viewDate = title ? new Date(title + " 1") : new Date();
+    const today = new Date();
+    if (today.getFullYear() === viewDate.getFullYear() && today.getMonth() === viewDate.getMonth()) {
+      viewDate = today;
+    }
+    const y = viewDate.getFullYear();
+    const m = String(viewDate.getMonth() + 1).padStart(2, "0");
+    const d = String(viewDate.getDate()).padStart(2, "0");
+    dateStr = `${y}-${m}-${d}`;
+
+    if (dateInput) {
+      const lastDay = new Date(y, viewDate.getMonth() + 1, 0).getDate();
+      dateInput.min = `${y}-${m}-01`;
+      dateInput.max = `${y}-${m}-${String(lastDay).padStart(2, "0")}`;
+    }
+  }
+
   if (modal && dateInput) {
     dateInput.value = dateStr;
     modal.classList.remove("hidden");
@@ -2682,4 +2748,9 @@ window.executeCarryForward = async function () {
   } catch (err) {
     showToast(err.message, "error");
   }
+};
+
+window.openTabularTransactions = function () {
+  const [year, month] = currentMonth.split("-");
+  window.open(`/transactions?year=${year}&month=${parseInt(month)}`, "_blank");
 };

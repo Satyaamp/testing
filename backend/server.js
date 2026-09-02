@@ -19,6 +19,7 @@ const routes = [
   'dashboard',
   'monthly',
   'yearly',
+  'transactions',
   'analytics',
   'profile',
   'forgot-password',

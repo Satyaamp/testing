@@ -6,7 +6,8 @@ const parser = require('../utils/parser.util');
 
 exports.create = async (req, res) => {
   try {
-    success(res, await service.createExpense(req.user.id, req.body));
+    const expense = await service.createExpense(req.user.id, req.body);
+    success(res, expense, 'Expense added successfully');
   } catch (err) {
     console.error("[Create Expense Error]", err.message);
     res.status(400).json({ message: err.message });
@@ -33,6 +34,24 @@ exports.balance = async (req, res) => {
   try {
     const data = await service.getRemainingBalance(req.user.id);
     success(res, data, 'Balance fetched successfully');
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.hierarchyBreakdown = async (req, res) => {
+  try {
+    const data = await service.getHierarchyBreakdown(req.user.id);
+    success(res, data, 'Hierarchy breakdown fetched successfully');
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.paginatedTransactions = async (req, res) => {
+  try {
+    const data = await service.getPaginatedTransactions(req.user.id, req.query);
+    success(res, data, 'Paginated transactions fetched successfully');
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

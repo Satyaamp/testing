@@ -214,15 +214,20 @@ async function loadDashboard() {
 
     // Update Text
     const balanceEl = document.getElementById("balance");
-    if (balanceEl) balanceEl.innerText = `₹${balance}`;
-    if (balanceEl) balanceEl.innerText = `₹${formatINR(balance)}`;
+    if (balanceEl) {
+      if (balance < 0) {
+        balanceEl.innerText = `-₹${formatINR(Math.abs(balance))}`;
+        balanceEl.style.color = "#ef4444";
+      } else {
+        balanceEl.innerText = `₹${formatINR(balance)}`;
+        balanceEl.style.color = "";
+      }
+    }
 
     const incomeEl = document.getElementById("totalIncome");
-    if (incomeEl) incomeEl.innerText = `₹${income}`;
     if (incomeEl) incomeEl.innerText = `₹${formatINR(income)}`;
 
     const expenseEl = document.getElementById("totalExpense");
-    if (expenseEl) expenseEl.innerText = `₹${expense}`;
     if (expenseEl) expenseEl.innerText = `₹${formatINR(expense)}`;
 
     // Calculate Liquid Fill Percentages (Income is baseline)
@@ -230,9 +235,9 @@ async function loadDashboard() {
 
     // Visual Fill (Capped at 100%)
     const expenseFill = Math.min((expense / base) * 100, 100);
-    const balanceFill = Math.min((balance / base) * 100, 100);
+    const balanceFill = balance > 0 ? Math.min((balance / base) * 100, 100) : 0;
 
-    // Apply Heights
+    // Apply Heights & Over-Budget Visual Indicator
     const fillIncome = document.getElementById("fillIncome");
     if (fillIncome) fillIncome.style.height = "100%"; // Income is the limit
 
@@ -240,7 +245,31 @@ async function loadDashboard() {
     if (fillExpense) fillExpense.style.height = `${expenseFill}%`;
 
     const fillBalance = document.getElementById("fillBalance");
-    if (fillBalance) fillBalance.style.height = `${Math.max(0, balanceFill)}%`;
+    const balanceCard = document.querySelector(".balance-card");
+
+    if (balance < 0) {
+      if (balanceCard) {
+        balanceCard.classList.add("over-budget");
+        balanceCard.style.borderColor = "rgba(239, 68, 68, 0.5)";
+        balanceCard.style.boxShadow = "0 0 25px rgba(239, 68, 68, 0.25)";
+      }
+      if (fillBalance) {
+        fillBalance.classList.remove("liquid-green");
+        fillBalance.classList.add("liquid-red");
+        fillBalance.style.height = "25%";
+      }
+    } else {
+      if (balanceCard) {
+        balanceCard.classList.remove("over-budget");
+        balanceCard.style.borderColor = "";
+        balanceCard.style.boxShadow = "";
+      }
+      if (fillBalance) {
+        fillBalance.classList.remove("liquid-red");
+        fillBalance.classList.add("liquid-green");
+        fillBalance.style.height = `${balanceFill}%`;
+      }
+    }
 
     // Dynamic Wave Speed based on Fill Level (Higher fill = Faster waves)
     const setWaveSpeed = (id, pct) => {
@@ -254,7 +283,7 @@ async function loadDashboard() {
 
     setWaveSpeed("fillIncome", 100);
     setWaveSpeed("fillExpense", expenseFill);
-    setWaveSpeed("fillBalance", Math.max(0, balanceFill));
+    setWaveSpeed("fillBalance", balanceFill);
 
     // Update Hover Percentages
     const pctIncome = document.getElementById("pctIncome");
@@ -264,7 +293,12 @@ async function loadDashboard() {
     if (pctExpense) pctExpense.innerText = `${((expense / base) * 100).toFixed(1)}%`;
 
     const pctBalance = document.getElementById("pctBalance");
-    if (pctBalance) pctBalance.innerText = `${((balance / base) * 100).toFixed(1)}%`;
+    if (pctBalance) {
+      pctBalance.innerText = balance < 0 
+        ? `Over budget by ₹${formatINR(Math.abs(balance))}` 
+        : `${((balance / base) * 100).toFixed(1)}%`;
+      pctBalance.style.color = balance < 0 ? "#fca5a5" : "";
+    }
 
   } catch (err) {
     showToast(err.message, "error");
@@ -1446,4 +1480,189 @@ if (backToTopBtn) {
   backToTopBtn.addEventListener("click", () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
+};
+
+/* ===============================
+   DRILL-DOWN BREAKDOWN MODAL
+================================ */
+let cachedHierarchy = null;
+
+window.closeBreakdownModal = function () {
+  const modal = document.getElementById("breakdownModal");
+  if (modal) {
+    modal.classList.add("hidden");
+    document.body.classList.remove("modal-open");
+  }
+};
+
+window.openBreakdownModal = async function (type) {
+  const modal = document.getElementById("breakdownModal");
+  const titleEl = document.getElementById("breakdownModalTitle");
+  const subtitleEl = document.getElementById("breakdownModalSubtitle");
+  const bodyEl = document.getElementById("breakdownModalBody");
+
+  if (!modal || !bodyEl) return;
+
+  // Set titles based on type
+  if (type === "expense") {
+    titleEl.innerText = "Total Expense Breakdown";
+    subtitleEl.innerText = "Select a year to open the full Yearly Report or view Monthly Breakdown";
+  } else if (type === "income") {
+    titleEl.innerText = "Total Income Breakdown";
+    subtitleEl.innerText = "Expand a year to view monthly income and open any month";
+  } else {
+    titleEl.innerText = "Remaining Balance Breakdown";
+    subtitleEl.innerText = "Expand a year to compare monthly savings and open any month";
+  }
+
+  bodyEl.innerHTML = `
+    <div style="text-align: center; padding: 40px 20px; opacity: 0.7;">
+      <p>Loading breakdown records...</p>
+    </div>
+  `;
+
+  modal.classList.remove("hidden");
+  document.body.classList.add("modal-open");
+
+  try {
+    const res = await apiRequest("/expenses/breakdown/hierarchy");
+    cachedHierarchy = res.data || [];
+    renderBreakdownList(type, cachedHierarchy);
+  } catch (err) {
+    bodyEl.innerHTML = `
+      <div style="text-align: center; padding: 30px; color: #ef4444;">
+        <p>⚠️ Failed to load breakdown: ${err.message}</p>
+        <button onclick="openBreakdownModal('${type}')" style="margin-top: 10px; padding: 8px 16px; border-radius: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); cursor: pointer;">Retry</button>
+      </div>
+    `;
+  }
+};
+
+function renderBreakdownList(type, yearsData) {
+  const bodyEl = document.getElementById("breakdownModalBody");
+  if (!bodyEl) return;
+
+  if (!yearsData || yearsData.length === 0) {
+    bodyEl.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px; opacity: 0.6;">
+        <div style="font-size: 2.5rem; margin-bottom: 10px;">📂</div>
+        <p>No transactions found to break down.</p>
+      </div>
+    `;
+    return;
+  }
+
+  let html = `<div style="display: flex; flex-direction: column; gap: 14px;">`;
+
+  yearsData.forEach((yearObj) => {
+    const isExpense = type === "expense";
+    const isIncome = type === "income";
+    const isBalance = type === "balance";
+
+    let mainStatText = "";
+    let statColor = "";
+
+    if (isExpense) {
+      mainStatText = `₹${formatINR(yearObj.totalExpense)}`;
+      statColor = "#ef4444";
+    } else if (isIncome) {
+      mainStatText = `₹${formatINR(yearObj.totalIncome)}`;
+      statColor = "#38bdf8";
+    } else {
+      const isNegative = yearObj.balance < 0;
+      mainStatText = `${isNegative ? '-' : ''}₹${formatINR(Math.abs(yearObj.balance))}`;
+      statColor = isNegative ? "#ef4444" : "#22c55e";
+    }
+
+    const yearId = `breakdown-year-${yearObj.year}`;
+
+    html += `
+      <div class="breakdown-year-card">
+        <div class="breakdown-year-header">
+          <div>
+            <div class="breakdown-year-title">Year ${yearObj.year}</div>
+            ${isBalance ? `
+              <div class="breakdown-in-out-pill">
+                In: ₹${formatINR(yearObj.totalIncome)} • Out: ₹${formatINR(yearObj.totalExpense)}
+              </div>
+            ` : ''}
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px;">
+            ${isExpense ? `
+              <button onclick="window.open('/yearly?year=${yearObj.year}', '_blank')" class="btn-breakdown-report" title="View full year report in new tab">
+                Year Report ↗
+              </button>
+            ` : ''}
+
+            <button onclick="toggleBreakdownYear('${yearId}')" id="btn-${yearId}" class="btn-breakdown-toggle">
+              <span>Monthly</span> <span class="arrow-indicator">▼</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="breakdown-year-main-stat" style="color: ${statColor};">
+          ${mainStatText}
+        </div>
+
+        <!-- Collapsible Monthly Section -->
+        <div id="${yearId}" class="monthly-breakdown-container" style="display: none; margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${yearObj.months.length === 0 ? `
+              <div style="opacity: 0.6; font-size: 0.85rem; padding: 6px 0;">No active months recorded in ${yearObj.year}.</div>
+            ` : yearObj.months.map(m => {
+              let monthValueText = "";
+              let monthColor = "";
+
+              if (isExpense) {
+                monthValueText = `₹${formatINR(m.expense)}`;
+                monthColor = "#fb7185";
+              } else if (isIncome) {
+                monthValueText = `₹${formatINR(m.income)}`;
+                monthColor = "#38bdf8";
+              } else {
+                const isNeg = m.balance < 0;
+                monthValueText = `${isNeg ? '-' : ''}₹${formatINR(Math.abs(m.balance))}`;
+                monthColor = isNeg ? "#fb7185" : "#4ade80";
+              }
+
+              return `
+                <div class="breakdown-month-row">
+                  <div style="min-width: 0;">
+                    <div class="breakdown-month-name">${m.name}</div>
+                    ${isBalance ? `
+                      <div class="breakdown-month-sub">In: ₹${formatINR(m.income)} | Out: ₹${formatINR(m.expense)}</div>
+                    ` : ''}
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                    <span style="font-weight: 700; font-size: 0.95rem; color: ${monthColor};">${monthValueText}</span>
+                    <button onclick="window.open('/transactions?year=${yearObj.year}&month=${m.month}', '_blank')" class="breakdown-month-open-btn" title="Open ${m.name} ${yearObj.year} Transactions in new tab">
+                      Open ↗
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  bodyEl.innerHTML = html;
+}
+
+window.toggleBreakdownYear = function (containerId) {
+  const container = document.getElementById(containerId);
+  const btn = document.getElementById(`btn-${containerId}`);
+  if (!container) return;
+
+  const isHidden = container.style.display === "none";
+  container.style.display = isHidden ? "block" : "none";
+
+  if (btn) {
+    const arrow = btn.querySelector(".arrow-indicator");
+    if (arrow) arrow.innerText = isHidden ? "▲" : "▼";
+  }
 };

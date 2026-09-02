@@ -14,6 +14,8 @@ router.get('/weekly', auth, ctrl.weekly);
 router.get('/summary/category', auth, ctrl.summary);
 router.get('/balance', auth, ctrl.balance);
 router.get('/summary/monthly', auth, ctrl.monthlySummary);
+router.get('/breakdown/hierarchy', auth, ctrl.hierarchyBreakdown);
+router.get('/transactions/paginated', auth, ctrl.paginatedTransactions);
 router.get('/yearly', auth, ctrl.yearly);
 router.delete('/:id', auth, ctrl.delete);
 router.put('/:id', auth, ctrl.update);

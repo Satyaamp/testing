@@ -132,9 +132,32 @@
      z-index: 1;
    }
 
+   .clickable-card {
+     cursor: pointer;
+     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+   }
+
+   .clickable-card:hover {
+     transform: translateY(-3px);
+     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+     border-color: rgba(255, 255, 255, 0.25);
+   }
+
    .balance-card p {
      font-size: 2.5rem;
      font-weight: bold;
+   }
+
+   .balance-card.over-budget,
+   .summary-card.over-budget {
+     border: 1px solid rgba(239, 68, 68, 0.6) !important;
+     box-shadow: 0 0 25px rgba(239, 68, 68, 0.3) !important;
+     background: rgba(239, 68, 68, 0.08) !important;
+   }
+
+   .balance-card.over-budget p,
+   .summary-card.over-budget p {
+     color: #ef4444 !important;
    }
 
    .actions {
@@ -1043,4 +1066,203 @@
      font-size: 1rem;
      letter-spacing: 0.5px;
      opacity: 0.8;
+   }
+
+   /* =============================================================
+      DRILL-DOWN BREAKDOWN MODAL - MOBILE OPTIMIZATION
+   ============================================================= */
+   .breakdown-modal-content {
+     max-width: 620px;
+     width: 92%;
+     max-height: 88vh;
+     display: flex;
+     flex-direction: column;
+     padding: 24px;
+     background: rgba(15, 23, 42, 0.96) !important;
+     backdrop-filter: blur(20px);
+     -webkit-backdrop-filter: blur(20px);
+     border: 1px solid rgba(255, 255, 255, 0.12) !important;
+     border-radius: 20px;
+     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+     position: relative;
+     transition: all 0.3s ease;
+   }
+
+   .modal-pull-handle {
+     display: none;
+     width: 44px;
+     height: 4px;
+     border-radius: 4px;
+     background: rgba(255, 255, 255, 0.25);
+     margin: 0 auto 12px auto;
+   }
+
+   /* Custom Sleek Scrollbar */
+   #breakdownModalBody {
+     overflow-y: auto;
+     flex: 1;
+     padding-right: 6px;
+     scrollbar-width: thin;
+     scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+   }
+   #breakdownModalBody::-webkit-scrollbar {
+     width: 4px;
+   }
+   #breakdownModalBody::-webkit-scrollbar-track {
+     background: transparent;
+   }
+   #breakdownModalBody::-webkit-scrollbar-thumb {
+     background: rgba(255, 255, 255, 0.2);
+     border-radius: 10px;
+   }
+
+   /* Year Card Component */
+   .breakdown-year-card {
+     background: rgba(255, 255, 255, 0.035);
+     border: 1px solid rgba(255, 255, 255, 0.08);
+     border-radius: 16px;
+     padding: 16px;
+     margin-bottom: 12px;
+     transition: border-color 0.2s;
+   }
+   .breakdown-year-card:hover {
+     border-color: rgba(255, 255, 255, 0.16);
+   }
+
+   .breakdown-year-header {
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     gap: 10px;
+   }
+
+   .breakdown-year-title {
+     font-size: 1.25rem;
+     font-weight: 700;
+     color: #fff;
+     letter-spacing: -0.01em;
+   }
+
+   .breakdown-in-out-pill {
+     font-size: 0.75rem;
+     padding: 3px 8px;
+     border-radius: 6px;
+     background: rgba(255, 255, 255, 0.06);
+     border: 1px solid rgba(255, 255, 255, 0.08);
+     color: #94a3b8;
+     display: inline-block;
+     margin-top: 4px;
+   }
+
+   .breakdown-year-main-stat {
+     font-size: 1.5rem;
+     font-weight: 800;
+     letter-spacing: -0.02em;
+     margin: 4px 0 6px 0;
+   }
+
+   .btn-breakdown-toggle {
+     padding: 6px 12px;
+     border-radius: 8px;
+     background: rgba(255, 255, 255, 0.08);
+     color: #f1f5f9;
+     border: 1px solid rgba(255, 255, 255, 0.15);
+     cursor: pointer;
+     font-size: 0.82rem;
+     font-weight: 600;
+     display: inline-flex;
+     align-items: center;
+     gap: 5px;
+     transition: all 0.2s;
+   }
+   .btn-breakdown-toggle:hover {
+     background: rgba(255, 255, 255, 0.15);
+   }
+
+   .btn-breakdown-report {
+     padding: 6px 12px;
+     border-radius: 8px;
+     background: rgba(239, 68, 68, 0.2);
+     border: 1px solid rgba(239, 68, 68, 0.4);
+     color: #fca5a5;
+     font-size: 0.82rem;
+     font-weight: 600;
+     cursor: pointer;
+     transition: all 0.2s;
+   }
+   .btn-breakdown-report:hover {
+     background: rgba(239, 68, 68, 0.35);
+   }
+
+   /* Month Row Inside Collapsible */
+   .breakdown-month-row {
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     padding: 10px 12px;
+     border-radius: 10px;
+     background: rgba(255, 255, 255, 0.03);
+     border: 1px solid rgba(255, 255, 255, 0.04);
+     gap: 10px;
+   }
+
+   .breakdown-month-name {
+     font-weight: 600;
+     color: #f8fafc;
+     font-size: 0.92rem;
+   }
+
+   .breakdown-month-sub {
+     font-size: 0.72rem;
+     color: #94a3b8;
+     margin-top: 2px;
+   }
+
+   .breakdown-month-open-btn {
+     padding: 5px 12px;
+     border-radius: 7px;
+     background: rgba(56, 189, 248, 0.15);
+     border: 1px solid rgba(56, 189, 248, 0.35);
+     color: #7dd3fc;
+     font-size: 0.8rem;
+     font-weight: 600;
+     cursor: pointer;
+     transition: all 0.2s;
+     white-space: nowrap;
+   }
+   .breakdown-month-open-btn:hover {
+     background: rgba(56, 189, 248, 0.3);
+   }
+
+   /* Mobile Bottom Sheet Layout */
+   @media (max-width: 640px) {
+     #breakdownModal {
+       align-items: flex-end !important;
+       padding: 0 !important;
+     }
+     .breakdown-modal-content {
+       width: 100% !important;
+       max-width: 100% !important;
+       max-height: 86vh !important;
+       border-radius: 24px 24px 0 0 !important;
+       padding: 16px 16px 20px 16px !important;
+       margin: 0 !important;
+       box-sizing: border-box;
+       animation: slideUpMobile 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+     }
+     .modal-pull-handle {
+       display: block;
+     }
+     .breakdown-year-main-stat {
+       font-size: 1.35rem;
+     }
+   }
+
+   @keyframes slideUpMobile {
+     from {
+       transform: translateY(100%);
+     }
+     to {
+       transform: translateY(0);
+     }
    }

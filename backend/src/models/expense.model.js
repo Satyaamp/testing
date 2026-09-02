@@ -24,6 +24,7 @@ const expenseSchema = new mongoose.Schema({
     required: true 
   },
   description: String,
+  isOverBudget: { type: Boolean, default: false },
   month: Number,
   year: Number
 }, { timestamps: true });

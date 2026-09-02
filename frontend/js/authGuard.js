@@ -2,8 +2,9 @@
 const token = localStorage.getItem("token");
 
 if (!token) {
-  // Not logged in → redirect to login
-  window.location.href = "/login";
+  // Not logged in → redirect to login preserving full destination URL & parameters
+  const currentPath = window.location.pathname + window.location.search;
+  window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
 }
 
 // Global Avatar Sync

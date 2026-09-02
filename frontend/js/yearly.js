@@ -6,7 +6,9 @@ let allIncomes = [];
 let allExpenses = [];
 let yearlyIncomeStats = [];
 let yearlyExpenseStats = [];
-let currentYear = new Date().getFullYear();
+const urlParams = new URLSearchParams(window.location.search);
+const paramYear = urlParams.get('year');
+let currentYear = paramYear ? parseInt(paramYear) : new Date().getFullYear();
 
 // Table Pagination & Search state (moved from HTML)
 let currentYearExpenses = [];
@@ -389,8 +391,8 @@ function updateMonthlyTable(incomes, expenses) {
 
         const savings = inc - exp;
         const arrow = savings >= 0 ? '▲' : '▼';
-        html += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-            <td style="padding: 12px;">${monthNames[i]}</td>
+        html += `<tr onclick="window.open('/transactions?year=${currentYear}&month=${i + 1}', '_blank')" style="border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.06)'" onmouseout="this.style.background='transparent'" title="Click to view ${monthNames[i]} ${currentYear} Transactions List (opens in new tab)">
+            <td style="padding: 12px; font-weight: 600;">${monthNames[i]} <span style="font-size: 0.75rem; opacity: 0.6; margin-left: 4px;">↗</span></td>
             <td style="padding: 12px; color: #4ade80;">₹${inc.toLocaleString('en-IN')}</td>
             <td style="padding: 12px; color: #ef4444;">₹${exp.toLocaleString('en-IN')}</td>
             <td style="padding: 12px; color: ${savings >= 0 ? '#4ade80' : '#ef4444'};"><span style="margin-right: 4px; font-size: 0.8em;">${arrow}</span>₹${savings.toLocaleString('en-IN')}</td>

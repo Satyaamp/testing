@@ -8,8 +8,8 @@
 
   <link rel="shortcut icon" href="assets/icons/month.png" type="image/png">
   <link rel="stylesheet" href="css/glass.css" />
-  <link rel="stylesheet" href="css/dashboard.css" />
-  <link rel="stylesheet" href="css/monthly.css" />
+  <link rel="stylesheet" href="css/dashboard.css?v=2.0" />
+  <link rel="stylesheet" href="css/monthly.css?v=2.0" />
   <script src="js/authGuard.js"></script>
 
   <style>
@@ -884,6 +884,13 @@
           <line x1="12" y1="15" x2="12" y2="3"></line>
         </svg>
       </button>
+      <!-- <button onclick="openTabularTransactions()" class="nav-btn"
+        style="height: 38px; width: 38px; padding: 0; margin-left: 5px; display: inline-flex; align-items: center; justify-content: center; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #7dd3fc; border-radius: 8px; cursor: pointer;"
+        title="Table View">
+
+        <i class="fas fa-table"></i>
+
+      </button> -->
       <div id="topCategoryIndicatorDesktop"></div>
     </div>
 
@@ -917,7 +924,18 @@
             <line x1="12" y1="8" x2="12.01" y2="8"></line>
           </svg></div>
         <div class="card-content">
-          <h4>Budget Limit</h4>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h4 style="margin: 0;">Budget Limit</h4>
+            <button onclick="event.stopPropagation(); openAddIncomeModal()"
+              style="background: rgba(56, 189, 248, 0.35); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #38bdf8; padding: 0; transition: background 0.2s;"
+              title="Add Income / Budget">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </button>
+          </div>
           <p id="monthlyIncome">₹0</p>
           <p class="hover-percentage" id="pctIncome">0%</p>
         </div>
@@ -1175,8 +1193,8 @@
       <input type="text" id="incomeSource" placeholder="Source (e.g. Salary, Freelance)" />
 
       <div class="date-wrapper">
-        <input type="date" id="incomeDate" disabled
-          style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; color-scheme: dark; cursor: not-allowed; opacity: 1; -webkit-text-fill-color: white;" />
+        <input type="date" id="incomeDate"
+          style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; color-scheme: dark; cursor: pointer;" />
       </div>
 
       <div class="modal-actions">
@@ -1189,7 +1207,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="js/monthly.js"></script>
+  <script type="module" src="js/monthly.js?v=2.4"></script>
   <script>
     document.getElementById('downloadPdfBtn').addEventListener('click', function () {
       const btn = this;
@@ -1302,8 +1320,8 @@
     // Initial check
     setTimeout(checkEmptyState, 100);
 
-    // Helper to open modal with correct date for Empty State
-    window.openEmptyStateModal = function () {
+    // Helper to open modal with correct date for Empty State or day selection
+    window.openEmptyStateModal = function (specificDate) {
       const modal = document.getElementById('expenseModal');
       const dateInput = document.getElementById('expenseDate');
       const title = document.getElementById('pageMonthTitle').innerText;
@@ -1322,24 +1340,35 @@
       dateInput.min = minStr;
       dateInput.max = maxStr;
 
-      const today = new Date();
-      let initialDate = viewDate; // Default to 1st
-
-      // If current month is being viewed, default to Today
-      if (today.getFullYear() === year && today.getMonth() === month) {
-        initialDate = today;
+      let valStr = "";
+      if (typeof specificDate === 'string' && specificDate.trim()) {
+        valStr = specificDate.trim();
+      } else {
+        const selectedCell = document.querySelector('.calendar-day.selected');
+        const activeMobileBubble = document.querySelector('.day-bubble.active');
+        if (selectedCell && selectedCell.dataset.date) {
+          valStr = selectedCell.dataset.date;
+        } else if (activeMobileBubble && activeMobileBubble.dataset.date) {
+          valStr = activeMobileBubble.dataset.date;
+        } else {
+          const today = new Date();
+          let initialDate = viewDate; // Default to 1st
+          if (today.getFullYear() === year && today.getMonth() === month) {
+            initialDate = today;
+          }
+          valStr = `${initialDate.getFullYear()}-${String(initialDate.getMonth() + 1).padStart(2, '0')}-${String(initialDate.getDate()).padStart(2, '0')}`;
+        }
       }
 
-      const valStr = `${initialDate.getFullYear()}-${String(initialDate.getMonth() + 1).padStart(2, '0')}-${String(initialDate.getDate()).padStart(2, '0')}`;
       dateInput.value = valStr;
-
       dateInput.disabled = false; // Enable for editing
       document.getElementById("expenseCategory").disabled = false;
       document.getElementById("expenseDesc").disabled = false;
       document.getElementById('expenseModalTitle').innerText = "Add Expense";
       document.getElementById('editExpenseId').value = "";
-      dateInput.style.cursor = 'text';
+      dateInput.style.cursor = 'pointer';
       modal.classList.remove('hidden');
+      document.body.classList.add('modal-open');
     }
   </script>
 </body>

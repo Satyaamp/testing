@@ -36,8 +36,9 @@ form.addEventListener("submit", async (e) => {
       localStorage.removeItem("userAvatar");
     }
 
-    // Redirect to dashboard
-    window.location.href = "dashboard";
+    // Redirect to preserved redirect parameter or dashboard
+    const redirectUrl = new URLSearchParams(window.location.search).get("redirect");
+    window.location.href = redirectUrl ? decodeURIComponent(redirectUrl) : "/dashboard";
   } catch (err) {
     // Also wait on error for consistent experience
     const elapsed = Date.now() - startTime;
@@ -68,7 +69,8 @@ window.handleCredentialResponse = async function (response) {
     }
 
     showToast("Google login successful!", "success");
-    setTimeout(() => window.location.href = "dashboard", 1000);
+    const redirectUrl = new URLSearchParams(window.location.search).get("redirect");
+    setTimeout(() => window.location.href = redirectUrl ? decodeURIComponent(redirectUrl) : "/dashboard", 1000);
   } catch (err) {
     showToast(err.message, "error");
   }
