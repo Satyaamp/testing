@@ -9,7 +9,7 @@ const { extractMonthYear } = require('../utils/date.util');
 exports.createExpense = async (userId, data) => {
   const { month, year } = extractMonthYear(data.date);
   const uid = new mongoose.Types.ObjectId(userId);
-  const amount = Number(data.amount);
+  const amount = Number(Number(data.amount).toFixed(2));
 
   if (!amount || amount <= 0) {
     throw new Error('Amount must be a positive number');
@@ -20,17 +20,17 @@ exports.createExpense = async (userId, data) => {
     { $match: { userId: uid, month, year } },
     { $group: { _id: null, total: { $sum: '$amount' } } }
   ]);
-  const totalIncome = incomeAgg ? incomeAgg.total : 0;
+  const totalIncome = Number((incomeAgg?.total || 0).toFixed(2));
 
   // 2. Calculate Total Expense for the target month
   const [expenseAgg] = await Expense.aggregate([
     { $match: { userId: uid, month, year } },
     { $group: { _id: null, total: { $sum: '$amount' } } }
   ]);
-  const totalExpense = expenseAgg ? expenseAgg.total : 0;
+  const totalExpense = Number((expenseAgg?.total || 0).toFixed(2));
 
-  // 3. Verify Budget
-  const remainingBalance = totalIncome - totalExpense;
+  // 3. Verify Budget (Round to 2 decimal places to prevent floating point precision errors)
+  const remainingBalance = Number((totalIncome - totalExpense).toFixed(2));
 
   console.log(`[Budget Check] User: ${userId} | Month: ${month}/${year}`);
   console.log(`Income: ${totalIncome} | Expense: ${totalExpense} | Balance: ${remainingBalance} | Attempting: ${amount}`);
@@ -38,13 +38,12 @@ exports.createExpense = async (userId, data) => {
   if (amount > remainingBalance) {
     const monthName = new Date(year, month - 1).toLocaleString('en-US', { month: 'long' });
     throw new Error(`Low balance for ${monthName} ${year}.
-    Left: ₹${remainingBalance}`);
-
-
+    Left: ₹${remainingBalance.toFixed(2)}`);
   }
 
   const expense = await Expense.create({
     ...data,
+    amount,
     userId,
     month,
     year
