@@ -16,10 +16,13 @@ exports.createIncome = async (req, res) => {
 
 exports.getMonthlyIncome = async (req, res) => {
   try {
+    const { month, year, startDate, endDate } = req.query;
     const data = await incomeService.getIncome(
       req.user.id,
-      req.query.month,
-      req.query.year
+      month,
+      year,
+      startDate,
+      endDate
     );
     success(res, data, 'Income fetched successfully');
   } catch (err) {

@@ -500,7 +500,7 @@ async function loadDateWiseExpenses(month, year) {
   const lastDay = new Date(year, month, 0).getDate();
   const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
   const endDate = `${year}-${String(month).padStart(2, '0')}-${lastDay}`;
-  const incRes = await apiRequest(`/income?startDate=${startDate}&endDate=${endDate}`);
+  const incRes = await apiRequest(`/income?startDate=${startDate}&endDate=${endDate}&month=${month}&year=${year}`);
   currentMonthIncomes = incRes.data || [];
 
   // Update Transaction Count with Animation
