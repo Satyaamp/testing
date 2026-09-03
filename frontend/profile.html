@@ -99,6 +99,25 @@
       color: #fde047;
     }
 
+    /* Switch Toggle for Reminders */
+    .switch-toggle input:checked + .slider-toggle {
+      background-color: #22c55e !important;
+    }
+    .slider-toggle:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    .switch-toggle input:checked + .slider-toggle:before {
+      transform: translateX(18px);
+    }
+
     /* MENU LIST (PWA Style) */
     .menu-list {
       display: flex;
@@ -676,6 +695,17 @@
 
         <span id="memberBadge" class="join-badge">Member</span>
 
+        <!-- Daily Reminder Read-only Status -->
+        <div style="margin-top: 15px; background: rgba(255, 255, 255, 0.05); padding: 10px 15px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; width: 100%; border: 1px solid rgba(255, 255, 255, 0.1); box-sizing: border-box;">
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: #e2e8f0;">
+            <span style="font-size: 1.1rem;">🔔</span>
+            <span>Daily Reminder</span>
+          </div>
+          <span id="profileReminderDisplay" style="font-size: 0.85rem; font-weight: 600; color: #94a3b8;">
+            Off
+          </span>
+        </div>
+
         <div style="display: flex; gap: 10px; margin-top: 25px; width: 100%; justify-content: center;">
           <button onclick="exportData()"
             style="flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; transition: all 0.2s;">
@@ -1086,9 +1116,75 @@
         }
       } finally {
         btn.innerText = "Save";
-        btn.style.opacity = "1";
+      btn.style.opacity = "1";
+    }
+  };
+
+  /* ===============================
+     WEB PUSH REMINDER HELPERS
+  ================================ */
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
+  async function loadReminderSettings() {
+    try {
+      const res = await apiRequest('/notifications/settings', 'GET', null, { skipLoader: true });
+      if (res && res.data) {
+        const toggle = document.getElementById('reminderToggle');
+        const timeSelect = document.getElementById('reminderTime');
+        if (toggle) toggle.checked = !!res.data.enabled;
+        if (timeSelect && res.data.time) timeSelect.value = res.data.time;
+        updateStatusMsg(res.data.enabled);
       }
-    };
+    } catch(e) {
+      console.warn("Could not load reminder settings", e);
+    }
+  }
+
+  /* ===============================
+     DAILY REMINDER STATUS DISPLAY
+  ================================ */
+  function formatTime12h(timeStr) {
+    if (!timeStr) return "9:00 PM";
+    const parts = timeStr.split(':');
+    let h = parseInt(parts[0], 10);
+    const m = parts[1] || "00";
+    const period = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return `${h}:${m} ${period}`;
+  }
+
+  async function loadProfileReminderStatus() {
+    try {
+      const res = await apiRequest('/notifications/settings', 'GET', null, { skipLoader: true });
+      const displayEl = document.getElementById('profileReminderDisplay');
+      if (!displayEl) return;
+
+      if (res && res.data && res.data.enabled && res.data.time) {
+        displayEl.innerText = formatTime12h(res.data.time);
+        displayEl.style.color = "#22c55e";
+      } else {
+        displayEl.innerText = "Off";
+        displayEl.style.color = "#94a3b8";
+      }
+    } catch (e) {
+      const displayEl = document.getElementById('profileReminderDisplay');
+      if (displayEl) {
+        displayEl.innerText = "Off";
+        displayEl.style.color = "#94a3b8";
+      }
+    }
+  }
+
+  loadProfileReminderStatus();
   </script>
 </body>
 

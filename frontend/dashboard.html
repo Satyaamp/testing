@@ -10,7 +10,7 @@
 
   <link rel="shortcut icon" href="assets/icons/dashboard.png" type="image/png">
   <link rel="stylesheet" href="css/glass.css" />
-  <link rel="stylesheet" href="css/dashboard.css?v=2.9" />
+  <link rel="stylesheet" href="css/dashboard.css?v=3.1" />
   <link rel="stylesheet" href="css/animations.css" />
   <style>
     .pagination-controls {
@@ -90,8 +90,14 @@
 
     </div>
 
-    <!-- Desktop Date Range (Center) -->
-    <div id="navbarDateRange" class="navbar-date-range"></div>
+    <!-- Desktop Date Range & Reminder (Center) -->
+    <div class="navbar-center-group">
+      <div id="navbarDateRange" class="navbar-date-range"></div>
+      <button id="navReminderBtn" class="nav-reminder-btn" onclick="openReminderModal()" title="Daily Expense Reminders">
+        <span>🔔</span>
+        <span id="navReminderDot" class="reminder-active-dot"></span>
+      </button>
+    </div>
 
     <div class="nav-actions">
       <button onclick="location.href='monthly'" class="nav-btn-monthly" title="Monthly Overview">
@@ -142,7 +148,13 @@
   </nav>
 
   <!-- Mobile Date Range (Sticky below navbar) -->
-  <div id="mobileDateRange" class="mobile-date-range glass-card"></div>
+  <div id="mobileDateContainer" class="mobile-date-range glass-card">
+    <span id="mobileDateRange"></span>
+    <button class="nav-reminder-btn mobile-reminder-inline-btn" onclick="openReminderModal()" title="Daily Expense Reminders">
+      <span>🔔</span>
+      <span id="mobReminderDot" class="reminder-active-dot"></span>
+    </button>
+  </div>
 
   <!-- Main Dashboard -->
   <main class="container">
@@ -597,12 +609,52 @@
 
   </main>
 
+  <!-- Daily Reminder Modal -->
+  <div id="reminderModal" class="modal hidden">
+    <div class="modal-content glass-card" style="max-width: 360px; text-align: left; padding: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 1.15rem; color: #fff;">
+          <span>🔔</span> Daily Reminder
+        </h3>
+        <label class="switch-toggle">
+          <input type="checkbox" id="modalReminderToggle" onchange="toggleModalReminders()" />
+          <span class="slider-toggle"></span>
+        </label>
+      </div>
+      <p style="font-size: 0.8rem; color: #94a3b8; margin: 0 0 16px 0; line-height: 1.4;">
+        Receive a daily push notification reminding you to record today's expenses.
+      </p>
+
+      <div style="margin-bottom: 14px;">
+        <label style="font-size: 0.72rem; color: #cbd5e1; display: block; margin-bottom: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;">
+          REMINDER TIME (SELECT ANY TIME)
+        </label>
+        <input type="time" id="modalReminderTime" class="reminder-time-input" onchange="saveModalReminderTime()" />
+        <div class="reminder-presets-row">
+          <button type="button" class="reminder-preset-pill" onclick="setReminderPreset('20:00')">8:00 PM</button>
+          <button type="button" class="reminder-preset-pill" onclick="setReminderPreset('21:00')">9:00 PM</button>
+          <button type="button" class="reminder-preset-pill" onclick="setReminderPreset('21:30')">9:30 PM</button>
+          <button type="button" class="reminder-preset-pill" onclick="setReminderPreset('22:00')">10:00 PM</button>
+          <button type="button" class="reminder-preset-pill" onclick="setReminderPreset('22:30')">10:30 PM</button>
+        </div>
+      </div>
+
+      <div id="modalReminderStatus" style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 20px;">
+        ⚪ Reminders disabled.
+      </div>
+
+      <div class="modal-actions" style="margin-top: 0;">
+        <button style="width: 100%; background: #22c55e; color: white;" onclick="closeReminderModal()">Done</button>
+      </div>
+    </div>
+  </div>
+
   <button id="backToTopBtn" title="Back to Top">↑</button>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
-  <script type="module" src="js/dashboard.js?v=2.9"></script>
+  <script type="module" src="js/dashboard.js?v=3.2"></script>
   <script type="module">
     import { apiRequest } from './js/api.js';
 

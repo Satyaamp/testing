@@ -2,8 +2,8 @@ const API_BASE = window.location.hostname === "localhost" || window.location.hos
   ? "http://localhost:5000/api"
   : "https://dhanrekhabackend.onrender.com/api";
 
-
-export const APP_VERSION = "v1.0.21";
+// 03-Sep-2026 SATYAM KUMAR
+export const APP_VERSION = "v1.0.22";
 
 // Inject Global Loader CSS
 const loaderStyle = document.createElement('style');
@@ -44,7 +44,8 @@ export async function apiRequest(endpoint, method = "GET", body = null, { skipLo
     localStorage.removeItem("token");
     localStorage.removeItem("userAvatar");
     token = null;
-    window.location.href = "/login";
+    const currentPath = window.location.pathname + window.location.search;
+    window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
     return;
   }
 
@@ -87,6 +88,15 @@ export async function apiRequest(endpoint, method = "GET", body = null, { skipLo
         loaderDiv.classList.remove('visible');
       }
     }
+  }
+
+  // Handle Token Expiry (401 Unauthorized) with proper redirect back to target page
+  if (res.status === 401 && !window.location.pathname.includes('/login') && !window.location.pathname.includes('/signup')) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userAvatar");
+    const currentPath = window.location.pathname + window.location.search;
+    window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}&expired=true`;
+    return;
   }
 
   if (!res.ok) {

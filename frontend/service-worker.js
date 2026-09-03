@@ -1,4 +1,4 @@
-const CACHE_NAME = "dhanrekha-v48"; // UPDATE THIS VERSION ON EVERY DEPLOY TO FORCE REFRESH
+const CACHE_NAME = "dhanrekha-v49"; // UPDATE THIS VERSION ON EVERY DEPLOY TO FORCE REFRESH
 
 const STATIC_ASSETS = [
   "/",
@@ -110,4 +110,58 @@ self.addEventListener("fetch", event => {
       })
     );
   }
+});
+
+/* ================================
+   WEB PUSH NOTIFICATIONS
+================================ */
+self.addEventListener("push", event => {
+  let data = {
+    title: "🔔 Dhan₹ekha Daily Reminder",
+    body: "Have you logged your expenses for today? Tap to record your spending!",
+    icon: "/assets/icons/icon-192.png",
+    badge: "/assets/icons/icon-72.png",
+    url: "/dashboard?action=add-expense"
+  };
+
+  if (event.data) {
+    try {
+      const parsed = event.data.json();
+      data = { ...data, ...parsed };
+    } catch (e) {
+      data.body = event.data.text();
+    }
+  }
+
+  const options = {
+    body: data.body,
+    icon: data.icon || "/assets/icons/icon-192.png",
+    badge: data.badge || "/assets/icons/icon-72.png",
+    vibrate: [100, 50, 100],
+    data: {
+      url: data.url || "/dashboard?action=add-expense",
+      action: (data.data && data.data.action) || "add-expense"
+    }
+  };
+
+  event.waitUntil(self.registration.showNotification(data.title, options));
+});
+
+self.addEventListener("notificationclick", event => {
+  event.notification.close();
+  const targetUrl = (event.notification.data && event.notification.data.url) || "/dashboard?action=add-expense";
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then(clientList => {
+      for (const client of clientList) {
+        if ("focus" in client) {
+          client.navigate(targetUrl);
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
+  );
 });

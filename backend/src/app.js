@@ -51,7 +51,12 @@ app.use('/api/categories', require('./routes/category.routes'));
 app.use('/api/expenses', require('./routes/expense.routes'));
 app.use('/api/income', require('./routes/income.routes'));
 app.use('/api/whatsapp', require('./routes/whatsapp.routes'));
+app.use('/api/notifications', require('./routes/notification.routes'));
 app.use('/api', require('./routes/password.routes'));
+
+// Initialize Reminder Cron Service
+const notificationService = require('./services/notification.service');
+notificationService.initReminderCron();
 
 app.use(require('./middleware/error.middleware'));
 

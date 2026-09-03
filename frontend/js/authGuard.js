@@ -29,9 +29,16 @@ async function updateNavAvatars() {
       });
       const result = await res.json();
 
-      if (result && result.data && result.data.avatar) {
-        avatarUrl = result.data.avatar;
-        localStorage.setItem('userAvatar', avatarUrl);
+      if (result && result.data) {
+        if (result.data.name) {
+          localStorage.setItem('userName', result.data.name);
+        }
+        if (result.data.avatar) {
+          avatarUrl = result.data.avatar;
+          localStorage.setItem('userAvatar', avatarUrl);
+        } else {
+          return; // Still no avatar
+        }
       } else {
         return; // Still no avatar
       }

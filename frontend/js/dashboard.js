@@ -1936,3 +1936,211 @@ window.toggleBreakdownYear = function (containerId) {
     if (arrow) arrow.innerText = isHidden ? "▲" : "▼";
   }
 };
+
+/* ===============================
+   NOTIFICATION ACTION TRIGGER
+================================ */
+window.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("action") === "add-expense") {
+    setTimeout(() => {
+      if (typeof window.openExpense === "function") {
+        window.openExpense();
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }, 600);
+  }
+});
+
+/* ===============================
+   DASHBOARD REMINDER MODAL LOGIC
+================================ */
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+window.openReminderModal = function () {
+  const modal = document.getElementById("reminderModal");
+  if (modal) {
+    modal.classList.remove("hidden");
+    document.body.classList.add("modal-open");
+    loadDashboardReminderSettings();
+  }
+};
+
+window.closeReminderModal = function () {
+  const modal = document.getElementById("reminderModal");
+  if (modal) {
+    modal.classList.add("hidden");
+    document.body.classList.remove("modal-open");
+  }
+};
+
+async function loadDashboardReminderSettings() {
+  try {
+    const res = await apiRequest('/notifications/settings', 'GET', null, { skipLoader: true });
+    if (res && res.data) {
+      const toggle = document.getElementById('modalReminderToggle');
+      const timeSelect = document.getElementById('modalReminderTime');
+      const navDot = document.getElementById('navReminderDot');
+      const mobDot = document.getElementById('mobReminderDot');
+
+      const isEnabled = !!res.data.enabled;
+      if (toggle) toggle.checked = isEnabled;
+      if (timeSelect && res.data.time) timeSelect.value = res.data.time;
+
+      if (navDot) navDot.classList.toggle('active', isEnabled);
+      if (mobDot) mobDot.classList.toggle('active', isEnabled);
+
+      updateModalReminderStatus(isEnabled);
+    }
+  } catch (e) {
+    console.warn("Could not load reminder settings in dashboard", e);
+  }
+}
+
+function updateModalReminderStatus(enabled) {
+  const statusEl = document.getElementById('modalReminderStatus');
+  if (!statusEl) return;
+  if (!('Notification' in window)) {
+    statusEl.innerText = "❌ Notifications not supported in this browser.";
+    return;
+  }
+  if (Notification.permission === 'denied') {
+    statusEl.innerText = "⚠️ Notifications blocked in browser settings.";
+    statusEl.style.color = "#f87171";
+  } else if (enabled) {
+    statusEl.innerText = "✅ Daily reminder active at selected time.";
+    statusEl.style.color = "#4ade80";
+  } else {
+    statusEl.innerText = "⚪ Reminders disabled.";
+    statusEl.style.color = "#94a3b8";
+  }
+}
+
+window.toggleModalReminders = async function () {
+  const toggle = document.getElementById('modalReminderToggle');
+  const timeSelect = document.getElementById('modalReminderTime');
+  const isEnabled = toggle.checked;
+
+  if (isEnabled) {
+    if (!('Notification' in window)) {
+      alert("This browser does not support push notifications.");
+      toggle.checked = false;
+      return;
+    }
+
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      alert("Please allow notification permissions to receive daily reminders.");
+      toggle.checked = false;
+      updateModalReminderStatus(false);
+      return;
+    }
+
+    try {
+      let sub = null;
+      if ('serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.ready;
+        const vapidRes = await apiRequest('/notifications/vapid-key', 'GET', null, { skipLoader: true });
+        const vapidPublicKey = vapidRes.data?.publicKey;
+
+        sub = await reg.pushManager.getSubscription();
+        if (!sub && vapidPublicKey) {
+          sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+          });
+        }
+      }
+
+      await apiRequest('/notifications/subscribe', 'POST', {
+        subscription: sub ? sub.toJSON() : null,
+        reminderSettings: {
+          enabled: true,
+          time: timeSelect.value
+        }
+      });
+
+      // Quick confirmation notification
+      if ('serviceWorker' in navigator) {
+        try {
+          const reg = await navigator.serviceWorker.ready;
+          const timeFormatted = formatTime12h(timeSelect.value);
+          const rawName = localStorage.getItem('userName') || '';
+          const firstName = rawName.trim().split(' ')[0];
+          const greeting = firstName ? `Hi ${firstName.charAt(0).toUpperCase() + firstName.slice(1)}, ` : '';
+          reg.showNotification("🔔 Daily Reminder Active", {
+            body: `${greeting}you will be reminded daily at ${timeFormatted} to record your expenses!`,
+            icon: "/assets/icons/icon-192.png",
+            badge: "/assets/icons/icon-72.png",
+            vibrate: [100, 50, 100],
+            data: { url: "/dashboard?action=add-expense" }
+          });
+        } catch (e) { /* ignore */ }
+      }
+
+      showToast("Daily reminder enabled!", "success");
+      updateModalReminderStatus(true);
+      document.getElementById('navReminderDot')?.classList.add('active');
+      document.getElementById('mobReminderDot')?.classList.add('active');
+    } catch (err) {
+      console.error("Subscription error:", err);
+      updateModalReminderStatus(true);
+    }
+  } else {
+    await apiRequest('/notifications/subscribe', 'POST', {
+      reminderSettings: { enabled: false }
+    });
+    showToast("Daily reminder disabled", "info");
+    updateModalReminderStatus(false);
+    document.getElementById('navReminderDot')?.classList.remove('active');
+    document.getElementById('mobReminderDot')?.classList.remove('active');
+  }
+};
+
+function formatTime12h(timeStr) {
+  if (!timeStr) return "9:00 PM";
+  const parts = timeStr.split(':');
+  let h = parseInt(parts[0], 10);
+  const m = parts[1] || "00";
+  const period = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return `${h}:${m} ${period}`;
+}
+
+window.setReminderPreset = function (timeStr) {
+  const timeInput = document.getElementById("modalReminderTime");
+  if (timeInput) {
+    timeInput.value = timeStr;
+    saveModalReminderTime();
+  }
+};
+
+window.saveModalReminderTime = async function () {
+  const toggle = document.getElementById('modalReminderToggle');
+  const timeSelect = document.getElementById('modalReminderTime');
+  if (!toggle.checked) return;
+
+  try {
+    await apiRequest('/notifications/subscribe', 'POST', {
+      reminderSettings: {
+        enabled: true,
+        time: timeSelect.value
+      }
+    });
+    showToast(`Reminder set for ${formatTime12h(timeSelect.value)}!`, "success");
+  } catch (e) {
+    console.error("Failed to update reminder time", e);
+  }
+};
+
+// Check reminder status on page load to light up dot
+loadDashboardReminderSettings();
