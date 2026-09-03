@@ -344,6 +344,19 @@
       color: white;
     }
 
+    input[type="date"].custom-input {
+      color-scheme: dark !important;
+      color: white !important;
+      -webkit-text-fill-color: white !important;
+      min-height: 42px;
+    }
+
+    input[type="date"].custom-input::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      opacity: 0.75;
+      cursor: pointer;
+    }
+
     .toolbar-bottom-actions {
       display: flex;
       justify-content: space-between;
@@ -746,9 +759,10 @@
           </select>
         </div>
 
-        <div>
-          <input type="date" id="dateFilter" class="custom-input" onchange="applyFilters()"
-            title="Filter specific date" />
+        <div style="display: flex; flex-direction: column; min-width: 0;">
+          <!-- <label for="dateFilter" style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px;">📅 Specific Day</label> -->
+          <input type="date" id="dateFilter" class="custom-input" onchange="applyFilters()" title="Filter specific date"
+            data-placeholder="Choose date" />
         </div>
 
         <div>
@@ -868,7 +882,7 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-  <script type="module" src="js/transactions.js?v=3.0"></script>
+  <script type="module" src="js/transactions.js?v=3.1"></script>
 
 </body>
 

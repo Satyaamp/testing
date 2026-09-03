@@ -26,7 +26,7 @@ exports.getIncome = async (userId, month, year, startDate, endDate) => {
     query.year = Number(year);
   }
 
-  return Income.find(query).sort({ date: -1 });
+  return Income.find(query).sort({ date: -1, _id: -1 });
 };
 
 exports.updateIncome = async (userId, incomeId, data) => {

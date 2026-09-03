@@ -68,7 +68,7 @@ exports.getWeekly = async (userId, startDate, endDate) => {
       query.date.$lte = end;
     }
     // If date range is provided, return all matching data (for charts)
-    return Expense.find(query).sort({ date: -1 });
+    return Expense.find(query).sort({ date: -1, _id: -1 });
   }
 
   // Default: Last 7 days, limit 3 (for Recent Expenses list)
@@ -76,7 +76,7 @@ exports.getWeekly = async (userId, startDate, endDate) => {
     userId: uid,
     date: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
   })
-    .sort({ date: -1 })   // latest first
+    .sort({ date: -1, _id: -1 })   // latest first
     .limit(3);            // ✅ only 3 transactions
 };
 
@@ -505,7 +505,8 @@ exports.getAllExpenses = async (userId, startDate, endDate) => {
   }
 
   return Expense.find(query)
-    .sort({ date: -1 }); // latest first
+    .sort({ date: -1, _id: -1 }); // latest first
+
 };
 
 
@@ -514,5 +515,5 @@ exports.getByMonthYear = async (userId, month, year) => {
     userId,
     month: Number(month),
     year: Number(year)
-  }).sort({ date: -1 });
+  }).sort({ date: -1, _id: -1 });
 };

@@ -2336,13 +2336,21 @@ async function populateCategorySelect() {
   if (!select) return;
 
   try {
-    const res = await apiRequest("/expenses/categories");
+    let res;
+    try {
+      res = await apiRequest("/categories");
+    } catch (e) {
+      res = await apiRequest("/expenses/categories");
+    }
+
     select.innerHTML = '<option value="" disabled selected>Select Category</option>';
     if (res.data && Array.isArray(res.data)) {
-      res.data.forEach(cat => {
+      res.data.forEach(c => {
+        const catName = typeof c === 'string' ? c : c.name;
+        const catIcon = (typeof c === 'object' && c.icon) ? `${c.icon} ` : '';
         const option = document.createElement("option");
-        option.value = cat;
-        option.textContent = cat;
+        option.value = catName;
+        option.textContent = `${catIcon}${catName}`;
         select.appendChild(option);
       });
     }

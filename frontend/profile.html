@@ -1014,9 +1014,16 @@
           lastActive = diffDays === 0 ? "Today" : (diffDays === 1 ? "Yesterday" : `${diffDays} days ago`);
         }
 
-        // 7. Recent Activity Timeline
+        // 7. Recent Activity Timeline (Proper LIFO: newest date first, tie-break by creation order)
         const sortedExpenses = [...expenses].sort((a, b) => {
-          return new Date(b.date) - new Date(a.date);
+          const dateA = new Date(a.date).getTime();
+          const dateB = new Date(b.date).getTime();
+          if (dateB !== dateA) return dateB - dateA;
+
+          // Tie-breaker for same-day transactions: newest inserted first
+          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : (b._id ? parseInt(String(b._id).substring(0, 8), 16) : 0);
+          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : (a._id ? parseInt(String(a._id).substring(0, 8), 16) : 0);
+          return timeB - timeA;
         }).slice(0, 5);
         const timelineContainer = document.getElementById('activityTimeline');
 

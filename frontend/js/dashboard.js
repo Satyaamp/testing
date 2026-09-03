@@ -180,27 +180,288 @@ function handleChartDataState(canvasId, hasData, containerId, icon = "📊", tex
 /* ===============================
    POPULATE CATEGORIES
 ================================ */
-async function populateCategorySelect() {
+let fullCategoryList = [];
+let selectedCatColor = "#38bdf8";
+
+async function populateCategorySelect(selectedCategoryName = "") {
   const select = document.getElementById("expenseCategory");
 
   try {
-    const res = await apiRequest("/expenses/categories");
-    expenseCategories = res.data || [];
+    let res;
+    try {
+      res = await apiRequest("/categories");
+    } catch (e) {
+      res = await apiRequest("/expenses/categories");
+    }
+
+    fullCategoryList = res.data || [];
+    expenseCategories = fullCategoryList.map(c => typeof c === 'string' ? c : c.name);
 
     if (select) {
       select.innerHTML = '<option value="" disabled selected>Select Category</option>';
 
-      expenseCategories.forEach(cat => {
+      fullCategoryList.forEach(c => {
+        const catName = typeof c === 'string' ? c : c.name;
+        const catIcon = (typeof c === 'object' && c.icon) ? `${c.icon} ` : '';
         const option = document.createElement("option");
-        option.value = cat;
-        option.textContent = cat;
+        option.value = catName;
+        option.textContent = `${catIcon}${catName}`;
+        if (selectedCategoryName && selectedCategoryName === catName) {
+          option.selected = true;
+        }
         select.appendChild(option);
       });
+
+      // Quick add custom category option at bottom
+      const addOption = document.createElement("option");
+      addOption.value = "__ADD_NEW__";
+      addOption.textContent = "➕ Add Custom Category...";
+      addOption.style.color = "#38bdf8";
+      addOption.style.fontWeight = "bold";
+      select.appendChild(addOption);
+
+      select.onchange = function () {
+        if (this.value === "__ADD_NEW__") {
+          this.value = "";
+          window.openCategoryManager(true);
+        }
+      };
     }
   } catch (err) {
     console.error("Failed to load categories", err);
   }
 }
+
+/* ===============================
+   CATEGORY MANAGER LOGIC
+================================ */
+window.switchCategoryTab = function (tab) {
+  const listTab = document.getElementById("catTabList");
+  const formTab = document.getElementById("catTabForm");
+  const listBtn = document.getElementById("catTabListBtn");
+  const formBtn = document.getElementById("catTabFormBtn");
+
+  if (!listTab || !formTab) return;
+
+  if (tab === "form") {
+    listTab.style.display = "none";
+    formTab.style.display = "flex";
+    if (listBtn) listBtn.classList.remove("active");
+    if (formBtn) formBtn.classList.add("active");
+    setTimeout(() => {
+      document.getElementById("catNameInput")?.focus();
+    }, 120);
+  } else {
+    formTab.style.display = "none";
+    listTab.style.display = "flex";
+    if (formBtn) formBtn.classList.remove("active");
+    if (listBtn) listBtn.classList.add("active");
+  }
+};
+
+window.openCategoryManager = function (focusAdd = false) {
+  const modal = document.getElementById("categoryModal");
+  if (!modal) return;
+
+  modal.classList.remove("hidden");
+  document.body.classList.add("modal-open");
+  resetCategoryForm();
+  renderCategoryManagerList();
+
+  if (focusAdd) {
+    switchCategoryTab("form");
+  } else {
+    switchCategoryTab("list");
+  }
+};
+
+window.closeCategoryManager = function () {
+  const modal = document.getElementById("categoryModal");
+  if (modal) modal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+};
+
+window.selectCatEmoji = function (emoji) {
+  const iconInput = document.getElementById("catIconInput");
+  if (iconInput) iconInput.value = emoji;
+};
+
+window.selectCatColor = function (color, swatchEl) {
+  selectedCatColor = color;
+  const picker = document.getElementById("catColorPicker");
+  if (picker) picker.value = color;
+
+  document.querySelectorAll(".color-swatch-chip").forEach(el => el.classList.remove("active"));
+  if (swatchEl) {
+    swatchEl.classList.add("active");
+  }
+};
+
+window.resetCategoryForm = function () {
+  const title = document.getElementById("categoryFormTitle");
+  const cancelBtn = document.getElementById("cancelCategoryEditBtn");
+  const idInput = document.getElementById("editingCategoryId");
+  const nameInput = document.getElementById("catNameInput");
+  const iconInput = document.getElementById("catIconInput");
+  const saveBtn = document.getElementById("saveCategoryBtn");
+
+  if (title) title.innerText = "➕ Create Custom Category";
+  if (cancelBtn) cancelBtn.style.display = "none";
+  if (idInput) idInput.value = "";
+  if (nameInput) nameInput.value = "";
+  if (iconInput) iconInput.value = "🏷️";
+  if (saveBtn) saveBtn.innerHTML = "<span>💾 Save Category</span>";
+  selectCatColor("#38bdf8");
+};
+
+window.filterCategoryManagerList = function () {
+  const query = (document.getElementById("catSearchInput")?.value || "").toLowerCase().trim();
+  renderCategoryManagerList(query);
+};
+
+window.renderCategoryManagerList = function (searchQuery = "") {
+  const listEl = document.getElementById("categoryManagerList");
+  const tabCount = document.getElementById("catTabCount");
+  if (!listEl) return;
+
+  if (tabCount) tabCount.innerText = fullCategoryList.length;
+
+  let displayList = fullCategoryList;
+  if (searchQuery) {
+    displayList = fullCategoryList.filter(c => {
+      const name = typeof c === 'string' ? c : c.name;
+      return name.toLowerCase().includes(searchQuery);
+    });
+  }
+
+  if (displayList.length === 0) {
+    listEl.innerHTML = `
+      <div style="text-align: center; padding: 30px 10px; color: #94a3b8; font-size: 0.88rem;">
+        No categories match your search.
+        <br>
+        <button type="button" onclick="switchCategoryTab('form')" style="margin-top: 10px; padding: 6px 14px; border-radius: 8px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #7dd3fc; cursor: pointer; font-size: 0.8rem; font-weight: 600;">
+          + Create "${searchQuery}"
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  listEl.innerHTML = displayList.map(c => {
+    const isCustom = typeof c === 'object' && !c.isSystem;
+    const catName = typeof c === 'string' ? c : c.name;
+    const catIcon = (typeof c === 'object' && c.icon) ? c.icon : '🏷️';
+    const catColor = (typeof c === 'object' && c.color) ? c.color : '#38bdf8';
+    const catId = typeof c === 'object' ? c._id : '';
+
+    return `
+      <div class="category-row-card">
+        <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+          <span style="font-size: 1.25rem;">${catIcon}</span>
+          <div style="min-width: 0;">
+            <div style="font-weight: 600; color: #fff; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              ${catName}
+            </div>
+          </div>
+          <span class="${isCustom ? 'cat-badge-custom' : 'cat-badge-system'}">
+            ${isCustom ? 'Custom' : 'Default'}
+          </span>
+          <span style="width: 10px; height: 10px; border-radius: 50%; background-color: ${catColor}; display: inline-block;" title="Color: ${catColor}"></span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 6px;">
+          ${isCustom ? `
+            <button onclick="editCategory('${catId}')" class="cat-action-btn" title="Edit Category" style="color: #38bdf8;">
+              ✏️
+            </button>
+            <button onclick="deleteCategory('${catId}', '${catName.replace(/'/g, "\\'")}')" class="cat-action-btn" title="Delete Category" style="color: #ef4444;">
+              🗑️
+            </button>
+          ` : `
+            <span style="font-size: 0.72rem; color: #64748b; padding: 2px 6px; letter-spacing: 0.3px;">Standard</span>
+          `}
+        </div>
+      </div>
+    `;
+  }).join("");
+};
+
+window.saveCustomCategory = async function () {
+  const id = document.getElementById("editingCategoryId")?.value;
+  const name = document.getElementById("catNameInput")?.value?.trim();
+  const icon = document.getElementById("catIconInput")?.value?.trim() || "🏷️";
+  const color = selectedCatColor || "#38bdf8";
+
+  if (!name) {
+    showToast("Please enter a category name", "error");
+    return;
+  }
+
+  try {
+    if (id) {
+      await apiRequest(`/categories/${id}`, "PUT", { name, icon, color });
+      showToast(`Category "${name}" updated successfully`, "success");
+    } else {
+      await apiRequest("/categories", "POST", { name, icon, color });
+      showToast(`Category "${name}" created successfully`, "success");
+    }
+
+    resetCategoryForm();
+    await populateCategorySelect(name);
+    renderCategoryManagerList();
+    switchCategoryTab("list");
+  } catch (err) {
+    showToast(err.message || "Failed to save category", "error");
+  }
+};
+
+window.editCategory = function (id) {
+  const category = fullCategoryList.find(c => c._id === id);
+  if (!category) return;
+
+  const title = document.getElementById("categoryFormTitle");
+  const cancelBtn = document.getElementById("cancelCategoryEditBtn");
+  const idInput = document.getElementById("editingCategoryId");
+  const nameInput = document.getElementById("catNameInput");
+  const iconInput = document.getElementById("catIconInput");
+  const saveBtn = document.getElementById("saveCategoryBtn");
+
+  if (title) title.innerText = `✏️ Edit "${category.name}"`;
+  if (cancelBtn) cancelBtn.style.display = "inline";
+  if (idInput) idInput.value = category._id;
+  if (nameInput) nameInput.value = category.name;
+  if (iconInput) iconInput.value = category.icon || "🏷️";
+  if (saveBtn) saveBtn.innerHTML = "<span>💾 Update Category</span>";
+  selectCatColor(category.color || "#38bdf8");
+
+  switchCategoryTab("form");
+};
+
+window.deleteCategory = async function (id, name) {
+  if (!confirm(`Are you sure you want to delete "${name}"? Any existing expenses will be reassigned to "Other".`)) {
+    return;
+  }
+
+  try {
+    await apiRequest(`/categories/${id}`, "DELETE", { reassignTo: "Other" });
+    showToast(`Category "${name}" deleted`, "success");
+    await populateCategorySelect();
+    renderCategoryManagerList();
+  } catch (err) {
+    showToast(err.message || "Failed to delete category", "error");
+  }
+};
+
+window.toggleCategoryVisibility = async function (id, hide) {
+  try {
+    await apiRequest(`/categories/${id}/visibility`, "PATCH", { hide });
+    showToast(hide ? "Default category hidden" : "Default category restored", "success");
+    await populateCategorySelect();
+    renderCategoryManagerList();
+  } catch (err) {
+    showToast(err.message || "Failed to update category visibility", "error");
+  }
+};
 
 /* ===============================
    LOAD DASHBOARD DATA
@@ -322,6 +583,10 @@ window.logout = function () {
 
 window.openExpense = function () {
   const modal = document.getElementById("expenseModal");
+  const dateInput = document.getElementById("expenseDate");
+  if (dateInput && !dateInput.value) {
+    dateInput.value = new Date().toISOString().split("T")[0];
+  }
 
   modal.classList.remove("hidden");
   document.body.classList.add("modal-open");
@@ -370,6 +635,11 @@ window.addExpense = async function () {
 
 window.openIncome = function () {
   const modal = document.getElementById("incomeModal");
+  const dateInput = document.getElementById("incomeDate");
+  if (dateInput && !dateInput.value) {
+    dateInput.value = new Date().toISOString().split("T")[0];
+  }
+
   modal.classList.remove("hidden");
   document.body.classList.add("modal-open");
 };

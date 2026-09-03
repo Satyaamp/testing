@@ -10,7 +10,7 @@
 
   <link rel="shortcut icon" href="assets/icons/dashboard.png" type="image/png">
   <link rel="stylesheet" href="css/glass.css" />
-  <link rel="stylesheet" href="css/dashboard.css?v=2.5" />
+  <link rel="stylesheet" href="css/dashboard.css?v=2.9" />
   <link rel="stylesheet" href="css/animations.css" />
   <style>
     .pagination-controls {
@@ -164,6 +164,7 @@
     <section class="actions animate-enter delay-1">
       <button onclick="openExpense()">➕ New Expense</button>
       <button onclick="openIncome()">➕ Monthly Budget</button>
+      <button onclick="openCategoryManager()" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #7dd3fc;" title="Manage Custom Categories">⚙️ Categories</button>
     </section>
 
     <!-- Summary Cards -->
@@ -202,19 +203,148 @@
 
         <input type="number" id="expenseAmount" placeholder="Amount (₹)" />
 
-        <select id="expenseCategory">
-          <option value="">Select Category</option>
-          <!-- Categories are populated dynamically from js/dashboard.js -->
-        </select>
+        <div style="margin: 8px 0 4px 0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+            <label style="font-size: 0.8rem; font-weight: 600; color: #94a3b8;">Category</label>
+            <button type="button" onclick="openCategoryManager()" style="background: none; border: none; color: #38bdf8; font-size: 0.78rem; font-weight: 600; cursor: pointer; padding: 0; display: inline-flex; align-items: center; gap: 3px;" title="Open Category Manager">
+              <span>⚙️ Manage / Add</span>
+            </button>
+          </div>
+          <select id="expenseCategory" style="width: 100%; margin: 0 0 10px 0;">
+            <option value="">Select Category</option>
+            <!-- Categories are populated dynamically from /api/categories -->
+          </select>
+        </div>
 
-        <input type="date" id="expenseDate"
-          style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); color-scheme: dark;" />
+        <div class="modal-date-group">
+          <label for="expenseDate">📅 Expense Date</label>
+          <input type="date" id="expenseDate" data-placeholder="Select date" />
+        </div>
 
         <input type="text" id="expenseDesc" placeholder="Description (optional)" />
 
         <div class="modal-actions">
           <button onclick="addExpense()">Save</button>
           <button class="cancel" onclick="closeExpense()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CATEGORY MANAGER MODAL -->
+    <div id="categoryModal" class="modal hidden">
+      <div class="breakdown-modal-content glass-card" style="max-width: 580px; width: 94%; max-height: 86vh; padding: 20px;">
+        <div class="modal-pull-handle"></div>
+
+        <!-- Modal Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; margin-bottom: 14px;">
+          <div>
+            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+              <span>⚙️</span> Category Management
+            </h3>
+            <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: #94a3b8;">Manage your personal categories, icons, and visibility</p>
+          </div>
+          <button onclick="closeCategoryManager()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.8;" title="Close">&times;</button>
+        </div>
+
+        <!-- Tab Controls: Active Categories vs Add/Edit Category -->
+        <div style="display: flex; gap: 8px; margin-bottom: 14px; background: rgba(0,0,0,0.3); padding: 4px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+          <button id="catTabListBtn" type="button" onclick="switchCategoryTab('list')" class="cat-tab-btn active" style="flex: 1; padding: 8px 12px; border-radius: 8px; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+            📋 Categories (<span id="catTabCount">0</span>)
+          </button>
+          <button id="catTabFormBtn" type="button" onclick="switchCategoryTab('form')" class="cat-tab-btn" style="flex: 1; padding: 8px 12px; border-radius: 8px; border: none; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+            ➕ Add Category
+          </button>
+        </div>
+
+        <!-- TAB 1: CATEGORIES LIST -->
+        <div id="catTabList" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
+          <!-- Search & Filter Bar -->
+          <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+            <input type="text" id="catSearchInput" placeholder="🔍 Search categories..." oninput="filterCategoryManagerList()" style="flex: 1; padding: 8px 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: white; font-size: 0.85rem; outline: none; margin: 0;" />
+            <button type="button" onclick="switchCategoryTab('form')" style="padding: 8px 14px; border-radius: 10px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #7dd3fc; font-weight: 600; font-size: 0.82rem; cursor: pointer; white-space: nowrap;">
+              + New
+            </button>
+          </div>
+
+          <!-- Category List Container with Slim Scrollbar -->
+          <div id="categoryManagerList" class="custom-slim-scroll" style="overflow-y: auto; flex: 1; max-height: 48vh; padding-right: 4px; display: flex; flex-direction: column; gap: 6px;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- TAB 2: ADD / EDIT CATEGORY FORM -->
+        <div id="catTabForm" style="display: none; flex-direction: column; gap: 14px; overflow-y: auto; max-height: 52vh; padding-right: 4px;" class="custom-slim-scroll">
+          <div style="background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px;">
+            <div style="font-weight: 700; font-size: 0.95rem; color: #38bdf8; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+              <span id="categoryFormTitle">➕ Create Custom Category</span>
+              <button id="cancelCategoryEditBtn" type="button" onclick="resetCategoryForm(); switchCategoryTab('list');" style="display: none; background: none; border: none; color: #94a3b8; font-size: 0.78rem; text-decoration: underline; cursor: pointer;">Cancel Edit</button>
+            </div>
+
+            <input type="hidden" id="editingCategoryId" value="" />
+
+            <!-- Icon & Name Row -->
+            <div style="margin-bottom: 12px;">
+              <label style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 6px; display: block;">Icon & Name</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="catIconInput" value="🏷️" maxlength="2" style="width: 52px; text-align: center; font-size: 1.4rem; padding: 8px; margin: 0; border-radius: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: white;" title="Emoji icon" />
+                <input type="text" id="catNameInput" placeholder="Category Name (e.g. Gym, Pet Care, Books)" style="flex: 1; margin: 0; padding: 10px 14px; border-radius: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: white; font-size: 0.92rem;" />
+              </div>
+            </div>
+
+            <!-- Emoji Suggestions -->
+            <div style="margin-bottom: 14px;">
+              <label style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 6px; display: block;">Suggested Emojis</label>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button type="button" class="emoji-chip" onclick="selectCatEmoji('🍔')">🍔</button>
+                <button type="button" class="emoji-chip" onclick="selectCatEmoji('🚗')">🚗</button>
+                <button type="button" class="emoji-chip" onclick="selectCatEmoji('🛒')">🛒</button>
+                <button type="button" class="emoji-chip" onclick="selectCatEmoji('🏋️')">🏋️</button>
+                <button type="button" class="emoji-chip" onclick="selectCatEmoji('🐾')">🐾</button>
+                <button type="button" class="emoji-chip" onclick="selectCatEmoji('🎮')">🎮</button>
+                <button type="button" class="emoji-chip" onclick="selectCatEmoji('📚')">📚</button>
+                <button type="button" class="emoji-chip" onclick="selectCatEmoji('🩺')">🩺</button>
+                <button type="button" class="emoji-chip" onclick="selectCatEmoji('✈️')">✈️</button>
+                <button type="button" class="emoji-chip" onclick="selectCatEmoji('💻')">💻</button>
+                <button type="button" class="emoji-chip" onclick="selectCatEmoji('🎁')">🎁</button>
+                <button type="button" class="emoji-chip" onclick="selectCatEmoji('🎨')">🎨</button>
+                <button type="button" class="emoji-chip" onclick="selectCatEmoji('👔')">👔</button>
+                <button type="button" class="emoji-chip" onclick="selectCatEmoji('💎')">💎</button>
+              </div>
+            </div>
+
+            <!-- Color Palette -->
+            <div style="margin-bottom: 16px;">
+              <label style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 6px; display: block;">Theme Color</label>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span class="color-swatch-chip active" style="background-color: #38bdf8;" onclick="selectCatColor('#38bdf8', this)"></span>
+                <span class="color-swatch-chip" style="background-color: #10b981;" onclick="selectCatColor('#10b981', this)"></span>
+                <span class="color-swatch-chip" style="background-color: #f59e0b;" onclick="selectCatColor('#f59e0b', this)"></span>
+                <span class="color-swatch-chip" style="background-color: #ef4444;" onclick="selectCatColor('#ef4444', this)"></span>
+                <span class="color-swatch-chip" style="background-color: #a855f7;" onclick="selectCatColor('#a855f7', this)"></span>
+                <span class="color-swatch-chip" style="background-color: #ec4899;" onclick="selectCatColor('#ec4899', this)"></span>
+                <span class="color-swatch-chip" style="background-color: #06b6d4;" onclick="selectCatColor('#06b6d4', this)"></span>
+                <span class="color-swatch-chip" style="background-color: #6366f1;" onclick="selectCatColor('#6366f1', this)"></span>
+                <span class="color-swatch-chip" style="background-color: #f97316;" onclick="selectCatColor('#f97316', this)"></span>
+                <span class="color-swatch-chip" style="background-color: #14b8a6;" onclick="selectCatColor('#14b8a6', this)"></span>
+                <input type="color" id="catColorPicker" value="#38bdf8" style="width: 26px; height: 26px; border: none; padding: 0; border-radius: 50%; background: none; cursor: pointer; margin-left: 4px;" title="Custom hex color" onchange="selectCatColor(this.value)" />
+              </div>
+            </div>
+
+            <!-- Buttons -->
+            <div style="display: flex; gap: 10px;">
+              <button type="button" id="saveCategoryBtn" onclick="saveCustomCategory()" style="flex: 1; padding: 12px; border-radius: 10px; background: #059669; color: white; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <span>💾 Save Category</span>
+              </button>
+              <button type="button" onclick="switchCategoryTab('list')" style="padding: 12px 18px; border-radius: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-weight: 600; cursor: pointer;">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div style="margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
+          <button onclick="closeCategoryManager()" style="width: 100%; padding: 11px; border-radius: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #f1f5f9; font-weight: 600; cursor: pointer;">Done</button>
         </div>
       </div>
     </div>
@@ -304,8 +434,10 @@
 
         <input type="number" id="incomeAmount" placeholder="Amount (₹)" />
         <input type="text" id="incomeSource" placeholder="Source (Salary, Home, Freelance)" />
-        <input type="date" id="incomeDate"
-          style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); color-scheme: dark;" />
+        <div class="modal-date-group">
+          <label for="incomeDate">📅 Income Date</label>
+          <input type="date" id="incomeDate" data-placeholder="Select date" />
+        </div>
 
         <div class="modal-actions">
           <button onclick="addIncome()">Save</button>
@@ -341,12 +473,16 @@
 
     <section class="filters glass-card animate-enter delay-4">
       <div class="filter-group">
-        <label>Date Range:</label>
+        <label style="display: flex; align-items: center; gap: 6px;">📅 Date Range Filter:</label>
         <div class="date-inputs">
-          <input type="date" id="startDate" placeholder="dd-mm-yyyy"
-            style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); color-scheme: dark;">
-          <input type="date" id="endDate" placeholder="dd-mm-yyyy"
-            style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); color-scheme: dark;">
+          <div class="date-field-col">
+            <span class="date-sub-label">FROM</span>
+            <input type="date" id="startDate" data-placeholder="From date" />
+          </div>
+          <div class="date-field-col">
+            <span class="date-sub-label">TO</span>
+            <input type="date" id="endDate" data-placeholder="To date" />
+          </div>
         </div>
       </div>
       <div class="filter-actions">
@@ -466,7 +602,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
-  <script type="module" src="js/dashboard.js?v=2.5"></script>
+  <script type="module" src="js/dashboard.js?v=2.9"></script>
   <script type="module">
     import { apiRequest } from './js/api.js';
 
@@ -535,7 +671,12 @@
         // Fetch all expenses to sort correctly
         const res = await apiRequest("/expenses", "GET", null, { skipLoader: true });
         allExpenses = (res.data || []).sort((a, b) => {
-          return new Date(b.date) - new Date(a.date);
+          const dateA = new Date(a.date).getTime();
+          const dateB = new Date(b.date).getTime();
+          if (dateB !== dateA) return dateB - dateA;
+          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : (b._id ? parseInt(String(b._id).substring(0, 8), 16) : 0);
+          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : (a._id ? parseInt(String(a._id).substring(0, 8), 16) : 0);
+          return timeB - timeA;
         }).slice(0, 20);
 
         currentPage = 1;

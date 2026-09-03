@@ -1171,7 +1171,8 @@
         <!-- Populated by JS -->
       </select>
 
-      <div class="date-wrapper">
+      <div class="date-wrapper" style="margin: 10px 0; text-align: left;">
+        <label for="expenseDate" style="display: block; font-size: 0.8rem; font-weight: 600; color: #94a3b8; margin-bottom: 4px;">📅 Expense Date</label>
         <input type="date" id="expenseDate" disabled
           style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; color-scheme: dark; cursor: not-allowed; opacity: 1; -webkit-text-fill-color: white;" />
       </div>
@@ -1192,7 +1193,8 @@
       <input type="number" id="incomeAmount" placeholder="Amount (₹)" />
       <input type="text" id="incomeSource" placeholder="Source (e.g. Salary, Freelance)" />
 
-      <div class="date-wrapper">
+      <div class="date-wrapper" style="margin: 10px 0; text-align: left;">
+        <label for="incomeDate" style="display: block; font-size: 0.8rem; font-weight: 600; color: #94a3b8; margin-bottom: 4px;">📅 Income Date</label>
         <input type="date" id="incomeDate"
           style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; color-scheme: dark; cursor: pointer;" />
       </div>
@@ -1207,7 +1209,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="js/monthly.js?v=2.4"></script>
+  <script type="module" src="js/monthly.js?v=2.6"></script>
   <script>
     document.getElementById('downloadPdfBtn').addEventListener('click', function () {
       const btn = this;

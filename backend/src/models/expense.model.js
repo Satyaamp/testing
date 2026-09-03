@@ -6,22 +6,8 @@ const expenseSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
   category: { 
     type: String, 
-    enum: [
-      'Food', 
-      'Transport', 
-      'Groceries', 
-      'Rent', 
-      'Stationery', 
-      'Personal Care',
-      'Electric Bill',  
-      'Water Bill',  
-      'Cylinder',  
-      'Internet Bill',  
-      'EMI',            
-      'Carry Forward',      
-      'Other'
-    ],
-    required: true 
+    required: [true, 'Category is required'],
+    trim: true
   },
   description: String,
   isOverBudget: { type: Boolean, default: false },

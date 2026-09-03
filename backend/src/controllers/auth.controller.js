@@ -62,12 +62,15 @@ exports.me = async (req, res, next) => {
 // Update Profile Route
 exports.updateProfile = async (req, res, next) => {
   try {
-    const { phoneNumber } = req.body;
+    const { phoneNumber, name } = req.body;
     let data = {};
-    if (phoneNumber) {
+    if (phoneNumber !== undefined) {
       // WhatsApp webhooks provide phone numbers as pure digit strings (e.g. 919876543210).
       // We strip out +, -, spaces, and parentheses to ensure a flawless match.
-      data.phoneNumber = phoneNumber.replace(/\D/g, '');
+      data.phoneNumber = phoneNumber ? phoneNumber.replace(/\D/g, '') : '';
+    }
+    if (name && typeof name === 'string' && name.trim()) {
+      data.name = name.trim();
     }
 
     // Only update if there are fields to update
