@@ -584,8 +584,12 @@ window.logout = function () {
 window.openExpense = function () {
   const modal = document.getElementById("expenseModal");
   const dateInput = document.getElementById("expenseDate");
-  if (dateInput && !dateInput.value) {
-    dateInput.value = new Date().toISOString().split("T")[0];
+  const todayIso = new Date().toISOString().split("T")[0];
+  if (dateInput) {
+    dateInput.max = todayIso;
+    if (!dateInput.value) {
+      dateInput.value = todayIso;
+    }
   }
 
   modal.classList.remove("hidden");
@@ -608,6 +612,16 @@ window.addExpense = async function () {
 
   if (!amount || !category || !date) {
     showToast("Amount, category and date are required", "error");
+    return;
+  }
+
+  const now = new Date();
+  const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  if (date > todayIso) {
+    const parts = date.split('-');
+    const formattedDate = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : date;
+    const formattedToday = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
+    showToast(`Future date not allowed: ${formattedDate} is in the future (today is ${formattedToday}).`, "warning");
     return;
   }
 
@@ -636,8 +650,12 @@ window.addExpense = async function () {
 window.openIncome = function () {
   const modal = document.getElementById("incomeModal");
   const dateInput = document.getElementById("incomeDate");
-  if (dateInput && !dateInput.value) {
-    dateInput.value = new Date().toISOString().split("T")[0];
+  const todayIso = new Date().toISOString().split("T")[0];
+  if (dateInput) {
+    dateInput.max = todayIso;
+    if (!dateInput.value) {
+      dateInput.value = todayIso;
+    }
   }
 
   modal.classList.remove("hidden");
@@ -658,6 +676,16 @@ window.addIncome = async function () {
 
   if (!amount || !date) {
     showToast("Amount and date are required", "error");
+    return;
+  }
+
+  const now = new Date();
+  const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  if (date > todayIso) {
+    const parts = date.split('-');
+    const formattedDate = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : date;
+    const formattedToday = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
+    showToast(`Future date not allowed: ${formattedDate} is in the future (today is ${formattedToday}).`, "warning");
     return;
   }
 
@@ -741,6 +769,17 @@ window.backToEditScan = function () {
   document.getElementById("scanPreviewSection").classList.add("hidden");
   const textInput = document.getElementById("scanTextInput");
   if (textInput) {
+    if (scannedExpensesData && scannedExpensesData.length > 0) {
+      const updatedLines = scannedExpensesData.map(item => {
+        if (item.rawLine) {
+          return item.rawLine;
+        }
+        const dateStr = item.rawDateText || formatScanDisplayDate(item.date);
+        const desc = (item.description && item.description !== 'Scanned Expense') ? item.description : item.category;
+        return `${dateStr} ${item.amount} ${desc}`.trim();
+      }).filter(Boolean);
+      textInput.value = updatedLines.join('\n');
+    }
     textInput.focus();
   }
 };
@@ -760,7 +799,11 @@ window.processScan = async function () {
   const text = textInput ? textInput.value.trim() : "";
 
   if (!file && !text) {
-    showDialog("Input Required", "Please upload a receipt image or paste your expense notes.", "warning");
+    showDialog(
+      "Input Required",
+      "Kindly add at least one expense as per the required format:<br/><br/><strong style='color: #60a5fa; letter-spacing: 0.3px;'>Date &nbsp;Amount &nbsp;Category</strong><br/><br/><span style='font-size: 0.88rem; color: #94a3b8;'>Example:<br/><code>06-09-2026 250 Groceries</code><br/><code>06-09-2026 100 Transport</code></span>",
+      "warning"
+    );
     return;
   }
 
@@ -796,7 +839,12 @@ window.processScan = async function () {
     scannedExpensesData = res.data?.expenses || [];
 
     if (scannedExpensesData.length === 0) {
-      showToast("No expenses detected in the provided note or receipt.", "warning");
+      showDialog(
+        "No Expenses Detected",
+        "Could not detect any valid expenses in the provided notes. Kindly add at least one expense with date and amount as per the format:<br/><br/><strong style='color: #60a5fa; letter-spacing: 0.3px;'>DD-MM-YYYY &nbsp;Amount &nbsp;Category / Notes</strong><br/><br/><span style='font-size: 0.88rem; color: #94a3b8;'>Example:<br/><code>06-09-2026 250 Groceries</code><br/><code>06-09-2026 100 Transport</code></span>",
+        "warning"
+      );
+      return;
     }
 
     renderScanPreview(false); // false = not yet validated
@@ -820,23 +868,83 @@ function formatScanDisplayDate(dateStr) {
     const parts = String(dateStr).split("-");
     if (parts.length === 3 && parts[0].length === 4) {
       const year = parts[0];
-      const monthIdx = parseInt(parts[1], 10) - 1;
+      const month = parts[1].padStart(2, '0');
       const day = parts[2].padStart(2, '0');
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      const mName = months[monthIdx] || parts[1];
-      return `${day}-${mName}-${year}`; // e.g. 06-Sep-2026
+      return `${day}-${month}-${year}`; // DD-MM-YYYY
     }
     const d = new Date(dateStr);
     if (!isNaN(d.getTime())) {
       const day = String(d.getDate()).padStart(2, '0');
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      return `${day}-${months[d.getMonth()]}-${d.getFullYear()}`;
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      return `${day}-${month}-${d.getFullYear()}`;
     }
     return dateStr;
   } catch (e) {
     return dateStr;
   }
 }
+
+function validateClientExpenseDate(dateStr) {
+  if (!dateStr) return { isValid: false, error: "Date is required" };
+  const parts = String(dateStr).split('-');
+  if (parts.length !== 3) return { isValid: false, error: "Invalid date format" };
+  let y, m, d;
+  if (parts[0].length === 4) {
+    y = parseInt(parts[0], 10);
+    m = parseInt(parts[1], 10);
+    d = parseInt(parts[2], 10);
+  } else {
+    d = parseInt(parts[0], 10);
+    m = parseInt(parts[1], 10);
+    y = parseInt(parts[2], 10);
+  }
+  if (isNaN(y) || isNaN(m) || isNaN(d)) return { isValid: false, error: "Invalid date values" };
+  if (m < 1 || m > 12) return { isValid: false, error: `Invalid month (${m}). Must be between 1 and 12.` };
+  const daysInMonth = new Date(y, m, 0).getDate();
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const mName = months[m - 1];
+  if (d < 1 || d > daysInMonth) {
+    return { isValid: false, error: `Invalid date: ${mName} ${y} only has ${daysInMonth} days (got ${d}).` };
+  }
+  const now = new Date();
+  const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const formattedIso = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  const formattedInput = `${String(d).padStart(2, '0')}-${String(m).padStart(2, '0')}-${y}`;
+  const formattedToday = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
+  if (formattedIso > todayIso) {
+    return { isValid: false, error: `Future date not allowed: ${formattedInput} is in the future (today is ${formattedToday}).` };
+  }
+  return { isValid: true, error: null, isoDate: formattedIso, displayDate: formattedInput };
+}
+
+window.updateScannedDate = function (index, newIsoDate) {
+  if (scannedExpensesData[index]) {
+    const item = scannedExpensesData[index];
+    const val = validateClientExpenseDate(newIsoDate);
+    const oldRawDate = item.rawDateText;
+    const newFormattedDate = val.displayDate || formatScanDisplayDate(newIsoDate);
+
+    item.date = newIsoDate;
+    item.rawDateText = newFormattedDate;
+    item.isValid = val.isValid;
+    item.dateError = val.error;
+
+    // Retain corrected date inside rawLine for "Edit Notes" synchronization
+    if (item.rawLine) {
+      if (oldRawDate && item.rawLine.includes(oldRawDate)) {
+        item.rawLine = item.rawLine.replace(oldRawDate, newFormattedDate);
+      } else {
+        const desc = (item.description && item.description !== 'Scanned Expense') ? item.description : item.category;
+        item.rawLine = `${newFormattedDate} ${item.amount} ${desc}`.trim();
+      }
+    } else {
+      const desc = (item.description && item.description !== 'Scanned Expense') ? item.description : item.category;
+      item.rawLine = `${newFormattedDate} ${item.amount} ${desc}`.trim();
+    }
+
+    renderScanPreview();
+  }
+};
 
 function renderScanPreview(isValidated = false) {
   const tbody = document.getElementById("scanPreviewTableBody");
@@ -861,8 +969,12 @@ function renderScanPreview(isValidated = false) {
   const end = Math.min(start + SCAN_PER_PAGE, totalItems);
   const pageItems = scannedExpensesData.slice(start, end);
 
+  const now = new Date();
+  const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
   pageItems.forEach((item, pageIdx) => {
     const globalIndex = start + pageIdx;
+    const isInvalid = item.isValid === false;
 
     let currentCat = item.category || 'Other';
     const matchedCategory = expenseCategories.find(
@@ -883,22 +995,37 @@ function renderScanPreview(isValidated = false) {
       `<option value="${cat}" ${cat === currentCat ? "selected" : ""} style="background: #333; color: white;">${cat}</option>`
     ).join("");
 
-    let rowStyle = "";
-    if (item.isValid === true) {
-      rowStyle = "background: rgba(34, 197, 94, 0.15);";
-    } else if (item.isValid === false) {
-      rowStyle = "background: rgba(239, 68, 68, 0.15);";
-    }
+    const displayDate = item.rawDateText || formatScanDisplayDate(item.date);
 
     const tr = document.createElement("tr");
+    if (isInvalid) {
+      tr.style.background = "rgba(239, 68, 68, 0.12)";
+      tr.style.boxShadow = "inset 3px 0 0 #ef4444";
+    }
+
     tr.innerHTML = `
-      <td style="white-space: nowrap; font-weight: 500; color: #e2e8f0;">${formatScanDisplayDate(item.date)}</td>
-      <td style="font-weight: 600; color: #34d399;">₹${formatINR(item.amount)}</td>
-      <td>
+      <td style="white-space: nowrap; font-weight: 500; vertical-align: middle;">
+        <div style="color: ${isInvalid ? '#fca5a5' : '#e2e8f0'}; display: flex; align-items: center; gap: 6px;">
+          <span>${displayDate}</span>
+          ${isInvalid ? `
+            <span style="background: rgba(239, 68, 68, 0.25); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 4px; padding: 1px 5px; font-size: 0.68rem; font-weight: 700;">
+              Invalid
+            </span>
+          ` : ''}
+        </div>
+        ${isInvalid ? `
+          <div class="scan-date-error">
+            ⚠️ ${item.dateError || 'Invalid date'}
+          </div>
+          <input type="date" value="${item.isValid ? item.date : ''}" max="${todayIso}" onchange="updateScannedDate(${globalIndex}, this.value)" class="scan-date-input" title="Pick a valid date" />
+        ` : ''}
+      </td>
+      <td style="font-weight: 600; color: #34d399; vertical-align: middle;">₹${formatINR(item.amount)}</td>
+      <td style="vertical-align: middle;">
         <select onchange="updateScannedCategory(${globalIndex}, this.value)" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px; padding: 2px 4px; font-size: 0.8rem; outline: none; cursor: pointer; width: 100%;">${options}</select>
       </td>
-      <td style="text-align: center;">
-        <button class="delete-scan-btn" onclick="deleteScannedItem(${globalIndex})" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;">
+      <td style="text-align: center; vertical-align: middle;">
+        <button class="delete-scan-btn" onclick="deleteScannedItem(${globalIndex})" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px;" title="Delete this entry">
            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
         </button>
       </td>
@@ -929,7 +1056,17 @@ window.changeScanPage = function (dir) {
 
 window.updateScannedCategory = function (index, value) {
   if (scannedExpensesData[index]) {
-    scannedExpensesData[index].category = value;
+    const item = scannedExpensesData[index];
+    const oldCat = item.category;
+    item.category = value;
+
+    // Retain updated category in rawLine if present
+    if (item.rawLine && oldCat && oldCat !== value) {
+      const catRegex = new RegExp(`(^|\\s)${oldCat}(\\s|$)`, 'i');
+      if (catRegex.test(item.rawLine)) {
+        item.rawLine = item.rawLine.replace(catRegex, `$1${value}$2`).trim();
+      }
+    }
   }
 };
 
@@ -942,9 +1079,21 @@ function renderScanButtons() {
   const container = document.querySelector("#scanPreviewSection .modal-actions");
   if (!container) return;
 
+  const invalidCount = (scannedExpensesData || []).filter(i => i.isValid === false).length;
+
   container.innerHTML = `
-    <button onclick="confirmScanUpload()" style="background: #22c55e; color: white; font-weight: 600; flex: 1; padding: 12px; border-radius: 8px; border: none; cursor: pointer;">Confirm & Save</button>
-    <button class="cancel" onclick="backToEditScan()" style="background: rgba(255,255,255,0.1); color: white; flex: 1; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer;">← Edit Notes</button>
+    ${invalidCount > 0 ? `
+      <div style="width: 100%; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 8px; padding: 8px 12px; margin-bottom: 8px; font-size: 0.8rem; color: #fca5a5; display: flex; align-items: center; gap: 8px;">
+        <span>⚠️</span>
+        <span><b>${invalidCount} entry with invalid or future date.</b> Please fix or delete before saving.</span>
+      </div>
+    ` : ''}
+    <div style="display: flex; gap: 10px; width: 100%;">
+      <button onclick="confirmScanUpload()" style="background: ${invalidCount > 0 ? '#475569' : '#22c55e'}; color: white; font-weight: 600; flex: 1; padding: 12px; border-radius: 8px; border: none; cursor: ${invalidCount > 0 ? 'not-allowed' : 'pointer'}; opacity: ${invalidCount > 0 ? '0.7' : '1'};">
+        ${invalidCount > 0 ? 'Fix Dates to Save' : 'Confirm & Save'}
+      </button>
+      <button class="cancel" onclick="backToEditScan()" style="background: rgba(255,255,255,0.1); color: white; flex: 1; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer;">← Edit Notes</button>
+    </div>
   `;
 }
 
@@ -959,6 +1108,28 @@ window.confirmScanUpload = async function () {
     return;
   }
 
+  // Double check all items client-side
+  let hasInvalid = false;
+  scannedExpensesData.forEach(item => {
+    const val = validateClientExpenseDate(item.date);
+    if (!val.isValid) {
+      item.isValid = false;
+      item.dateError = val.error;
+      hasInvalid = true;
+    }
+  });
+
+  if (hasInvalid) {
+    renderScanPreview();
+    const count = scannedExpensesData.filter(i => i.isValid === false).length;
+    showDialog(
+      "Action Required",
+      `Cannot save: ${count} expense(s) have invalid or future dates. Please fix the dates using the calendar input or delete them with the trash button before saving.`,
+      "warning"
+    );
+    return;
+  }
+
   try {
     const res = await apiRequest("/expenses/bulk", "POST", scannedExpensesData);
     const addedCount = res.results?.added?.length || 0;
@@ -967,7 +1138,8 @@ window.confirmScanUpload = async function () {
     if (failedCount === 0) {
       showToast(`${addedCount} expense${addedCount === 1 ? '' : 's'} added successfully!`, "success");
     } else {
-      showToast(`${addedCount} added, ${failedCount} failed to save.`, "warning");
+      const firstReason = res.results?.failed?.[0]?.reason || "Validation error";
+      showToast(`${addedCount} added, ${failedCount} failed: ${firstReason}`, "warning");
     }
 
     closeScanModal();

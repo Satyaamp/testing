@@ -1,4 +1,5 @@
 const Tesseract = require('tesseract.js');
+const { validateCalendarDate } = require('./date.util');
 
 // 1. OCR: Convert Image Buffer to Text
 exports.extractTextFromImage = async (buffer) => {
@@ -117,51 +118,72 @@ exports.parseExpenseText = (text, availableCategories = []) => {
     // A. Extract Date (supports DD-MMM-YYYY, DD MMM YYYY, DD/MM/YYYY, DD-MM-YYYY, or YYYY-MM-DD)
     let date = null;
     let matchedDateText = null;
+    let parsedDay = null;
+    let parsedMonth = null;
+    let parsedYear = null;
 
     // 1. With year: DD-Month-YYYY or DD Month YYYY (e.g., 12-Sep-2026, 12 September 26)
     const nameWithYearRegex = new RegExp('(\\b\\d{1,2})[\\s./-]+(' + monthNamesPattern + ')[\\s./-]+(20\\d{2}|19\\d{2}|\\d{2})\\b', 'i');
     const nameWithYearMatch = line.match(nameWithYearRegex);
 
     if (nameWithYearMatch) {
-      const day = nameWithYearMatch[1].padStart(2, '0');
+      parsedDay = nameWithYearMatch[1];
       const mKey = nameWithYearMatch[2].toLowerCase();
-      const month = monthMap[mKey] || '01';
+      parsedMonth = monthMap[mKey] || '01';
       let year = nameWithYearMatch[3];
       if (year.length === 2) year = '20' + year;
-      date = `${year}-${month}-${day}`;
+      parsedYear = year;
       matchedDateText = nameWithYearMatch[0];
     } else {
       // 2. Without year: DD-Month or DD Month (e.g., 12-Sep, 12 October)
       const nameWithoutYearRegex = new RegExp('(\\b\\d{1,2})[\\s./-]+(' + monthNamesPattern + ')\\b', 'i');
       const nameWithoutYearMatch = line.match(nameWithoutYearRegex);
       if (nameWithoutYearMatch) {
-        const day = nameWithoutYearMatch[1].padStart(2, '0');
+        parsedDay = nameWithoutYearMatch[1];
         const mKey = nameWithoutYearMatch[2].toLowerCase();
-        const month = monthMap[mKey] || '01';
-        const currentYear = new Date().getFullYear();
-        date = `${currentYear}-${month}-${day}`;
+        parsedMonth = monthMap[mKey] || '01';
+        parsedYear = new Date().getFullYear();
         matchedDateText = nameWithoutYearMatch[0];
       }
     }
 
     // 3. Check numeric dates (DD/MM/YYYY, DD-MM-YYYY, or YYYY-MM-DD)
-    if (!date) {
+    if (!matchedDateText) {
       const numMatch = line.match(/(\b\d{1,2}[./-]\d{1,2}[./-](?:20\d{2}|19\d{2}|\d{2})\b)|(\b(?:20\d{2}|19\d{2})[./-]\d{1,2}[./-]\d{1,2}\b)/);
       if (numMatch) {
         matchedDateText = numMatch[0];
         if (!matchedDateText.match(/^\d{4}/)) {
           const parts = matchedDateText.split(/[./-]/);
-          if (parts[2].length === 2) parts[2] = '20' + parts[2];
-          date = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+          let year = parts[2];
+          if (year.length === 2) year = '20' + year;
+          parsedYear = year;
+          parsedMonth = parts[1];
+          parsedDay = parts[0];
         } else {
-          date = matchedDateText;
+          const parts = matchedDateText.split(/[./-]/);
+          parsedYear = parts[0];
+          parsedMonth = parts[1];
+          parsedDay = parts[2];
         }
       }
     }
 
-    // Default to today if no date found in line
-    if (!date) {
-      date = new Date().toISOString().split('T')[0];
+    let isValidDate = true;
+    let dateError = null;
+
+    if (matchedDateText && parsedYear && parsedMonth && parsedDay) {
+      const val = validateCalendarDate(parsedYear, parsedMonth, parsedDay);
+      if (!val.isValid) {
+        isValidDate = false;
+        dateError = val.error;
+        date = `${parsedYear}-${String(parsedMonth).padStart(2, '0')}-${String(parsedDay).padStart(2, '0')}`;
+      } else {
+        date = val.isoDate;
+      }
+    } else {
+      // Default to today if no date found in line
+      const now = new Date();
+      date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     }
 
     // B. Extract Amount
@@ -188,24 +210,23 @@ exports.parseExpenseText = (text, availableCategories = []) => {
 
     for (const cand of directCandidates) {
       const candLower = cand.toLowerCase();
-      if (
-        descLower === candLower ||
-        new RegExp('(^|[^a-zA-Z0-9])' + escapeRegex(candLower) + '($|[^a-zA-Z0-9])', 'i').test(description)
-      ) {
-        const matchedUserCat = userCats.find(c => c.toLowerCase() === candLower);
-        category = matchedUserCat || cand;
+      const directRegex = new RegExp(`(^|[^a-z0-9])${escapeRegex(candLower)}([^a-z0-9]|$)`, 'i');
+      if (directRegex.test(descLower)) {
+        category = cand;
+        description = description
+          .replace(new RegExp(`(^|[^a-z0-9])${escapeRegex(cand)}([^a-z0-9]|$)`, 'gi'), ' ')
+          .replace(/^[\s\-:–—]+|[\s\-:–—]+$/g, '')
+          .trim();
         break;
       }
     }
 
-    // Step 2: Keyword mapping match
+    // Step 2: System Category Keyword Mapping
     if (!category) {
       for (const [catName, keywords] of Object.entries(systemCategoryKeywords)) {
-        const foundKw = keywords.find(kw => {
-          if (kw.includes(' ')) {
-            return descLower.includes(kw);
-          }
-          return new RegExp('(^|[^a-zA-Z0-9])' + escapeRegex(kw) + '($|[^a-zA-Z0-9])', 'i').test(description);
+        const foundKw = keywords.some(kw => {
+          const kwRegex = new RegExp(`(^|[^a-z0-9])${escapeRegex(kw)}([^a-z0-9]|$)`, 'i');
+          return kwRegex.test(descLower);
         });
 
         if (foundKw) {
@@ -224,6 +245,10 @@ exports.parseExpenseText = (text, availableCategories = []) => {
 
     expenses.push({
       date,
+      rawDateText: matchedDateText || null,
+      rawLine: line,
+      isValid: isValidDate,
+      dateError,
       amount,
       category,
       description: description || 'Scanned Expense'

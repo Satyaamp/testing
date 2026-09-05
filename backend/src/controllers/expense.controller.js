@@ -99,7 +99,11 @@ exports.update = async (req, res) => {
 };
 
 exports.addBulkExpenses = async (req, res) => {
-  const expenses = req.body;
+  const expenses = Array.isArray(req.body) ? req.body : [];
+  if (expenses.length === 0) {
+    return res.status(400).json({ success: false, message: 'No expenses provided to save.' });
+  }
+
   const results = { added: [], failed: [] };
 
   // Process sequentially to ensure budget is checked against the UPDATED balance after each insertion
