@@ -378,7 +378,7 @@ window.renderCategoryManagerList = function (searchQuery = "") {
               🗑️
             </button>
           ` : `
-            <span style="font-size: 0.72rem; color: #64748b; padding: 2px 6px; letter-spacing: 0.3px;">Standard</span>
+          
           `}
         </div>
       </div>
@@ -555,8 +555,8 @@ async function loadDashboard() {
 
     const pctBalance = document.getElementById("pctBalance");
     if (pctBalance) {
-      pctBalance.innerText = balance < 0 
-        ? `Over budget by ₹${formatINR(Math.abs(balance))}` 
+      pctBalance.innerText = balance < 0
+        ? `Over budget by ₹${formatINR(Math.abs(balance))}`
         : `${((balance / base) * 100).toFixed(1)}%`;
       pctBalance.style.color = balance < 0 ? "#fca5a5" : "";
     }
@@ -696,14 +696,35 @@ window.handleFileSelect = function (input) {
   document.getElementById("fileNameDisplay").innerText = fileName;
 };
 
-window.resetScan = function () {
+window.resetScan = function (keepText = false) {
   document.getElementById("scanInputSection").classList.remove("hidden");
   document.getElementById("scanPreviewSection").classList.add("hidden");
   document.getElementById("scanImageInput").value = "";
-  document.getElementById("scanTextInput").value = "";
+  if (!keepText) {
+    document.getElementById("scanTextInput").value = "";
+  }
   document.getElementById("fileNameDisplay").innerText = "Tap to upload image";
+  const formatInfo = document.getElementById("formatInfoNote");
+  if (formatInfo) formatInfo.style.display = "none";
   scannedExpensesData = [];
   currentScanPage = 1;
+};
+
+window.backToEditScan = function () {
+  document.getElementById("scanInputSection").classList.remove("hidden");
+  document.getElementById("scanPreviewSection").classList.add("hidden");
+  const textInput = document.getElementById("scanTextInput");
+  if (textInput) {
+    textInput.focus();
+  }
+};
+
+window.toggleFormatInfo = function (e) {
+  if (e) e.preventDefault();
+  const info = document.getElementById("formatInfoNote");
+  if (info) {
+    info.style.display = (info.style.display === "none" || !info.style.display) ? "block" : "none";
+  }
 };
 
 window.processScan = async function () {
@@ -713,6 +734,15 @@ window.processScan = async function () {
   if (!text) {
     showDialog("Input Required", "Please paste your expense notes to analyze.", "warning");
     return;
+  }
+
+  // Ensure categories are loaded before scan
+  if (!expenseCategories || expenseCategories.length === 0) {
+    try {
+      await populateCategorySelect();
+    } catch (e) {
+      console.warn("Could not load categories before scan:", e);
+    }
   }
 
   try {
@@ -756,10 +786,19 @@ function renderScanPreview(isValidated = false) {
   pageItems.forEach((item, pageIdx) => {
     const globalIndex = start + pageIdx;
 
-    let currentCat = item.category;
-    if (!expenseCategories.includes(currentCat)) {
+    let currentCat = item.category || 'Other';
+    const matchedCategory = expenseCategories.find(
+      c => c.trim().toLowerCase() === currentCat.trim().toLowerCase()
+    );
+    if (matchedCategory) {
+      currentCat = matchedCategory;
+      item.category = matchedCategory;
+    } else if (expenseCategories.includes('Other')) {
       currentCat = 'Other';
       item.category = 'Other';
+    } else if (expenseCategories.length > 0) {
+      currentCat = expenseCategories[0];
+      item.category = expenseCategories[0];
     }
 
     const options = expenseCategories.map(cat =>
@@ -774,7 +813,6 @@ function renderScanPreview(isValidated = false) {
     }
 
     const tr = document.createElement("tr");
-    if (rowStyle) tr.style = rowStyle;
     tr.innerHTML = `
       <td style="white-space: nowrap;">${item.date}</td>
       <td style="font-weight: 600; color: #34d399;">₹${formatINR(item.amount)}</td>
@@ -803,13 +841,14 @@ function renderScanPreview(isValidated = false) {
     `;
   }
 
-  renderScanButtons(isValidated);
+  renderScanButtons();
 }
 
 window.changeScanPage = function (dir) {
   currentScanPage += dir;
-  renderScanPreview(false); // Reset validation when navigating
+  renderScanPreview();
 };
+
 window.updateScannedCategory = function (index, value) {
   if (scannedExpensesData[index]) {
     scannedExpensesData[index].category = value;
@@ -818,154 +857,41 @@ window.updateScannedCategory = function (index, value) {
 
 window.deleteScannedItem = function (index) {
   scannedExpensesData.splice(index, 1);
-  // Reset validity tracking on items change to force re-validation
-  scannedExpensesData.forEach(item => delete item.isValid);
-  // If items change, require re-validation
-  renderScanPreview(false);
+  renderScanPreview();
 };
 
-function renderScanButtons(isValidated) {
+function renderScanButtons() {
   const container = document.querySelector("#scanPreviewSection .modal-actions");
   if (!container) return;
 
-  if (isValidated) {
-    container.innerHTML = `
-      <button onclick="confirmScanUpload()" style="background: #22c55e; color: black;">Confirm & Save</button>
-    `;
-  } else {
-    container.innerHTML = `
-      <button onclick="validateBudget()" style="background: #facc15; color: black;">🔍 Validate Budget</button>
-    `;
-  }
+  container.innerHTML = `
+    <button onclick="confirmScanUpload()" style="background: #22c55e; color: white; font-weight: 600; flex: 1; padding: 12px; border-radius: 8px; border: none; cursor: pointer;">Confirm & Save</button>
+    <button class="cancel" onclick="backToEditScan()" style="background: rgba(255,255,255,0.1); color: white; flex: 1; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer;">← Edit Notes</button>
+  `;
 }
 
+// Backward-compatible alias (balance check removed across DhanRekha)
 window.validateBudget = async function () {
-  if (scannedExpensesData.length === 0) return;
-
-  // Group expenses by Month-Year to check budget efficiently
-  const groups = {};
-  scannedExpensesData.forEach(item => {
-    const d = new Date(item.date);
-    const key = `${d.getFullYear()}-${d.getMonth() + 1}`; // "2023-10"
-    if (!groups[key]) groups[key] = 0;
-    groups[key] += item.amount;
-  });
-
-  let allValid = true;
-  let errorItems = [];
-  const invalidMonths = new Set();
-
-  try {
-    for (const key of Object.keys(groups)) {
-      const [year, month] = key.split('-');
-      const totalAttempt = groups[key];
-
-      // Fetch monthly summary to get balance
-      const res = await apiRequest(`/expenses/summary/monthly?month=${month}&year=${year}`);
-      const balance = res.data.balance; // This is Income - Expense
-
-      if (totalAttempt > balance) {
-        allValid = false;
-        invalidMonths.add(key);
-        const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long' });
-
-        errorItems.push(`
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-            <div style="text-align: left;">
-              <div style="font-weight: bold; color: #fff; font-size: 1rem;">${monthName} ${year}</div>
-              <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">Available: ₹${formatINR(balance)}</div>
-            </div>
-            <div style="text-align: right;">
-              <div style="color: #ef4444; font-weight: bold;">Need ₹${formatINR(totalAttempt)}</div>
-            </div>
-          </div>
-        `);
-      }
-    }
-
-    // Mark items as valid or invalid based on budget check
-    scannedExpensesData.forEach(item => {
-      const d = new Date(item.date);
-      const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
-      item.isValid = !invalidMonths.has(key);
-    });
-
-    if (allValid) {
-      renderScanPreview(true); // Enable Confirm button
-    } else {
-      const listHtml = `<div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 0 15px; margin-top: 15px; max-height: 200px; overflow-y: auto;">${errorItems.join('')}</div>`;
-      showDialog("Budget Exceeded", `The following months have insufficient funds:${listHtml}`, "warning");
-      renderScanPreview(false); // Re-render to show colored rows
-    }
-  } catch (err) {
-    showDialog("Validation Error", err.message, "error");
-  }
+  await window.confirmScanUpload();
 };
 
 window.confirmScanUpload = async function () {
+  if (!scannedExpensesData || scannedExpensesData.length === 0) {
+    showToast("No expenses to save", "error");
+    return;
+  }
+
   try {
     const res = await apiRequest("/expenses/bulk", "POST", scannedExpensesData);
+    const addedCount = res.results?.added?.length || 0;
+    const failedCount = res.results?.failed?.length || 0;
 
-    // 1. Identify all unique months from the scanned data
-    const uniqueMonths = new Set();
-    scannedExpensesData.forEach(item => {
-      if (item.date) {
-        const d = new Date(item.date);
-        uniqueMonths.add(`${d.getFullYear()}-${d.getMonth() + 1}`);
-      }
-    });
-
-    if (uniqueMonths.size === 0) {
-      const now = new Date();
-      uniqueMonths.add(`${now.getFullYear()}-${now.getMonth() + 1}`);
-    }
-
-    // 2. Fetch updated balances for all affected months
-    const balancePromises = Array.from(uniqueMonths).map(async (key) => {
-      const [year, month] = key.split('-');
-      const balanceRes = await apiRequest(`/expenses/summary/monthly?month=${month}&year=${year}`);
-      const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long' });
-      return {
-        monthName,
-        year,
-        balance: balanceRes.data.balance
-      };
-    });
-
-    const balances = await Promise.all(balancePromises);
-
-    // 3. Helper to generate HTML list of balances
-    const generateBalanceList = () => {
-      return balances.map(b => `
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-          <span style="color: rgba(255,255,255,0.9);">${b.monthName} ${b.year}</span>
-          <span style="font-weight: bold; color: #34d399;">₹${formatINR(b.balance)}</span>
-        </div>
-      `).join('');
-    };
-
-    let title = "";
-    let msg = "";
-    let type = "";
-
-    if (res.results.failed.length === 0) {
-      title = "Success";
-      msg = `Expenses added successfully.<br>
-             <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 0 15px; margin-top: 15px; max-height: 200px; overflow-y: auto;">
-               ${generateBalanceList()}
-             </div>`;
-      type = "success";
+    if (failedCount === 0) {
+      showToast(`${addedCount} expense${addedCount === 1 ? '' : 's'} added successfully!`, "success");
     } else {
-      title = "Budget Alert";
-      msg = `${res.results.failed.length} expenses could not be added due to budget limits.<br>
-             <div style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;">Updated Balances:</div>
-             <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 0 15px; margin-top: 5px; max-height: 200px; overflow-y: auto;">
-               ${generateBalanceList()}
-             </div>`;
-      type = "warning";
+      showToast(`${addedCount} added, ${failedCount} failed to save.`, "warning");
     }
 
-    showDialog(title, msg, type);
     closeScanModal();
     loadDashboard();
     loadRecentExpenses();
@@ -1775,14 +1701,14 @@ window.openBreakdownModal = async function (type) {
 
   // Set titles based on type
   if (type === "expense") {
-    titleEl.innerText = "Total Expense Breakdown";
-    subtitleEl.innerText = "Select a year to open the full Yearly Report or view Monthly Breakdown";
+    titleEl.innerText = "Expense Breakdown";
+    // subtitleEl.innerText = "Select a year to open the full Yearly Report or view Monthly Breakdown";
   } else if (type === "income") {
-    titleEl.innerText = "Total Income Breakdown";
-    subtitleEl.innerText = "Expand a year to view monthly income and open any month";
+    titleEl.innerText = "Income Breakdown";
+    // subtitleEl.innerText = "Expand a year to view monthly income and open any month";
   } else {
     titleEl.innerText = "Remaining Balance Breakdown";
-    subtitleEl.innerText = "Expand a year to compare monthly savings and open any month";
+    // subtitleEl.innerText = "Expand a year to compare monthly savings and open any month";
   }
 
   bodyEl.innerHTML = `
@@ -1881,22 +1807,22 @@ function renderBreakdownList(type, yearsData) {
             ${yearObj.months.length === 0 ? `
               <div style="opacity: 0.6; font-size: 0.85rem; padding: 6px 0;">No active months recorded in ${yearObj.year}.</div>
             ` : yearObj.months.map(m => {
-              let monthValueText = "";
-              let monthColor = "";
+      let monthValueText = "";
+      let monthColor = "";
 
-              if (isExpense) {
-                monthValueText = `₹${formatINR(m.expense)}`;
-                monthColor = "#fb7185";
-              } else if (isIncome) {
-                monthValueText = `₹${formatINR(m.income)}`;
-                monthColor = "#38bdf8";
-              } else {
-                const isNeg = m.balance < 0;
-                monthValueText = `${isNeg ? '-' : ''}₹${formatINR(Math.abs(m.balance))}`;
-                monthColor = isNeg ? "#fb7185" : "#4ade80";
-              }
+      if (isExpense) {
+        monthValueText = `₹${formatINR(m.expense)}`;
+        monthColor = "#fb7185";
+      } else if (isIncome) {
+        monthValueText = `₹${formatINR(m.income)}`;
+        monthColor = "#38bdf8";
+      } else {
+        const isNeg = m.balance < 0;
+        monthValueText = `${isNeg ? '-' : ''}₹${formatINR(Math.abs(m.balance))}`;
+        monthColor = isNeg ? "#fb7185" : "#4ade80";
+      }
 
-              return `
+      return `
                 <div class="breakdown-month-row">
                   <div style="min-width: 0;">
                     <div class="breakdown-month-name">${m.name}</div>
@@ -1912,7 +1838,7 @@ function renderBreakdownList(type, yearsData) {
                   </div>
                 </div>
               `;
-            }).join('')}
+    }).join('')}
           </div>
         </div>
       </div>

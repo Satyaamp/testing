@@ -16,7 +16,7 @@
     rel="stylesheet">
 
   <link rel="stylesheet" href="css/glass.css" />
-  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/dashboard.css?v=3.3" />
 
   <style>
     /* =============================================================
@@ -45,12 +45,29 @@
       color: #f1f5f9;
       min-height: 100vh;
       margin: 0;
+      padding-top: 80px;
     }
 
     .transactions-container {
       max-width: 1280px;
-      margin: 24px auto;
+      margin: 16px auto;
       padding: 0 20px 80px 20px;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding-top: 60px !important;
+      }
+
+      .transactions-container {
+        margin: 8px auto 40px auto;
+        padding: 0 12px 60px 12px;
+      }
+
+      .hero-header {
+        padding: 14px 16px !important;
+        margin-bottom: 14px !important;
+      }
     }
 
     /* Hero Header */
@@ -687,9 +704,9 @@
           <h1 class="hero-title" id="periodName">Transactions</h1>
           <button class="month-step-btn" onclick="stepMonth(1)" title="Next Month">❯</button>
         </div>
-        <p class="hero-subtitle" id="periodSubtext">
+        <!-- <p class="hero-subtitle" id="periodSubtext">
           Detailed date-wise ledger with server-side pagination and instant CSV/PDF export.
-        </p>
+        </p> -->
       </div>
 
       <!-- <div class="hero-actions">

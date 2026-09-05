@@ -39,10 +39,10 @@ document.addEventListener("DOMContentLoaded", () => {
 function updatePageHeader() {
   const monthName = monthNames[targetMonth - 1] || `Month ${targetMonth}`;
   const titleText = `${monthName} ${targetYear} Transactions`;
-  
+
   const periodNameEl = document.getElementById("periodName");
   const periodSubtextEl = document.getElementById("periodSubtext");
-  
+
   if (periodNameEl) periodNameEl.innerText = `${monthName} ${targetYear}`;
   if (periodSubtextEl) {
     periodSubtextEl.innerText = `Detailed date-wise ledger for ${monthName} ${targetYear} with server pagination and Excel-safe CSV export.`;
@@ -397,7 +397,7 @@ window.applyFilters = function () {
   currentCategory = document.getElementById("categoryFilter")?.value || '';
   currentDate = document.getElementById("dateFilter")?.value || '';
   currentStatus = document.getElementById("statusFilter")?.value || 'all';
-  
+
   const sortVal = document.getElementById("sortFilter")?.value || 'date-desc';
   const [sBy, sOrd] = sortVal.split('-');
   currentSortBy = sBy;

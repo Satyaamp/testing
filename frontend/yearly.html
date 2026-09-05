@@ -10,8 +10,27 @@
 
   <link rel="shortcut icon" href="assets/icons/dashboard.png" type="image/png">
   <link rel="stylesheet" href="css/glass.css" />
-  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/dashboard.css?v=3.3" />
   <style>
+    body {
+      padding-top: 80px;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding-top: 60px !important;
+      }
+
+      .container {
+        padding: 6px 12px;
+      }
+
+      .year-navigation {
+        margin-bottom: 12px;
+        padding: 10px 14px;
+      }
+    }
+
     .year-navigation {
       display: flex;
       align-items: center;

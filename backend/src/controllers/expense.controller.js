@@ -183,8 +183,17 @@ exports.parseSource = async (req, res) => {
       return res.status(400).json({ message: "No text or image provided" });
     }
 
+    // Fetch user categories for smart categorization
+    let userCategories = [];
+    try {
+      const categoryService = require('../services/category.service');
+      userCategories = await categoryService.getUserCategoryNames(req.user.id);
+    } catch (e) {
+      console.warn("Could not fetch user categories for parsing:", e.message);
+    }
+
     // Parse the text into structured data
-    const expenses = parser.parseExpenseText(text);
+    const expenses = parser.parseExpenseText(text, userCategories);
 
     success(res, { expenses, rawText: text }, 'Expenses parsed successfully');
   } catch (error) {
