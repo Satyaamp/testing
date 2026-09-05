@@ -54,15 +54,18 @@ export async function apiRequest(endpoint, method = "GET", body = null, { skipLo
     loaderDiv.classList.add('visible');
   }
 
+  const isFormData = body instanceof FormData;
+  const headers = {
+    ...(token && { Authorization: `Bearer ${token}` }),
+    ...(!isFormData && { "Content-Type": "application/json" })
+  };
+
   let res, data;
   try {
     res = await fetch(API_BASE + endpoint, {
       method,
-      headers: {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` })
-      },
-      body: body ? JSON.stringify(body) : null
+      headers,
+      body: isFormData ? body : (body ? JSON.stringify(body) : null)
     });
 
     // Handle 204 No Content (common for DELETE requests)

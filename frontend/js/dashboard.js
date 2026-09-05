@@ -692,18 +692,44 @@ window.closeScanModal = function () {
 };
 
 window.handleFileSelect = function (input) {
-  const fileName = input.files[0] ? input.files[0].name : "Tap to upload image";
-  document.getElementById("fileNameDisplay").innerText = fileName;
+  const file = input.files ? input.files[0] : null;
+  const placeholder = document.getElementById("fileUploadPlaceholder");
+  const badge = document.getElementById("fileSelectedBadge");
+  const nameText = document.getElementById("selectedFileNameText");
+
+  if (file) {
+    if (placeholder) placeholder.style.display = "none";
+    if (badge) {
+      badge.style.display = "flex";
+      if (nameText) nameText.innerText = `📄 ${file.name} (${(file.size / 1024).toFixed(0)} KB)`;
+    }
+  } else {
+    window.clearSelectedImage();
+  }
+};
+
+window.clearSelectedImage = function (e) {
+  if (e) {
+    e.stopPropagation();
+    e.preventDefault();
+  }
+  const input = document.getElementById("scanImageInput");
+  if (input) input.value = "";
+  const placeholder = document.getElementById("fileUploadPlaceholder");
+  const badge = document.getElementById("fileSelectedBadge");
+  if (placeholder) placeholder.style.display = "block";
+  if (badge) badge.style.display = "none";
+  const display = document.getElementById("fileNameDisplay");
+  if (display) display.innerText = "Tap to upload receipt or bill";
 };
 
 window.resetScan = function (keepText = false) {
   document.getElementById("scanInputSection").classList.remove("hidden");
   document.getElementById("scanPreviewSection").classList.add("hidden");
-  document.getElementById("scanImageInput").value = "";
+  window.clearSelectedImage();
   if (!keepText) {
     document.getElementById("scanTextInput").value = "";
   }
-  document.getElementById("fileNameDisplay").innerText = "Tap to upload image";
   const formatInfo = document.getElementById("formatInfoNote");
   if (formatInfo) formatInfo.style.display = "none";
   scannedExpensesData = [];
@@ -728,11 +754,13 @@ window.toggleFormatInfo = function (e) {
 };
 
 window.processScan = async function () {
+  const fileInput = document.getElementById("scanImageInput");
   const textInput = document.getElementById("scanTextInput");
-  const text = textInput.value.trim();
+  const file = fileInput?.files?.[0];
+  const text = textInput ? textInput.value.trim() : "";
 
-  if (!text) {
-    showDialog("Input Required", "Please paste your expense notes to analyze.", "warning");
+  if (!file && !text) {
+    showDialog("Input Required", "Please upload a receipt image or paste your expense notes.", "warning");
     return;
   }
 
@@ -745,20 +773,70 @@ window.processScan = async function () {
     }
   }
 
-  try {
-    // Use apiRequest for JSON (Text Only)
-    const res = await apiRequest("/expenses/parse", "POST", { text });
+  const analyzeBtn = document.getElementById("scanAnalyzeBtn") || document.querySelector("#scanInputSection .modal-actions button");
+  const origBtnText = analyzeBtn ? analyzeBtn.innerHTML : "Analyze";
+  if (analyzeBtn) {
+    analyzeBtn.disabled = true;
+    analyzeBtn.innerHTML = file ? "⏳ Scanning Receipt (OCR)..." : "⏳ Analyzing...";
+  }
 
-    scannedExpensesData = res.data.expenses;
+  try {
+    let res;
+    if (file) {
+      const formData = new FormData();
+      formData.append("image", file);
+      if (text) {
+        formData.append("text", text);
+      }
+      res = await apiRequest("/expenses/parse", "POST", formData);
+    } else {
+      res = await apiRequest("/expenses/parse", "POST", { text });
+    }
+
+    scannedExpensesData = res.data?.expenses || [];
+
+    if (scannedExpensesData.length === 0) {
+      showToast("No expenses detected in the provided note or receipt.", "warning");
+    }
+
     renderScanPreview(false); // false = not yet validated
 
     document.getElementById("scanInputSection").classList.add("hidden");
     document.getElementById("scanPreviewSection").classList.remove("hidden");
 
   } catch (err) {
-    showDialog("Analysis Failed", err.message || "Failed to analyze text.", "error");
+    showDialog("Analysis Failed", err.message || "Failed to analyze receipt or notes.", "error");
+  } finally {
+    if (analyzeBtn) {
+      analyzeBtn.disabled = false;
+      analyzeBtn.innerHTML = origBtnText;
+    }
   }
 };
+
+function formatScanDisplayDate(dateStr) {
+  if (!dateStr) return "-";
+  try {
+    const parts = String(dateStr).split("-");
+    if (parts.length === 3 && parts[0].length === 4) {
+      const year = parts[0];
+      const monthIdx = parseInt(parts[1], 10) - 1;
+      const day = parts[2].padStart(2, '0');
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const mName = months[monthIdx] || parts[1];
+      return `${day}-${mName}-${year}`; // e.g. 06-Sep-2026
+    }
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      const day = String(d.getDate()).padStart(2, '0');
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      return `${day}-${months[d.getMonth()]}-${d.getFullYear()}`;
+    }
+    return dateStr;
+  } catch (e) {
+    return dateStr;
+  }
+}
 
 function renderScanPreview(isValidated = false) {
   const tbody = document.getElementById("scanPreviewTableBody");
@@ -814,7 +892,7 @@ function renderScanPreview(isValidated = false) {
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td style="white-space: nowrap;">${item.date}</td>
+      <td style="white-space: nowrap; font-weight: 500; color: #e2e8f0;">${formatScanDisplayDate(item.date)}</td>
       <td style="font-weight: 600; color: #34d399;">₹${formatINR(item.amount)}</td>
       <td>
         <select onchange="updateScannedCategory(${globalIndex}, this.value)" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px; padding: 2px 4px; font-size: 0.8rem; outline: none; cursor: pointer; width: 100%;">${options}</select>
@@ -1779,7 +1857,15 @@ function renderBreakdownList(type, yearsData) {
             <div class="breakdown-year-title">Year ${yearObj.year}</div>
             ${isBalance ? `
               <div class="breakdown-in-out-pill">
-                In: ₹${formatINR(yearObj.totalIncome)} • Out: ₹${formatINR(yearObj.totalExpense)}
+                <span class="breakdown-in-tag" title="Income">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                  ₹${formatINR(yearObj.totalIncome)}
+                </span>
+                <span class="breakdown-sep">•</span>
+                <span class="breakdown-out-tag" title="Expense">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+                  ₹${formatINR(yearObj.totalExpense)}
+                </span>
               </div>
             ` : ''}
           </div>
@@ -1827,7 +1913,17 @@ function renderBreakdownList(type, yearsData) {
                   <div style="min-width: 0;">
                     <div class="breakdown-month-name">${m.name}</div>
                     ${isBalance ? `
-                      <div class="breakdown-month-sub">In: ₹${formatINR(m.income)} | Out: ₹${formatINR(m.expense)}</div>
+                      <div class="breakdown-month-sub">
+                        <span class="breakdown-in-tag" title="Income">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                          ₹${formatINR(m.income)}
+                        </span>
+                        <span class="breakdown-sep">|</span>
+                        <span class="breakdown-out-tag" title="Expense">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+                          ₹${formatINR(m.expense)}
+                        </span>
+                      </div>
                     ` : ''}
                   </div>
                   <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">

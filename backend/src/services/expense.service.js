@@ -342,11 +342,11 @@ exports.getPaginatedTransactions = async (userId, query = {}) => {
   let fetchedIncomes = [];
 
   if (type === 'all' || type === 'expense') {
-    fetchedExpenses = await Expense.find(expMatch).lean();
+    fetchedExpenses = await Expense.find(expMatch).sort({ date: -1, _id: -1 }).lean();
   }
   if (type === 'all' || type === 'income') {
     if (status !== 'overBudget' && incMatch._id !== null) {
-      fetchedIncomes = await Income.find(incMatch).lean();
+      fetchedIncomes = await Income.find(incMatch).sort({ date: -1, _id: -1 }).lean();
     }
   }
 
@@ -354,6 +354,7 @@ exports.getPaginatedTransactions = async (userId, query = {}) => {
   const unified = [
     ...fetchedExpenses.map(e => ({
       _id: e._id,
+      createdAt: e.createdAt,
       type: 'expense',
       category: e.category,
       amount: e.amount,
@@ -365,6 +366,7 @@ exports.getPaginatedTransactions = async (userId, query = {}) => {
     })),
     ...fetchedIncomes.map(i => ({
       _id: i._id,
+      createdAt: i.createdAt,
       type: 'income',
       category: '-',
       source: i.source || 'Income',
@@ -377,14 +379,20 @@ exports.getPaginatedTransactions = async (userId, query = {}) => {
     }))
   ];
 
-  // 4. Sort
+  // 4. Sort (by date, tie-breaking by exact creation datetime)
   unified.sort((a, b) => {
     if (sortBy === 'amount') {
       return sortOrder === 'asc' ? a.amount - b.amount : b.amount - a.amount;
     }
     const dateA = new Date(a.date).getTime();
     const dateB = new Date(b.date).getTime();
-    return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    if (dateA !== dateB) {
+      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    }
+    // Tie-breaker: sort by creation datetime / ObjectId timestamp (LIFO)
+    const timeA = a.createdAt ? new Date(a.createdAt).getTime() : (a._id ? parseInt(String(a._id).substring(0, 8), 16) * 1000 : 0);
+    const timeB = b.createdAt ? new Date(b.createdAt).getTime() : (b._id ? parseInt(String(b._id).substring(0, 8), 16) * 1000 : 0);
+    return sortOrder === 'asc' ? timeA - timeB : timeB - timeA;
   });
 
   // 5. Paginate

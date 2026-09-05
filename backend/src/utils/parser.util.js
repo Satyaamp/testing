@@ -86,6 +86,24 @@ const systemCategoryKeywords = {
   ]
 };
 
+// Month names mapping for date parsing
+const monthMap = {
+  jan: '01', january: '01',
+  feb: '02', february: '02',
+  mar: '03', march: '03',
+  apr: '04', april: '04',
+  may: '05',
+  jun: '06', june: '06',
+  jul: '07', july: '07',
+  aug: '08', august: '08',
+  sep: '09', sept: '09', september: '09',
+  oct: '10', october: '10',
+  nov: '11', november: '11',
+  dec: '12', december: '12'
+};
+
+const monthNamesPattern = 'jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t|tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?';
+
 // 2. Parsing: Extract structured data from raw text
 exports.parseExpenseText = (text, availableCategories = []) => {
   const lines = text.split(/\r?\n/);
@@ -96,23 +114,58 @@ exports.parseExpenseText = (text, availableCategories = []) => {
     line = line.trim();
     if (!line) return;
 
-    // A. Extract Date (DD/MM/YYYY, DD-MM-YYYY, or YYYY-MM-DD)
-    const dateMatch = line.match(/(\d{1,2}[./-]\d{1,2}[./-]\d{2,4})|(\d{4}[./-]\d{1,2}[./-]\d{1,2})/);
-    let date = dateMatch ? dateMatch[0] : null;
+    // A. Extract Date (supports DD-MMM-YYYY, DD MMM YYYY, DD/MM/YYYY, DD-MM-YYYY, or YYYY-MM-DD)
+    let date = null;
+    let matchedDateText = null;
 
-    // Normalize date to YYYY-MM-DD
-    if (date) {
-      if (!date.match(/^\d{4}/)) {
-        const parts = date.split(/[./-]/);
-        if (parts[2].length === 2) parts[2] = '20' + parts[2];
-        date = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-      }
+    // 1. With year: DD-Month-YYYY or DD Month YYYY (e.g., 12-Sep-2026, 12 September 26)
+    const nameWithYearRegex = new RegExp('(\\b\\d{1,2})[\\s./-]+(' + monthNamesPattern + ')[\\s./-]+(20\\d{2}|19\\d{2}|\\d{2})\\b', 'i');
+    const nameWithYearMatch = line.match(nameWithYearRegex);
+
+    if (nameWithYearMatch) {
+      const day = nameWithYearMatch[1].padStart(2, '0');
+      const mKey = nameWithYearMatch[2].toLowerCase();
+      const month = monthMap[mKey] || '01';
+      let year = nameWithYearMatch[3];
+      if (year.length === 2) year = '20' + year;
+      date = `${year}-${month}-${day}`;
+      matchedDateText = nameWithYearMatch[0];
     } else {
+      // 2. Without year: DD-Month or DD Month (e.g., 12-Sep, 12 October)
+      const nameWithoutYearRegex = new RegExp('(\\b\\d{1,2})[\\s./-]+(' + monthNamesPattern + ')\\b', 'i');
+      const nameWithoutYearMatch = line.match(nameWithoutYearRegex);
+      if (nameWithoutYearMatch) {
+        const day = nameWithoutYearMatch[1].padStart(2, '0');
+        const mKey = nameWithoutYearMatch[2].toLowerCase();
+        const month = monthMap[mKey] || '01';
+        const currentYear = new Date().getFullYear();
+        date = `${currentYear}-${month}-${day}`;
+        matchedDateText = nameWithoutYearMatch[0];
+      }
+    }
+
+    // 3. Check numeric dates (DD/MM/YYYY, DD-MM-YYYY, or YYYY-MM-DD)
+    if (!date) {
+      const numMatch = line.match(/(\b\d{1,2}[./-]\d{1,2}[./-](?:20\d{2}|19\d{2}|\d{2})\b)|(\b(?:20\d{2}|19\d{2})[./-]\d{1,2}[./-]\d{1,2}\b)/);
+      if (numMatch) {
+        matchedDateText = numMatch[0];
+        if (!matchedDateText.match(/^\d{4}/)) {
+          const parts = matchedDateText.split(/[./-]/);
+          if (parts[2].length === 2) parts[2] = '20' + parts[2];
+          date = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        } else {
+          date = matchedDateText;
+        }
+      }
+    }
+
+    // Default to today if no date found in line
+    if (!date) {
       date = new Date().toISOString().split('T')[0];
     }
 
     // B. Extract Amount
-    let tempLine = dateMatch ? line.replace(dateMatch[0], '') : line;
+    let tempLine = matchedDateText ? line.replace(matchedDateText, '') : line;
     const amountMatch = tempLine.match(/(\d+(?:\.\d{1,2})?)/);
     const amount = amountMatch ? parseFloat(amountMatch[0]) : null;
 

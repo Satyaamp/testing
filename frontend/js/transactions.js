@@ -235,22 +235,17 @@ function renderMobileCards(transactions) {
 
     return `
       <div class="mobile-tx-card">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-          <div>
-            <span class="pill-badge ${isIncome ? 'pill-inflow' : 'pill-outflow'}">
-              ${isIncome ? '↑ Inflow' : '↓ Outflow'}
-            </span>
-            <span style="font-size: 0.8rem; color: #64748b; margin-left: 8px;">${dateFormatted}</span>
-          </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.88rem; font-weight: 600; color: #94a3b8;">${dateFormatted}</span>
           <span class="amount-cell ${isIncome ? 'amount-positive' : 'amount-negative'}">
             ${isIncome ? '+' : '-'}₹${formatINR(tx.amount)}
           </span>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
           <div>
             ${isIncome ? `
-              <span style="font-weight: 700; color: #f8fafc; font-size: 0.98rem;">${tx.description || 'Income'}</span>
+              <span class="category-tag" style="background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3);">Income</span>
             ` : `
               <span class="category-tag">${tx.category}</span>
             `}
@@ -262,7 +257,9 @@ function renderMobileCards(transactions) {
 
         ${!isIncome && tx.description && tx.description !== '-' ? `
           <div style="font-size: 0.85rem; color: #94a3b8;">${tx.description}</div>
-        ` : ''}
+        ` : (isIncome && tx.description && tx.description !== '-' && tx.description.toLowerCase() !== 'income' ? `
+          <div style="font-size: 0.85rem; color: #94a3b8;">${tx.description}</div>
+        ` : '')}
       </div>
     `;
   }).join('');

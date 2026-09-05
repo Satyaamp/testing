@@ -176,11 +176,14 @@ exports.parseSource = async (req, res) => {
 
     // If an image file is uploaded, perform OCR
     if (req.file) {
-      text = await parser.extractTextFromImage(req.file.buffer);
+      console.log(`[OCR] Processing image receipt (${(req.file.size / 1024).toFixed(1)} KB)...`);
+      const ocrText = await parser.extractTextFromImage(req.file.buffer);
+      console.log(`[OCR] Extracted text length: ${ocrText?.length || 0}`);
+      text = text ? `${text}\n${ocrText}` : (ocrText || '');
     }
 
-    if (!text) {
-      return res.status(400).json({ message: "No text or image provided" });
+    if (!text || !text.trim()) {
+      return res.status(400).json({ message: "No readable text detected in receipt. Please ensure the image is clear or type notes manually." });
     }
 
     // Fetch user categories for smart categorization
@@ -197,6 +200,7 @@ exports.parseSource = async (req, res) => {
 
     success(res, { expenses, rawText: text }, 'Expenses parsed successfully');
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("[Parse Source Error]:", error);
+    res.status(500).json({ message: error.message || 'Failed to process receipt image' });
   }
 };
