@@ -65,7 +65,7 @@ function setupCarousel() {
 
     startX = e.touches[0].clientX;
     isDragging = true;
-  });
+  }, { passive: true });
 
   track.addEventListener("touchend", (e) => {
     if (!isDragging) return;
@@ -80,7 +80,7 @@ function setupCarousel() {
         prevSlide();
       }
     }
-  });
+  }, { passive: true });
 
   // Resize Observer to adjust height dynamically
   const resizeObserver = new ResizeObserver(() => {
@@ -1765,41 +1765,53 @@ function showToast(message, type = "error", duration = 3000) {
   if (!toast) {
     toast = document.createElement("div");
     toast.id = "toast-notification";
-
-    // Apply styling via JS so no CSS file edit is needed
-    Object.assign(toast.style, {
-      position: "fixed",
-      bottom: "80px", // Just above bottom nav usually
-      left: "50%",
-      transform: "translateX(-50%) translateY(20px)",
-
-      backdropFilter: "blur(12px)",
-      webkitBackdropFilter: "blur(12px)",
-      border: "1px solid rgba(255, 255, 255, 0.25)",
-
-      color: "#fff",
-      padding: "12px 24px",
-      borderRadius: "50px",
-      fontSize: "0.95rem",
-      fontWeight: "500",
-      zIndex: "9999",
-      opacity: "0",
-      transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-      pointerEvents: "auto",
-      pointerEvents: "auto", // Ensure button is clickable
-      whiteSpace: "nowrap"
-    });
-
     document.body.appendChild(toast);
   }
 
+  // Always re-apply responsive styling to adapt to orientation / viewport size
+  Object.assign(toast.style, {
+    position: "fixed",
+    bottom: "28px",
+    left: "50%",
+    transform: "translateX(-50%) translateY(20px)",
+    backdropFilter: "blur(14px)",
+    webkitBackdropFilter: "blur(14px)",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
+    color: "#fff",
+    padding: "10px 16px",
+    borderRadius: "14px",
+    fontSize: "0.88rem",
+    fontWeight: "500",
+    zIndex: "999999",
+    opacity: "0",
+    transition: "all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    pointerEvents: "auto",
+    whiteSpace: "normal", // Wrap text so it never goes outside phone screens
+    wordBreak: "break-word",
+    maxWidth: "min(92vw, 420px)",
+    width: "max-content",
+    boxSizing: "border-box",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "10px",
+    textAlign: "left",
+    lineHeight: "1.4"
+  });
+
   // 3. Apply Dynamic Colors based on Type
   if (type === "success") {
-    toast.style.background = "rgba(34, 197, 94, 0.85)"; // Green
-    toast.style.boxShadow = "0 8px 32px rgba(34, 197, 94, 0.3)";
+    toast.style.background = "rgba(34, 197, 94, 0.92)"; // Green
+    toast.style.boxShadow = "0 8px 30px rgba(34, 197, 94, 0.35)";
+  } else if (type === "info") {
+    toast.style.background = "rgba(14, 165, 233, 0.92)"; // Cyan / Info
+    toast.style.boxShadow = "0 8px 30px rgba(14, 165, 233, 0.35)";
+  } else if (type === "warning") {
+    toast.style.background = "rgba(245, 158, 11, 0.92)"; // Amber / Warning
+    toast.style.boxShadow = "0 8px 30px rgba(245, 158, 11, 0.35)";
   } else {
-    toast.style.background = "rgba(220, 38, 38, 0.85)"; // Red
-    toast.style.boxShadow = "0 8px 32px rgba(220, 38, 38, 0.3)";
+    toast.style.background = "rgba(220, 38, 38, 0.92)"; // Red
+    toast.style.boxShadow = "0 8px 30px rgba(220, 38, 38, 0.35)";
   }
 
   // 4. Clear existing timeout to prevent previous auto-hide from closing this new toast
@@ -1808,15 +1820,18 @@ function showToast(message, type = "error", duration = 3000) {
     toast.hideTimeout = null;
   }
 
-  // 4. Set text and show
+  // 5. Populate text and OK button
   toast.innerHTML = "";
   const textSpan = document.createElement("span");
+  textSpan.style.cssText = "flex: 1; word-break: break-word;";
   textSpan.innerText = message;
   toast.appendChild(textSpan);
 
   const okBtn = document.createElement("button");
   okBtn.innerText = "OK";
-  okBtn.style.cssText = "margin-left: 12px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.5); color: white; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold;";
+  okBtn.style.cssText = "margin-left: auto; background: rgba(255,255,255,0.22); border: 1px solid rgba(255,255,255,0.5); color: white; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; flex-shrink: 0; transition: background 0.15s;";
+  okBtn.onmouseover = () => okBtn.style.background = "rgba(255,255,255,0.35)";
+  okBtn.onmouseout = () => okBtn.style.background = "rgba(255,255,255,0.22)";
 
   okBtn.onclick = () => {
     toast.style.opacity = "0";
@@ -1826,14 +1841,13 @@ function showToast(message, type = "error", duration = 3000) {
 
   toast.appendChild(okBtn);
 
-  toast.style.opacity = "1";
-  toast.style.transform = "translateX(-50%) translateY(0)";
+  // Animate in
+  requestAnimationFrame(() => {
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+  });
 
-  // 4. Clear existing timeout if multiple swipes happen quickly
-  if (toast.hideTimeout) clearTimeout(toast.hideTimeout);
-
-  // 5. Hide after duration (if > 0)
-  // 5. Only set auto-hide if duration is greater than 0
+  // 6. Only set auto-hide if duration is greater than 0
   if (duration > 0) {
     toast.hideTimeout = setTimeout(() => {
       toast.style.opacity = "0";
@@ -2338,3 +2352,832 @@ window.saveModalReminderTime = async function () {
 
 // Check reminder status on page load to light up dot
 loadDashboardReminderSettings();
+
+/* ===============================
+   VOICE & HINGLISH EXPENSE/INCOME ENTRY (OPTION 1 CONFIRMATION)
+================================ */
+
+let voiceRecognition = null;
+let isVoiceListening = false;
+let voiceParsedTransactions = [];
+let activeVoiceTarget = null; // null = voiceModal, 'expense' = expenseModal, 'income' = incomeModal, 'bulk' = scanModal
+let voiceSilenceTimer = null;
+
+const voiceSystemCategoryKeywords = {
+  'Transport': [
+    'transport', 'travel', 'uber', 'ola', 'rapido', 'taxi', 'cab', 'bus', 'train',
+    'flight', 'air', 'metro', 'auto', 'fuel', 'petrol', 'diesel', 'cng', 'parking',
+    'toll', 'fare', 'vehicle', 'bike', 'car', 'scooter', 'fastag', 'gaadi'
+  ],
+  'Food': [
+    'food', 'lunch', 'dinner', 'breakfast', 'snack', 'snacks', 'cafe', 'restaurant',
+    'hotel', 'zomato', 'swiggy', 'tea', 'chai', 'coffee', 'bakery', 'meal', 'meals',
+    'burger', 'pizza', 'dosa', 'samosa', 'maggi', 'sweets', 'mithai', 'dhaba',
+    'nashta', 'khana', 'paneer', 'roti', 'lassi'
+  ],
+  'Groceries': [
+    'grocery', 'groceries', 'supermarket', 'mart', 'dmart', 'blinkit', 'zepto',
+    'instamart', 'bigbasket', 'milk', 'vegetables', 'vegetable', 'fruits', 'fruit',
+    'kirana', 'ration', 'sabzi', 'sabji', 'atta', 'rice', 'dal', 'oil', 'masala', 'doodh'
+  ],
+  'Rent': [
+    'rent', 'house rent', 'room rent', 'flat rent', 'hostel', 'pg', 'maintenance', 'landlord', 'kiraya'
+  ],
+  'Electric Bill': [
+    'electricity', 'electric', 'power bill', 'current bill', 'bijli', 'electricity bill',
+    'bescom', 'msedcl', 'uppcl', 'tneb', 'cesc'
+  ],
+  'Water Bill': [
+    'water bill', 'jal board', 'water tanker', 'pani bill'
+  ],
+  'Cylinder': [
+    'cylinder', 'lpg', 'gas cylinder', 'indane', 'bharat gas', 'hp gas', 'gas bill', 'cooking gas'
+  ],
+  'Bills': [
+    'bill', 'bills', 'recharge', 'mobile recharge', 'dth', 'postpaid', 'prepaid',
+    'airtel', 'jio', 'vi', 'vodafone', 'utility', 'broadband', 'wifi'
+  ],
+  'Shopping': [
+    'shopping', 'amazon', 'flipkart', 'myntra', 'meesho', 'ajio', 'clothes',
+    'clothing', 'shoes', 'dress', 'shirt', 'pants', 'tshirt', 'mall', 'store', 'fashion'
+  ],
+  'Health': [
+    'health', 'doctor', 'medicine', 'medicines', 'pharmacy', 'hospital', 'clinic',
+    'medical', 'test', 'lab', 'apollo', 'pharmeasy', '1mg', 'dentist', 'consultation',
+    'dawa', 'dawai'
+  ],
+  'Salary': [
+    'salary', 'stipend', 'wages', 'kamai', 'bonus', 'freelance'
+  ]
+};
+
+function escapeVoiceRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function escapeVoiceHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+const voiceMonthNames = {
+  jan: 1, january: 1,
+  feb: 2, february: 2,
+  mar: 3, march: 3,
+  apr: 4, april: 4,
+  may: 5,
+  jun: 6, june: 6,
+  jul: 7, july: 7,
+  aug: 8, august: 8,
+  sep: 9, sept: 9, september: 9,
+  oct: 10, october: 10,
+  nov: 11, november: 11,
+  dec: 12, december: 12
+};
+
+window.parseHinglishVoiceTranscript = function (transcript) {
+  if (!transcript || typeof transcript !== 'string') return [];
+
+  let text = transcript.trim();
+  // Segment on connectors: 'aur', 'phir', 'and', 'then', 'also', commas, semicolons, newlines
+  const connectorRegex = /\b(?:aur|phir|and|then|also)\b|[,;\n]+/gi;
+  const rawSegments = text.split(connectorRegex).map(s => s.trim()).filter(Boolean);
+
+  const items = [];
+  const now = new Date();
+  const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayIso = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+
+  const userCats = Array.isArray(expenseCategories) ? expenseCategories.map(c => typeof c === 'string' ? c : c.name).filter(Boolean) : [];
+
+  for (const seg of rawSegments) {
+    let segmentText = seg;
+
+    // 1. Detect Date (Explicit DD-MM-YYYY, YYYY-MM-DD, Named Month, or Relative kal/aaj/parso)
+    let date = todayIso;
+    let dateText = 'Today';
+
+    // 1a. Explicit full date DD-MM-YYYY or DD/MM/YYYY or DD.MM.YYYY
+    const fullDmy = segmentText.match(/\b(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})\b/);
+    if (fullDmy) {
+      const day = parseInt(fullDmy[1], 10);
+      const month = parseInt(fullDmy[2], 10);
+      const year = parseInt(fullDmy[3], 10);
+      if (month >= 1 && month <= 12 && day >= 1 && day <= 31 && year >= 2000 && year <= 2099) {
+        date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        dateText = `${String(day).padStart(2, '0')}-${String(month).padStart(2, '0')}-${year}`;
+        segmentText = segmentText.replace(fullDmy[0], ' ');
+      }
+    } else {
+      // 1b. Explicit full date YYYY-MM-DD
+      const fullYmd = segmentText.match(/\b(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})\b/);
+      if (fullYmd) {
+        const year = parseInt(fullYmd[1], 10);
+        const month = parseInt(fullYmd[2], 10);
+        const day = parseInt(fullYmd[3], 10);
+        if (month >= 1 && month <= 12 && day >= 1 && day <= 31 && year >= 2000 && year <= 2099) {
+          date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          dateText = `${String(day).padStart(2, '0')}-${String(month).padStart(2, '0')}-${year}`;
+          segmentText = segmentText.replace(fullYmd[0], ' ');
+        }
+      } else {
+        // 1c. Named month: e.g. "4th March 2026", "4 march", "15 aug"
+        const dMonthY = segmentText.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]+)(?:\s+(\d{4}))?\b/i);
+        if (dMonthY && voiceMonthNames[dMonthY[2].toLowerCase()]) {
+          const day = parseInt(dMonthY[1], 10);
+          const month = voiceMonthNames[dMonthY[2].toLowerCase()];
+          const year = dMonthY[3] ? parseInt(dMonthY[3], 10) : now.getFullYear();
+          if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+            date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            dateText = `${String(day).padStart(2, '0')}-${String(month).padStart(2, '0')}-${year}`;
+            segmentText = segmentText.replace(dMonthY[0], ' ');
+          }
+        } else {
+          // 1d. Named month: "March 4th 2026", "Aug 15"
+          const monthDY = segmentText.match(/\b([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s*,?\s*(\d{4}))?\b/i);
+          if (monthDY && voiceMonthNames[monthDY[1].toLowerCase()]) {
+            const month = voiceMonthNames[monthDY[1].toLowerCase()];
+            const day = parseInt(monthDY[2], 10);
+            const year = monthDY[3] ? parseInt(monthDY[3], 10) : now.getFullYear();
+            if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+              date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+              dateText = `${String(day).padStart(2, '0')}-${String(month).padStart(2, '0')}-${year}`;
+              segmentText = segmentText.replace(monthDY[0], ' ');
+            }
+          } else if (/\b(?:parso|parson|day\s*before\s*yesterday)\b/i.test(segmentText)) {
+            const d = new Date(now);
+            d.setDate(d.getDate() - 2);
+            date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            dateText = '2 Days Ago';
+            segmentText = segmentText.replace(/\b(?:parso|parson|day\s*before\s*yesterday)\b/gi, ' ');
+          } else if (/\b(?:yesterday|kal|beeta\s*kal)\b/i.test(segmentText)) {
+            date = yesterdayIso;
+            dateText = 'Yesterday';
+            segmentText = segmentText.replace(/\b(?:yesterday|kal|beeta\s*kal)\b/gi, ' ');
+          } else if (/\b(?:today|aaj)\b/i.test(segmentText)) {
+            date = todayIso;
+            dateText = 'Today';
+            segmentText = segmentText.replace(/\b(?:today|aaj)\b/gi, ' ');
+          } else {
+            // 1e. Hindi spoken: "4 tarikh ko", "5 tareekh", "20 date ko"
+            const tarikhMatch = segmentText.match(/\b(\d{1,2})\s*(?:st|nd|rd|th)?\s*(?:tarikh|tareekh|taareekh|date)\s*(?:ko)?\b/i);
+            if (tarikhMatch) {
+              const day = parseInt(tarikhMatch[1], 10);
+              const m = now.getMonth() + 1;
+              const y = now.getFullYear();
+              if (day >= 1 && day <= 31) {
+                date = `${y}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                dateText = `${String(day).padStart(2, '0')}-${String(m).padStart(2, '0')}-${y}`;
+                segmentText = segmentText.replace(tarikhMatch[0], ' ');
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // 2. Detect Amount
+    let amount = null;
+    const kMatch = segmentText.match(/\b(\d+(?:\.\d+)?)\s*k\b/i);
+    if (kMatch) {
+      amount = parseFloat(kMatch[1]) * 1000;
+      segmentText = segmentText.replace(kMatch[0], ' ');
+    } else {
+      const numMatch = segmentText.match(/(?:rs\.?|inr|₹)?\s*(\d+(?:\.\d{1,2})?)/i);
+      if (numMatch) {
+        amount = parseFloat(numMatch[1]);
+        segmentText = segmentText.replace(numMatch[0], ' ');
+      }
+    }
+
+    if (!amount || isNaN(amount) || amount <= 0) {
+      continue;
+    }
+
+    // 3. Detect Type (Income vs Expense)
+    const incomeKeywords = /\b(?:salary|income|bonus|cashback|credited|aaya|aayi|mila|mile|kamaya|interest|refund)\b/i;
+    const isIncome = incomeKeywords.test(segmentText);
+    const type = isIncome ? 'income' : 'expense';
+
+    // 4. Clean Description
+    let cleanDesc = segmentText
+      .replace(/\b(?:rs\.?|inr|rupees|rupaye|rupay|bucks)\b/gi, '')
+      .replace(/[₹$]/g, '')
+      .replace(/\b(?:spent|paid|kharcha|diya|kharida|bheja|on|for|ka|ki|ke|liye)\b/gi, '')
+      .replace(/\b(?:salary|income|bonus|cashback|credited|aaya|aayi|mila|mile|kamaya|interest|refund)\b/gi, '')
+      .replace(/^[\s\-:–—]+|[\s\-:–—]+$/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    // Specific Income source extraction
+    let incomeSource = 'Salary';
+    if (isIncome) {
+      const sourceMatches = ['Bonus', 'Freelance', 'Salary', 'Cashback', 'Gift', 'Rental', 'Investment', 'Interest'];
+      for (const sm of sourceMatches) {
+        if (new RegExp(`\\b${sm}\\b`, 'i').test(seg)) {
+          incomeSource = sm;
+          break;
+        }
+      }
+      if (incomeSource === 'Salary' && cleanDesc) {
+        incomeSource = cleanDesc.charAt(0).toUpperCase() + cleanDesc.slice(1);
+      }
+    }
+
+    // 5. Category Detection
+    let category = null;
+    const allCandidates = Array.from(new Set([...userCats, ...Object.keys(voiceSystemCategoryKeywords)]));
+
+    for (const cand of allCandidates) {
+      const regex = new RegExp(`(^|[^a-z0-9])${escapeVoiceRegex(cand.toLowerCase())}([^a-z0-9]|$)`, 'i');
+      if (regex.test(cleanDesc.toLowerCase()) || regex.test(seg.toLowerCase())) {
+        category = cand;
+        break;
+      }
+    }
+
+    if (!category) {
+      for (const [catName, keywords] of Object.entries(voiceSystemCategoryKeywords)) {
+        const match = keywords.some(kw => {
+          const kwRegex = new RegExp(`(^|[^a-z0-9])${escapeVoiceRegex(kw)}([^a-z0-9]|$)`, 'i');
+          return kwRegex.test(cleanDesc.toLowerCase()) || kwRegex.test(seg.toLowerCase());
+        });
+        if (match) {
+          category = catName;
+          break;
+        }
+      }
+    }
+
+    if (!category) {
+      category = isIncome ? 'Salary' : 'Other';
+    }
+
+    const note = cleanDesc || (isIncome ? incomeSource : category);
+
+    items.push({
+      id: `vt_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      type,
+      amount,
+      category: isIncome ? incomeSource : category,
+      source: isIncome ? incomeSource : undefined,
+      date,
+      dateText,
+      description: note,
+      rawSegment: seg
+    });
+  }
+
+  return items;
+};
+
+window.openVoiceModal = function () {
+  activeVoiceTarget = null;
+  const modal = document.getElementById("voiceModal");
+  if (!modal) return;
+
+  document.getElementById("voiceListeningSection")?.classList.remove("hidden");
+  document.getElementById("voiceReviewSection")?.classList.add("hidden");
+
+  const transcriptInput = document.getElementById("voiceTranscriptInput");
+  if (transcriptInput) transcriptInput.value = "";
+
+  const tipsContent = document.getElementById("voiceTipsContent");
+  const tipsBtn = document.getElementById("voiceTipsToggleBtn");
+  const tipsArrow = document.getElementById("voiceTipsArrow");
+  if (tipsContent) tipsContent.classList.add("hidden");
+  if (tipsBtn) tipsBtn.classList.remove("active");
+  if (tipsArrow) tipsArrow.innerText = "▼";
+
+  setVoiceListeningUI(false, "Ready — Tap Start to Speak");
+  modal.classList.remove("hidden");
+  document.body.classList.add("modal-open");
+};
+
+window.toggleVoiceTips = function () {
+  const content = document.getElementById("voiceTipsContent");
+  const toggleBtn = document.getElementById("voiceTipsToggleBtn");
+  const arrow = document.getElementById("voiceTipsArrow");
+  if (!content) return;
+
+  const isHidden = content.classList.contains("hidden");
+  if (isHidden) {
+    content.classList.remove("hidden");
+    if (toggleBtn) toggleBtn.classList.add("active");
+    if (arrow) arrow.innerText = "▲";
+  } else {
+    content.classList.add("hidden");
+    if (toggleBtn) toggleBtn.classList.remove("active");
+    if (arrow) arrow.innerText = "▼";
+  }
+};
+
+window.closeVoiceModal = function () {
+  window.stopVoiceRecognition();
+  const modal = document.getElementById("voiceModal");
+  if (modal) modal.classList.add("hidden");
+  document.body.classList.remove("modal-open");
+  voiceParsedTransactions = [];
+  activeVoiceTarget = null;
+};
+
+function setVoiceListeningUI(listening, statusText) {
+  isVoiceListening = listening;
+  const micCircle = document.getElementById("voiceMicCircle");
+  const micIcon = document.getElementById("voiceMicIcon");
+  const statusBadge = document.getElementById("voiceStatusBadge");
+  const statusLabel = document.getElementById("voiceStatusText");
+  const toggleBtn = document.getElementById("voiceToggleBtn");
+  const toggleIcon = document.getElementById("voiceToggleIcon");
+  const toggleText = document.getElementById("voiceToggleText");
+
+  if (listening) {
+    if (micCircle) micCircle.classList.add("listening");
+    if (micIcon) micIcon.innerText = "🛑";
+    if (statusBadge) statusBadge.classList.add("active");
+    if (statusLabel) statusLabel.innerText = statusText || "Listening... Speak now";
+
+    if (toggleBtn) {
+      toggleBtn.style.background = "linear-gradient(135deg, #ef4444, #f43f5e)";
+      toggleBtn.style.boxShadow = "0 4px 20px rgba(239, 68, 68, 0.5)";
+    }
+    if (toggleIcon) toggleIcon.innerText = "⏹️";
+    if (toggleText) toggleText.innerText = "Stop & Process";
+  } else {
+    if (micCircle) micCircle.classList.remove("listening");
+    if (micIcon) micIcon.innerText = "🎤";
+    if (statusBadge) statusBadge.classList.remove("active");
+    if (statusLabel) statusLabel.innerText = statusText || "Ready — Tap Start to Speak";
+
+    if (toggleBtn) {
+      toggleBtn.style.background = "linear-gradient(135deg, #0284c7, #2563eb)";
+      toggleBtn.style.boxShadow = "0 4px 15px rgba(2, 132, 199, 0.4)";
+    }
+    if (toggleIcon) toggleIcon.innerText = "🎙️";
+    if (toggleText) toggleText.innerText = "Start Speaking";
+  }
+}
+
+function cleanupVoiceEngine() {
+  if (voiceRecognition) {
+    try {
+      voiceRecognition.onstart = null;
+      voiceRecognition.onresult = null;
+      voiceRecognition.onerror = null;
+      voiceRecognition.onend = null;
+      voiceRecognition.abort();
+    } catch (e) { }
+    voiceRecognition = null;
+  }
+}
+
+let voiceLanguageFallbackTried = false;
+
+window.initVoiceEngine = function (lang) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    return null;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+  recognition.lang = lang || 'en-IN'; // Indian English natively supports Hindi/Hinglish words
+
+  recognition.onstart = function () {
+    setVoiceListeningUI(true, "Listening... Speak now");
+  };
+
+  recognition.onresult = function (event) {
+    let interim = "";
+    let final = "";
+
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        final += transcript;
+      } else {
+        interim += transcript;
+      }
+    }
+
+    const currentText = (final || interim).trim();
+    if (activeVoiceTarget === 'bulk') {
+      const bulkInput = document.getElementById("scanTextInput");
+      if (bulkInput && final) {
+        bulkInput.value = (bulkInput.value ? bulkInput.value + "\n" : "") + final.trim();
+      }
+    } else {
+      const transcriptInput = document.getElementById("voiceTranscriptInput");
+      if (transcriptInput && currentText) {
+        transcriptInput.value = currentText;
+      }
+    }
+  };
+
+  recognition.onerror = function (event) {
+    console.warn("Speech Recognition Event:", event.error);
+    if (event.error === 'network') {
+      // If we haven't tried language fallback yet, try with default navigator language
+      if (!voiceLanguageFallbackTried && recognition.lang === 'en-IN') {
+        voiceLanguageFallbackTried = true;
+        console.log("Retrying speech recognition with system language fallback...");
+        cleanupVoiceEngine();
+        setTimeout(() => {
+          window.startVoiceRecognition(navigator.language || 'en-US');
+        }, 300);
+        return;
+      }
+
+      setVoiceListeningUI(false, "Cloud speech offline. You can type below!");
+      const input = document.getElementById("voiceTranscriptInput");
+      if (input) input.focus();
+      showToast("Speech service network error. Please type notes directly below.", "warning");
+    } else if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+      setVoiceListeningUI(false, "Microphone access blocked.");
+      showDialog(
+        "Microphone Access Required",
+        "Please allow microphone access in your browser settings (chrome://settings/content/microphone) or Windows Privacy Settings, or type your expense directly in the text box.",
+        "warning"
+      );
+    } else if (event.error === 'no-speech') {
+      setVoiceListeningUI(false, "No speech detected. Tap Start to try again.");
+    } else {
+      setVoiceListeningUI(false, "Mic stopped. Tap Start to speak.");
+    }
+  };
+
+  recognition.onend = function () {
+    if (isVoiceListening) {
+      setVoiceListeningUI(false, "Ready — Tap Start to Speak");
+    }
+  };
+
+  return recognition;
+};
+
+window.startVoiceRecognition = function (langOverride) {
+  try {
+    if (!langOverride) {
+      voiceLanguageFallbackTried = false;
+    }
+    cleanupVoiceEngine();
+
+    voiceRecognition = window.initVoiceEngine(langOverride);
+    if (!voiceRecognition) {
+      showToast("Speech recognition not supported in this browser. Please use Chrome, Edge, or type below.", "warning");
+      return;
+    }
+    voiceRecognition.start();
+  } catch (e) {
+    console.error("Voice start error", e);
+    setVoiceListeningUI(false, "Ready — Tap Start to Speak");
+  }
+};
+
+window.stopVoiceRecognition = function () {
+  if (voiceSilenceTimer) clearTimeout(voiceSilenceTimer);
+  if (voiceRecognition) {
+    try {
+      voiceRecognition.stop();
+    } catch (e) { }
+  }
+  setVoiceListeningUI(false, "Ready — Tap Start to Speak");
+};
+
+window.toggleVoiceRecognition = function () {
+  if (isVoiceListening) {
+    // User explicitly pressed Stop!
+    window.stopVoiceRecognition();
+    window.processVoiceTranscript();
+  } else {
+    // User explicitly pressed Start!
+    window.startVoiceRecognition();
+  }
+};
+
+// Process transcript into Option 1 Confirmation List
+window.processVoiceTranscript = function () {
+  window.stopVoiceRecognition();
+  const transcriptInput = document.getElementById("voiceTranscriptInput");
+  const text = transcriptInput ? transcriptInput.value.trim() : "";
+
+  if (!text) {
+    showToast("No speech detected. Please speak or type an expense.", "info");
+    return;
+  }
+
+  // If shortcut target from expense/income modals
+  if (activeVoiceTarget === 'expense') {
+    const parsed = window.parseHinglishVoiceTranscript(text);
+    if (parsed.length > 0) {
+      const item = parsed[0];
+      const amtInput = document.getElementById("expenseAmount");
+      const catInput = document.getElementById("expenseCategory");
+      const descInput = document.getElementById("expenseDesc");
+      const dateInput = document.getElementById("expenseDate");
+      if (amtInput) amtInput.value = item.amount;
+      if (catInput && item.category) catInput.value = item.category;
+      if (descInput) descInput.value = item.description;
+      if (dateInput) dateInput.value = item.date;
+      showToast(`Filled: ₹${item.amount} for ${item.category}`, "success");
+    }
+    window.closeVoiceModal();
+    return;
+  }
+
+  if (activeVoiceTarget === 'income') {
+    const parsed = window.parseHinglishVoiceTranscript(text);
+    if (parsed.length > 0) {
+      const item = parsed[0];
+      const amtInput = document.getElementById("incomeAmount");
+      const srcInput = document.getElementById("incomeSource");
+      const dateInput = document.getElementById("incomeDate");
+      if (amtInput) amtInput.value = item.amount;
+      if (srcInput) srcInput.value = item.source || item.category;
+      if (dateInput) dateInput.value = item.date;
+      showToast(`Filled: ₹${item.amount} (${item.source || item.category})`, "success");
+    }
+    window.closeVoiceModal();
+    return;
+  }
+
+  // Option 1 Multi-Item Flow
+  const newItems = window.parseHinglishVoiceTranscript(text);
+  if (newItems.length === 0) {
+    showDialog(
+      "No Valid Items Detected",
+      `Could not recognize any amount in: <em>"${escapeVoiceHtml(text)}"</em>.<br/><br/>Kindly speak an amount along with the item, e.g.:<br/><code>Chai 50, petrol 300 aur dinner 450</code>`,
+      "warning"
+    );
+    return;
+  }
+
+  // Append to current list (for "Speak Another" feature)
+  voiceParsedTransactions = [...voiceParsedTransactions, ...newItems];
+  renderVoiceConfirmationList();
+
+  document.getElementById("voiceListeningSection")?.classList.add("hidden");
+  document.getElementById("voiceReviewSection")?.classList.remove("hidden");
+};
+
+window.renderVoiceConfirmationList = function () {
+  const container = document.getElementById("voiceItemsList");
+  const summaryStrip = document.getElementById("voiceSummaryStrip");
+  const countBadge = document.getElementById("voiceItemCountBadge");
+  if (!container) return;
+
+  if (voiceParsedTransactions.length === 0) {
+    container.innerHTML = `<div style="text-align: center; padding: 20px; color: #94a3b8; font-size: 0.88rem;">No transactions in list. Tap "Speak Another" to add.</div>`;
+    if (summaryStrip) summaryStrip.innerHTML = "";
+    if (countBadge) countBadge.innerText = "0 Items";
+    return;
+  }
+
+  let totalExp = 0;
+  let expCount = 0;
+  let totalInc = 0;
+  let incCount = 0;
+
+  voiceParsedTransactions.forEach(item => {
+    if (item.type === 'income') {
+      incCount++;
+      totalInc += Number(item.amount) || 0;
+    } else {
+      expCount++;
+      totalExp += Number(item.amount) || 0;
+    }
+  });
+
+  if (countBadge) countBadge.innerText = `${voiceParsedTransactions.length} Item${voiceParsedTransactions.length === 1 ? '' : 's'}`;
+
+  if (summaryStrip) {
+    summaryStrip.innerHTML = `
+      <span>Total: <b>${voiceParsedTransactions.length}</b></span>
+      ${expCount > 0 ? `<span style="color: #f87171;">Expenses (${expCount}): <b>₹${totalExp.toLocaleString('en-IN')}</b></span>` : ''}
+      ${incCount > 0 ? `<span style="color: #4ade80;">Income (${incCount}): <b>₹${totalInc.toLocaleString('en-IN')}</b></span>` : ''}
+    `;
+  }
+
+  const now = new Date();
+  const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+  const userCats = Array.isArray(expenseCategories) ? expenseCategories.map(c => typeof c === 'string' ? c : c.name).filter(Boolean) : [];
+  const allCategoryOptions = Array.from(new Set([...userCats, ...Object.keys(voiceSystemCategoryKeywords), 'Other']));
+
+  container.innerHTML = voiceParsedTransactions.map((item, idx) => {
+    const isIncome = item.type === 'income';
+    const catOptions = allCategoryOptions.map(cat =>
+      `<option value="${cat}" ${cat.toLowerCase() === (item.category || '').toLowerCase() ? 'selected' : ''}>${cat}</option>`
+    ).join('');
+
+    return `
+      <div class="voice-item-card">
+        <div class="voice-item-top">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="voice-type-badge ${isIncome ? 'income' : 'expense'}">
+              ${isIncome ? '🟢 Income' : '🔴 Expense'}
+            </span>
+            <span style="font-size: 0.76rem; color: #94a3b8;">${item.dateText || 'Today'}</span>
+          </div>
+          <button type="button" class="voice-item-delete-btn" onclick="deleteVoiceItem(${idx})" title="Remove item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
+        </div>
+
+        <div class="voice-item-fields">
+          <div style="position: relative;">
+            <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: ${isIncome ? '#34d399' : '#f87171'}; font-weight: 700; font-size: 0.85rem;">₹</span>
+            <input type="number" value="${item.amount}" onchange="updateVoiceItem(${idx}, 'amount', this.value)" class="voice-input-sm" style="padding-left: 20px !important; font-weight: 700; color: ${isIncome ? '#34d399' : '#f87171'} !important; width: 100%;" min="1" step="any" placeholder="Amount" />
+          </div>
+
+          ${isIncome ? `
+            <input type="text" value="${escapeVoiceHtml(item.source || item.category || 'Salary')}" onchange="updateVoiceItem(${idx}, 'source', this.value)" class="voice-input-sm" placeholder="Source (Salary, Bonus...)" style="width: 100%;" />
+          ` : `
+            <select onchange="updateVoiceItem(${idx}, 'category', this.value)" class="voice-input-sm" style="width: 100%; cursor: pointer;">
+              ${catOptions}
+            </select>
+          `}
+
+          <input type="date" value="${item.date}" max="${todayIso}" onchange="updateVoiceItem(${idx}, 'date', this.value)" class="voice-input-sm" style="width: 100%;" />
+
+          <input type="text" value="${escapeVoiceHtml(item.description || '')}" onchange="updateVoiceItem(${idx}, 'description', this.value)" class="voice-input-sm voice-desc-field" placeholder="Note / Details (optional)" />
+        </div>
+      </div>
+    `;
+  }).join('');
+};
+
+window.updateVoiceItem = function (index, field, value) {
+  if (voiceParsedTransactions[index]) {
+    if (field === 'amount') {
+      voiceParsedTransactions[index].amount = parseFloat(value) || 0;
+    } else if (field === 'category') {
+      voiceParsedTransactions[index].category = value;
+    } else if (field === 'source') {
+      voiceParsedTransactions[index].source = value;
+      voiceParsedTransactions[index].category = value;
+    } else if (field === 'date') {
+      voiceParsedTransactions[index].date = value;
+    } else if (field === 'description') {
+      voiceParsedTransactions[index].description = value;
+    }
+    renderVoiceConfirmationList();
+  }
+};
+
+window.deleteVoiceItem = function (index) {
+  voiceParsedTransactions.splice(index, 1);
+  renderVoiceConfirmationList();
+  showToast("Item removed", "info");
+};
+
+window.voiceSpeakAnother = function () {
+  document.getElementById("voiceReviewSection")?.classList.add("hidden");
+  document.getElementById("voiceListeningSection")?.classList.remove("hidden");
+  const transcriptInput = document.getElementById("voiceTranscriptInput");
+  if (transcriptInput) transcriptInput.value = "";
+  setVoiceListeningUI(false, "Ready — Tap Start to Speak");
+};
+
+window.transferVoiceToBulkScan = function () {
+  if (!voiceParsedTransactions || voiceParsedTransactions.length === 0) {
+    showToast("No transactions to transfer", "info");
+    return;
+  }
+
+  const expenses = voiceParsedTransactions.filter(i => i.type === 'expense');
+  if (expenses.length === 0) {
+    showToast("No expenses to transfer to bulk table (incomes are not supported in bulk notes)", "info");
+    return;
+  }
+
+  scannedExpensesData = expenses.map(item => {
+    const displayDate = formatScanDisplayDate(item.date);
+    const desc = (item.description && item.description.trim()) || item.category || 'Expense';
+    return {
+      date: item.date,
+      rawDateText: displayDate,
+      rawLine: `${displayDate} ${item.amount} ${desc}`.trim(),
+      isValid: true,
+      dateError: null,
+      amount: Number(item.amount),
+      category: item.category || 'Other',
+      description: desc
+    };
+  });
+
+  // Pre-populate the bulk notes textarea so that "<- Edit Notes" retains the lines!
+  const bulkLines = scannedExpensesData.map(i => i.rawLine).join("\n");
+  const scanTextInput = document.getElementById("scanTextInput");
+  if (scanTextInput) {
+    scanTextInput.value = bulkLines;
+  }
+
+  // Close voice modal
+  window.closeVoiceModal();
+
+  // Open scan modal directly WITHOUT calling resetScan()
+  const scanModal = document.getElementById("scanModal");
+  if (scanModal) {
+    scanModal.classList.remove("hidden");
+    document.body.classList.add("modal-open");
+  }
+
+  document.getElementById("scanInputSection")?.classList.add("hidden");
+  document.getElementById("scanPreviewSection")?.classList.remove("hidden");
+
+  currentScanPage = 1;
+  renderScanPreview(false);
+  showToast(`Transferred ${expenses.length} item(s) to Bulk Preview!`, "success");
+};
+
+window.saveAllVoiceTransactions = async function () {
+  if (!voiceParsedTransactions || voiceParsedTransactions.length === 0) {
+    showToast("No transactions to save", "error");
+    return;
+  }
+
+  // Validate dates
+  for (const item of voiceParsedTransactions) {
+    const val = validateClientExpenseDate(item.date);
+    if (!val.isValid) {
+      showDialog("Invalid Date", `Item "${item.description || item.category}": ${val.error}`, "warning");
+      return;
+    }
+  }
+
+  const saveBtn = document.getElementById("voiceSaveAllBtn");
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerText = "⏳ Saving Transactions...";
+  }
+
+  try {
+    const expensesToSave = voiceParsedTransactions
+      .filter(i => i.type === 'expense')
+      .map(i => ({
+        date: i.date,
+        amount: Number(i.amount),
+        category: i.category,
+        description: i.description || i.category
+      }));
+
+    const incomesToSave = voiceParsedTransactions
+      .filter(i => i.type === 'income')
+      .map(i => ({
+        date: i.date,
+        amount: Number(i.amount),
+        source: i.source || i.category || 'Salary'
+      }));
+
+    let savedExpCount = 0;
+    let savedIncCount = 0;
+
+    // 1. Bulk Save Expenses
+    if (expensesToSave.length > 0) {
+      const res = await apiRequest("/expenses/bulk", "POST", expensesToSave);
+      savedExpCount = res.results?.added?.length || expensesToSave.length;
+    }
+
+    // 2. Save Incomes sequentially
+    for (const inc of incomesToSave) {
+      await apiRequest("/income", "POST", inc);
+      savedIncCount++;
+    }
+
+    const totalSaved = savedExpCount + savedIncCount;
+    showToast(`🎉 Successfully saved ${totalSaved} transaction${totalSaved === 1 ? '' : 's'}!`, "success");
+
+    window.closeVoiceModal();
+    loadDashboard();
+    loadRecentExpenses();
+
+  } catch (err) {
+    showDialog("Save Failed", err.message || "Could not save voice transactions.", "error");
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerText = "✅ Save All Transactions";
+    }
+  }
+};
+
+window.startVoiceForModal = function (target) {
+  activeVoiceTarget = target;
+  window.openVoiceModal();
+};
+
+window.startVoiceForBulkNotes = function () {
+  activeVoiceTarget = 'bulk';
+  window.openVoiceModal();
+};

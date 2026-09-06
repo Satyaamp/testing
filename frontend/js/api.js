@@ -149,43 +149,81 @@ export function showToast(message, type = "error") {
   if (!toast) {
     toast = document.createElement("div");
     toast.id = "toast-notification";
-
-    // Apply styling via JS so no CSS file edit is needed
-    Object.assign(toast.style, {
-      position: "fixed",
-      bottom: "80px",
-      left: "50%",
-      transform: "translateX(-50%) translateY(20px)",
-      backdropFilter: "blur(12px)",
-      webkitBackdropFilter: "blur(12px)",
-      border: "1px solid rgba(255, 255, 255, 0.25)",
-      color: "#fff",
-      padding: "12px 24px",
-      borderRadius: "50px",
-      fontSize: "0.95rem",
-      fontWeight: "500",
-      zIndex: "9999",
-      opacity: "0",
-      transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-      pointerEvents: "none",
-      whiteSpace: "nowrap"
-    });
-
     document.body.appendChild(toast);
   }
 
+  // Always re-apply responsive styling to adapt to orientation / viewport size
+  Object.assign(toast.style, {
+    position: "fixed",
+    bottom: "28px",
+    left: "50%",
+    transform: "translateX(-50%) translateY(20px)",
+    backdropFilter: "blur(14px)",
+    webkitBackdropFilter: "blur(14px)",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
+    color: "#fff",
+    padding: "10px 16px",
+    borderRadius: "14px",
+    fontSize: "0.88rem",
+    fontWeight: "500",
+    zIndex: "999999",
+    opacity: "0",
+    transition: "all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    pointerEvents: "auto",
+    whiteSpace: "normal",
+    wordBreak: "break-word",
+    maxWidth: "min(92vw, 420px)",
+    width: "max-content",
+    boxSizing: "border-box",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "10px",
+    textAlign: "left",
+    lineHeight: "1.4"
+  });
+
   // 3. Apply Dynamic Colors based on Type
-  toast.style.background = type === "success" ? "rgba(34, 197, 94, 0.85)" : "rgba(220, 38, 38, 0.75)";
-  toast.style.boxShadow = type === "success" ? "0 8px 32px rgba(34, 197, 94, 0.3)" : "0 8px 32px rgba(220, 38, 38, 0.3)";
+  if (type === "success") {
+    toast.style.background = "rgba(34, 197, 94, 0.92)";
+    toast.style.boxShadow = "0 8px 30px rgba(34, 197, 94, 0.35)";
+  } else if (type === "info") {
+    toast.style.background = "rgba(14, 165, 233, 0.92)";
+    toast.style.boxShadow = "0 8px 30px rgba(14, 165, 233, 0.35)";
+  } else if (type === "warning") {
+    toast.style.background = "rgba(245, 158, 11, 0.92)";
+    toast.style.boxShadow = "0 8px 30px rgba(245, 158, 11, 0.35)";
+  } else {
+    toast.style.background = "rgba(220, 38, 38, 0.92)";
+    toast.style.boxShadow = "0 8px 30px rgba(220, 38, 38, 0.35)";
+  }
 
-  // 4. Set text and show
-  toast.innerText = message;
-  toast.style.opacity = "1";
-  toast.style.transform = "translateX(-50%) translateY(0)";
-
+  // 4. Set text and show with OK button
   if (toast.hideTimeout) clearTimeout(toast.hideTimeout);
+
+  toast.innerHTML = "";
+  const textSpan = document.createElement("span");
+  textSpan.style.cssText = "flex: 1; word-break: break-word;";
+  textSpan.innerText = message;
+  toast.appendChild(textSpan);
+
+  const okBtn = document.createElement("button");
+  okBtn.innerText = "OK";
+  okBtn.style.cssText = "margin-left: auto; background: rgba(255,255,255,0.22); border: 1px solid rgba(255,255,255,0.5); color: white; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; flex-shrink: 0;";
+  okBtn.onclick = () => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateX(-50%) translateY(20px)";
+    if (toast.hideTimeout) clearTimeout(toast.hideTimeout);
+  };
+  toast.appendChild(okBtn);
+
+  requestAnimationFrame(() => {
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+  });
+
   toast.hideTimeout = setTimeout(() => {
     toast.style.opacity = "0";
     toast.style.transform = "translateX(-50%) translateY(20px)";
-  }, 2000);
+  }, 3000);
 }
