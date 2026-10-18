@@ -718,7 +718,7 @@
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            Export
+            Export & Statement
           </button>
           <button id="deleteAccountBtn" onclick="deleteAccount()"
             style="flex: 1; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 10px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; transition: all 0.2s;">
@@ -875,17 +875,7 @@
     </div>
   </main>
 
-  <!-- Export Confirmation Modal -->
-  <div id="exportModal" class="modal hidden">
-    <div class="modal-content glass-card" style="width: 90%; max-width: 450px; text-align: center;">
-      <h3 style="color: #34d399; margin-top: 0;">Export Data</h3>
-      <p style="color: #fff; margin-bottom: 25px;">Do you want to download a backup of all your expenses?</p>
-      <div class="modal-actions">
-        <button onclick="confirmExport()" style="background: #34d399; color: #000;">Yes, Export</button>
-        <button class="cancel" onclick="closeExportModal()">Cancel</button>
-      </div>
-    </div>
-  </div>
+
 
   <!-- Delete Confirmation Modal -->
   <div id="deleteModal" class="modal hidden">
@@ -900,7 +890,10 @@
     </div>
   </div>
 
-  <script type="module" src="js/profile.js"></script>
+  <!-- jsPDF & AutoTable Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script type="module" src="js/profile.js?v=2.7"></script>
   <script>
     function logout() {
       localStorage.removeItem("token");

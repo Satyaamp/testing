@@ -186,7 +186,7 @@ function renderTable(transactions) {
         </td>
         <td>
           <span class="pill-badge ${isIncome ? 'pill-inflow' : 'pill-outflow'}">
-            ${isIncome ? '↑ Inflow' : '↓ Outflow'}
+            ${isIncome ? '↑ Income (CR)' : '↓ Debit (DR)'}
           </span>
         </td>
         <td>
@@ -540,7 +540,7 @@ window.downloadExcel = async function () {
       [`Period: ${monthName} ${targetYear}   |   Generated On: ${new Date().toLocaleString('en-IN')}`],
       [],
       ["--- FINANCIAL SUMMARY ---"],
-      ["", "Total Inflow (INR)", "Total Outflow (INR)", "Net Balance (INR)", "Total Records", ""],
+      ["", "Total Income (CR) (INR)", "Total Debit (DR) (INR)", "Net Balance (INR)", "Total Records", ""],
       ["", Number(kpis.totalIncome || 0), Number(kpis.totalExpense || 0), Number(kpis.balance || 0), items.length, ""],
       [],
       ["--- TRANSACTION LEDGER ---"],
@@ -553,7 +553,7 @@ window.downloadExcel = async function () {
       const isIncome = t.type === 'income';
       aoa.push([
         new Date(t.date).toISOString().split('T')[0],
-        isIncome ? "INFLOW" : "EXPENSE",
+        isIncome ? "INCOME (CR)" : "DEBIT (DR)",
         isIncome ? "-" : (t.category || "-"),
         t.description || (isIncome ? "Income" : "-"),
         Number(t.amount || 0),
@@ -566,9 +566,9 @@ window.downloadExcel = async function () {
     // Bottom Summary
     aoa.push([]);
     const summaryInflowRow = aoa.length;
-    aoa.push(["", "", "", "TOTAL INFLOW", Number(kpis.totalIncome || 0), ""]);
+    aoa.push(["", "", "", "TOTAL INCOME (CR)", Number(kpis.totalIncome || 0), ""]);
     const summaryOutflowRow = aoa.length;
-    aoa.push(["", "", "", "TOTAL OUTFLOW", Number(kpis.totalExpense || 0), ""]);
+    aoa.push(["", "", "", "TOTAL DEBIT (DR)", Number(kpis.totalExpense || 0), ""]);
     const summaryNetRow = aoa.length;
     aoa.push(["", "", "", "NET BALANCE", Number(kpis.balance || 0), ""]);
 
@@ -890,7 +890,7 @@ window.downloadPDF = async function () {
     // Summary Stripe
     doc.setFontSize(9.5);
     doc.setTextColor(30, 41, 59);
-    doc.text(`Inflow: INR ${formatINR(kpis.totalIncome || 0)}   |   Outflow: INR ${formatINR(kpis.totalExpense || 0)}   |   Net: INR ${formatINR(kpis.balance || 0)}   |   Total: ${items.length} records`, 14, 40);
+    doc.text(`Income (CR): INR ${formatINR(kpis.totalIncome || 0)}   |   Debit (DR): INR ${formatINR(kpis.totalExpense || 0)}   |   Net: INR ${formatINR(kpis.balance || 0)}   |   Total: ${items.length} records`, 14, 40);
 
     // Table Rows
     const tableData = items.map(t => {

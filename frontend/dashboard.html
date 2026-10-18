@@ -244,12 +244,33 @@
     </section>
 
     <!-- Quick Actions -->
-    <section class="actions animate-enter delay-1">
-      <button onclick="openExpense()">➕ New Expense</button>
-      <button onclick="openIncome()">➕ Monthly Budget</button>
-      <button onclick="openCategoryManager()"
-        style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #7dd3fc;"
-        title="Manage Custom Categories">⚙️ Categories</button>
+    <section class="quick-access-section animate-enter delay-1">
+      <!-- Primary Core Actions (Gold Action Cards) -->
+      <div class="actions-primary-row">
+        <button type="button" class="action-btn-primary" onclick="openExpense()" title="Add a new expense entry">
+          <span class="btn-icon">➕</span>
+          <span class="btn-text">New Expense</span>
+        </button>
+        <button type="button" class="action-btn-primary" onclick="openIncome()" title="Add or update monthly budget / income">
+          <span class="btn-icon">➕</span>
+          <span class="btn-text">Monthly Budget</span>
+        </button>
+      </div>
+
+      <!-- Secondary Utility Ribbon / Capsule Dock -->
+      <div class="actions-utility-dock" role="navigation" aria-label="Quick Utilities">
+        <button type="button" class="utility-dock-btn dock-categories" onclick="openCategoryManager()" title="Manage & Create Custom Categories">
+          <span class="dock-icon">⚙️</span>
+          <span class="dock-label">Categories</span>
+          <span class="dock-tag">Manage</span>
+        </button>
+        <div class="dock-separator" aria-hidden="true"></div>
+        <button type="button" class="utility-dock-btn dock-reports" onclick="openStatementTab()" title="Open Comprehensive Financial Statement & Reports in Authenticated Tab">
+          <span class="dock-icon">📑</span>
+          <span class="dock-label">Statement & Reports</span>
+          <span class="dock-tag export-tag">Export ↗</span>
+        </button>
+      </div>
     </section>
 
     <!-- Summary Cards -->
@@ -975,7 +996,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
-  <script type="module" src="js/dashboard.js?v=5.4"></script>
+  <script type="module" src="js/dashboard.js?v=5.6"></script>
   <script type="module">
     import { apiRequest } from './js/api.js';
 

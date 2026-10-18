@@ -160,27 +160,169 @@
      color: #ef4444 !important;
    }
 
+    /* ===============================
+       QUICK ACCESS & UTILITY DOCK
+    ================================ */
+    .quick-access-section,
     .actions {
       display: flex;
-      gap: 15px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 22px;
     }
 
+    .actions-primary-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .action-btn-primary,
     .actions button {
-      flex: 1;
-      padding: 15px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 15px 20px;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       background: #ffd166;
-      font-weight: bold;
+      color: #0f172a;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 14px rgba(255, 209, 102, 0.2);
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
     }
 
+    .action-btn-primary .btn-icon {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .action-btn-primary:hover,
     .actions button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+      background: #ffdb80;
+      box-shadow: 0 8px 20px rgba(255, 209, 102, 0.32);
+    }
+
+    .action-btn-primary:active,
+    .actions button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(255, 209, 102, 0.2);
+    }
+
+    /* Secondary Utility Capsule Dock */
+    .actions-utility-dock {
+      display: flex;
+      align-items: center;
+      background: rgba(18, 24, 38, 0.7);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 5px;
+      gap: 6px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.22);
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .actions-utility-dock:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.3);
+    }
+
+    .utility-dock-btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 10px 16px;
+      color: #94a3b8;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .utility-dock-btn .dock-icon {
+      font-size: 1rem;
+      line-height: 1;
+      transition: transform 0.2s ease;
+    }
+
+    .utility-dock-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateY(-1px);
+    }
+
+    .utility-dock-btn:hover .dock-icon {
+      transform: scale(1.12);
+    }
+
+    .utility-dock-btn:active {
+      transform: translateY(0);
+    }
+
+    .utility-dock-btn.dock-categories:hover {
+      color: #7dd3fc;
+      background: rgba(56, 189, 248, 0.1);
+      border-color: rgba(56, 189, 248, 0.28);
+    }
+
+    .utility-dock-btn.dock-reports:hover {
+      color: #6ee7b7;
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.28);
+    }
+
+    .dock-separator {
+      width: 1px;
+      height: 22px;
+      background: rgba(255, 255, 255, 0.1);
+      flex-shrink: 0;
+    }
+
+    .dock-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #94a3b8;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.2s ease;
+      line-height: 1.2;
+    }
+
+    .dock-categories:hover .dock-tag {
+      background: rgba(56, 189, 248, 0.2);
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    .dock-tag.export-tag {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+
+    .dock-reports:hover .dock-tag.export-tag {
+      background: rgba(16, 185, 129, 0.28);
+      color: #a7f3d0;
+      border-color: rgba(16, 185, 129, 0.5);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
     }
 
     .btn-voice-action {
@@ -1903,17 +2045,47 @@
    }
 
    @media (max-width: 640px) {
+     .quick-access-section,
      .actions {
+       display: flex;
+       flex-direction: column;
+       gap: 10px;
+       margin-bottom: 18px;
+     }
+     .actions-primary-row {
        display: grid;
        grid-template-columns: 1fr 1fr;
        gap: 10px;
      }
+     .action-btn-primary,
      .actions button {
-       padding: 12px 8px;
+       padding: 13px 8px;
        font-size: 0.88rem;
+       border-radius: 10px;
      }
-     .actions button:last-child {
-       grid-column: 1 / -1;
+     .actions-utility-dock {
+       padding: 3px;
+       gap: 3px;
+       border-radius: 10px;
+     }
+     .utility-dock-btn {
+       padding: 9px 8px;
+       font-size: 0.82rem;
+       gap: 6px;
+     }
+     .dock-tag {
+       font-size: 0.62rem;
+       padding: 1px 5px;
+     }
+     @media (max-width: 400px) {
+       .dock-tag {
+         display: none;
+       }
+       .utility-dock-btn {
+         padding: 8px 4px;
+         font-size: 0.78rem;
+         gap: 4px;
+       }
      }
      .voice-modal-content {
        max-width: 100% !important;

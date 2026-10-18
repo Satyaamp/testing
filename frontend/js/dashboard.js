@@ -281,6 +281,45 @@ window.closeCategoryManager = function () {
   document.body.classList.remove("modal-open");
 };
 
+window.openStatementTab = async function () {
+  try {
+    const token = localStorage.getItem("token") || "";
+    const today = new Date();
+    const todayStr = today.toISOString().split("T")[0];
+
+    let startStr = "";
+    try {
+      const meRes = await apiRequest("/auth/me", "GET", null, { skipLoader: true });
+      if (meRes?.data?.createdAt) {
+        startStr = new Date(meRes.data.createdAt).toISOString().split("T")[0];
+      }
+    } catch (e) {
+      console.warn("Could not fetch user createdAt for statement URL", e);
+    }
+
+    if (!startStr) {
+      const d = new Date(today.getFullYear(), 0, 1);
+      startStr = d.toISOString().split("T")[0];
+    }
+
+    const queryParams = new URLSearchParams({
+      startDate: startStr,
+      endDate: todayStr,
+      page: "1",
+      limit: "10"
+    });
+
+    if (token) {
+      queryParams.set("token", token);
+    }
+
+    window.open(`/statement?${queryParams.toString()}`, "_blank");
+  } catch (err) {
+    console.error("Statement launch error:", err);
+    window.open("/statement", "_blank");
+  }
+};
+
 window.selectCatEmoji = function (emoji) {
   const iconInput = document.getElementById("catIconInput");
   if (iconInput) iconInput.value = emoji;
@@ -580,11 +619,35 @@ window.logout = function () {
    EXPENSE MODAL
 ================================ */
 
+function getTodayIsoString() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
+window.resetExpenseForm = function () {
+  const amountInput = document.getElementById("expenseAmount");
+  const catInput = document.getElementById("expenseCategory");
+  const descInput = document.getElementById("expenseDesc");
+  const dateInput = document.getElementById("expenseDate");
+
+  if (amountInput) amountInput.value = "";
+  if (catInput) {
+    catInput.value = "";
+    catInput.selectedIndex = 0;
+  }
+  if (descInput) descInput.value = "";
+
+  const todayIso = getTodayIsoString();
+  if (dateInput) {
+    dateInput.value = todayIso;
+    dateInput.max = todayIso;
+  }
+};
 
 window.openExpense = function () {
   const modal = document.getElementById("expenseModal");
   const dateInput = document.getElementById("expenseDate");
-  const todayIso = new Date().toISOString().split("T")[0];
+  const todayIso = getTodayIsoString();
   if (dateInput) {
     dateInput.max = todayIso;
     if (!dateInput.value) {
@@ -615,12 +678,12 @@ window.addExpense = async function () {
     return;
   }
 
-  const now = new Date();
-  const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const todayIso = getTodayIsoString();
   if (date > todayIso) {
     const parts = date.split('-');
     const formattedDate = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : date;
-    const formattedToday = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
+    const partsToday = todayIso.split('-');
+    const formattedToday = partsToday.length === 3 ? `${partsToday[2]}-${partsToday[1]}-${partsToday[0]}` : todayIso;
     showToast(`Future date not allowed: ${formattedDate} is in the future (today is ${formattedToday}).`, "warning");
     return;
   }
@@ -632,6 +695,9 @@ window.addExpense = async function () {
       date,
       description
     });
+
+    // Reset expense form completely to initial state upon successful save
+    window.resetExpenseForm();
 
     closeExpense();
     loadDashboard();
@@ -647,10 +713,25 @@ window.addExpense = async function () {
    INCOME MODAL
 ================================ */
 
+window.resetIncomeForm = function () {
+  const amountInput = document.getElementById("incomeAmount");
+  const srcInput = document.getElementById("incomeSource");
+  const dateInput = document.getElementById("incomeDate");
+
+  if (amountInput) amountInput.value = "";
+  if (srcInput) srcInput.value = "";
+
+  const todayIso = getTodayIsoString();
+  if (dateInput) {
+    dateInput.value = todayIso;
+    dateInput.max = todayIso;
+  }
+};
+
 window.openIncome = function () {
   const modal = document.getElementById("incomeModal");
   const dateInput = document.getElementById("incomeDate");
-  const todayIso = new Date().toISOString().split("T")[0];
+  const todayIso = getTodayIsoString();
   if (dateInput) {
     dateInput.max = todayIso;
     if (!dateInput.value) {
@@ -679,12 +760,12 @@ window.addIncome = async function () {
     return;
   }
 
-  const now = new Date();
-  const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const todayIso = getTodayIsoString();
   if (date > todayIso) {
     const parts = date.split('-');
     const formattedDate = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : date;
-    const formattedToday = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
+    const partsToday = todayIso.split('-');
+    const formattedToday = partsToday.length === 3 ? `${partsToday[2]}-${partsToday[1]}-${partsToday[0]}` : todayIso;
     showToast(`Future date not allowed: ${formattedDate} is in the future (today is ${formattedToday}).`, "warning");
     return;
   }
@@ -695,6 +776,9 @@ window.addIncome = async function () {
       source,
       date
     });
+
+    // Reset income form completely to initial state upon successful save
+    window.resetIncomeForm();
 
     closeIncome();
     loadDashboard();
@@ -1720,6 +1804,8 @@ window.resetFilters = function () {
 loadDashboard();
 loadRecentExpenses();
 populateCategorySelect();
+window.resetExpenseForm?.();
+window.resetIncomeForm?.();
 
 loadCategoryChart();
 loadWeeklyTrend();

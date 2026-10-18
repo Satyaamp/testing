@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DhanRekha – Financial Statement Generator</title>
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#22c55e" />
+
+  <link rel="shortcut icon" href="assets/icons/dashboard.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap"
+    rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/glass.css" />
+
+  <!-- Instant Authentication Guard -->
+  <script src="js/authGuard.js"></script>
+
+  <!-- jsPDF & AutoTable for client-side PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+  <style>
+    :root {
+      --color-emerald: #22c55e;
+      --color-emerald-glow: rgba(34, 197, 94, 0.25);
+      --color-rose: #f43f5e;
+      --color-rose-glow: rgba(244, 63, 94, 0.25);
+      --color-sky: #38bdf8;
+      --bg-dark: #0a0e17;
+      --glass-card: rgba(18, 24, 38, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-border-focus: rgba(34, 197, 94, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 10% 15%, rgba(34, 197, 94, 0.09) 0%, transparent 45%),
+        radial-gradient(circle at 90% 85%, rgba(56, 189, 248, 0.07) 0%, transparent 45%),
+        var(--bg-dark);
+      color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navbar */
+    .navbar {
+      height: 70px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--glass-border);
+      background: rgba(10, 14, 23, 0.85);
+      backdrop-filter: blur(14px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+
+    .brand-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--color-emerald);
+      letter-spacing: -0.3px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 0.86rem;
+      font-weight: 500;
+      color: #cbd5e1;
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1050px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 30px 20px 80px 20px;
+      flex: 1;
+    }
+
+    /* Page Header */
+    .page-header {
+      margin-bottom: 26px;
+    }
+
+    .page-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .page-subtitle {
+      font-size: 0.92rem;
+      color: #94a3b8;
+      margin-top: 6px;
+    }
+
+    .auth-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.28);
+      border-radius: 20px;
+      color: #86efac;
+      font-size: 0.8rem;
+      font-weight: 600;
+      backdrop-filter: blur(8px);
+    }
+
+    .auth-dot {
+      width: 8px;
+      height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #22c55e;
+    }
+
+    /* Glass Card Standard */
+    .glass-panel {
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      backdrop-filter: blur(16px);
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      transition: border-color 0.2s;
+    }
+
+    /* Filter Form */
+    .filter-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 18px;
+      align-items: flex-end;
+    }
+
+    @media (max-width: 768px) {
+      .filter-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .date-input {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .date-input:focus {
+      border-color: var(--color-emerald);
+      box-shadow: 0 0 0 3px var(--color-emerald-glow);
+    }
+
+    .date-input.invalid-input {
+      border-color: var(--color-rose) !important;
+      box-shadow: 0 0 0 3px var(--color-rose-glow) !important;
+    }
+
+    .preset-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .preset-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      color: #94a3b8;
+      font-size: 0.8rem;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .preset-pill:hover,
+    .preset-pill.active {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: rgba(34, 197, 94, 0.4);
+      color: #86efac;
+    }
+
+    .fetch-btn {
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      color: #0b1120;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
+      height: 48px;
+      white-space: nowrap;
+    }
+
+    .fetch-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(34, 197, 94, 0.45);
+      color: #000;
+    }
+
+    .fetch-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Alert Banner */
+    .alert-banner {
+      background: rgba(244, 63, 94, 0.12);
+      border: 1px solid rgba(244, 63, 94, 0.35);
+      color: #fca5a5;
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-top: 16px;
+      font-size: 0.88rem;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      animation: alertShake 0.4s ease;
+    }
+
+    @keyframes alertShake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      20%,
+      60% {
+        transform: translateX(-5px);
+      }
+
+      40%,
+      80% {
+        transform: translateX(5px);
+      }
+    }
+
+    /* KPI Summary Banner */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+      animation: fadeInUp 0.4s ease forwards;
+    }
+
+    @media (max-width: 640px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .kpi-card {
+      background: var(--glass-card);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .kpi-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      color: #94a3b8;
+    }
+
+    .kpi-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.45rem;
+      font-weight: 700;
+    }
+
+    .kpi-inflow {
+      color: #22c55e;
+    }
+
+    .kpi-outflow {
+      color: #f43f5e;
+    }
+
+    .kpi-balance {
+      color: #38bdf8;
+    }
+
+    /* Results Header & Download Action */
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .results-meta {
+      font-size: 0.92rem;
+      color: #cbd5e1;
+    }
+
+    .results-count {
+      background: rgba(34, 197, 94, 0.15);
+      color: #86efac;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    .download-pdf-btn {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    }
+
+    .download-pdf-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+    }
+
+    /* Standard HTML Table Styling */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 14px;
+      border: 1px solid var(--glass-border);
+      background: rgba(10, 14, 23, 0.6);
+    }
+
+    table.statement-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    table.statement-table thead {
+      background: rgba(15, 23, 42, 0.95);
+      position: sticky;
+      top: 0;
+    }
+
+    table.statement-table th {
+      padding: 14px 16px;
+      color: #94a3b8;
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    table.statement-table td {
+      padding: 13px 16px;
+      color: #e2e8f0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      transition: background 0.15s ease;
+    }
+
+    table.statement-table tbody tr {
+      animation: rowFadeIn 0.25s ease-out forwards;
+    }
+
+    table.statement-table tbody tr:hover td {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    @keyframes rowFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .badge-type {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .badge-inflow {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .badge-outflow {
+      background: rgba(244, 63, 94, 0.15);
+      color: #fb7185;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    table.statement-table td.amount-cell,
+    .amount-cell {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    table.statement-table td.amount-inflow,
+    .amount-inflow {
+      color: #22c55e !important;
+    }
+
+    table.statement-table td.amount-outflow,
+    .amount-outflow {
+      color: #ef4444 !important;
+    }
+
+    /* Limit Selector Box */
+    .limit-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .custom-select {
+      padding: 6px 12px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      color: white;
+      font-size: 0.86rem;
+      outline: none;
+      transition: border-color 0.2s;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .custom-select:focus {
+      border-color: var(--color-emerald);
+      box-shadow: 0 0 0 2px var(--color-emerald-glow);
+    }
+
+    .custom-select option {
+      background: #0f172a;
+      color: white;
+    }
+
+    /* Pagination Bar (Matching /transactions) */
+    .ledger-pagination-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 16px 20px;
+      background: rgba(15, 23, 42, 0.5);
+      border-top: 1px solid var(--glass-border);
+      border-radius: 0 0 14px 14px;
+    }
+
+    .page-nav-btn {
+      padding: 7px 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      color: #e2e8f0;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .page-nav-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .page-nav-btn:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+    }
+
+    .page-nav-btn.active {
+      background: #22c55e;
+      color: #052e16;
+      border-color: #22c55e;
+      box-shadow: 0 2px 10px rgba(34, 197, 94, 0.35);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #94a3b8;
+    }
+
+    .empty-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+      opacity: 0.8;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(0, 0, 0, 0.2);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Top Navbar -->
+  <nav class="navbar">
+    <a href="/dashboard" class="brand-link">
+      <img src="assets/logo1.png" alt="DhanRekha Logo" class="brand-logo" onerror="this.style.display='none'" />
+      <span class="brand-name">DhanRekha</span>
+    </a>
+    <div class="nav-actions">
+      <a href="/dashboard" class="nav-btn">📊 Dashboard</a>
+      <a href="/profile" class="nav-btn">👤 Profile</a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="container">
+    <div class="page-header">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
+        <div>
+          <h1 class="page-title">
+            <span>📄</span> Statement
+          </h1>
+          <p class="page-subtitle">
+            Filter transactions by date range, review, and download verified PDF report.
+          </p>
+        </div>
+        <div id="authSessionBadge" class="auth-badge" style="display: none;">
+          <span class="auth-dot"></span>
+          <span id="authUserDisplay">Authenticated Session</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Control Card -->
+    <div class="glass-panel">
+      <div class="filter-grid">
+        <div class="input-group">
+          <label class="input-label" for="startDate">From Date</label>
+          <input type="date" id="startDate" class="date-input" required />
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="endDate">To Date</label>
+          <input type="date" id="endDate" class="date-input" required />
+        </div>
+
+        <button id="fetchBtn" class="fetch-btn">
+          <span id="fetchBtnIcon">🔍</span>
+          <span id="fetchBtnText">Fetch Statement</span>
+        </button>
+      </div>
+
+      <!-- Quick Range Presets -->
+      <div class="preset-row">
+        <span style="font-size: 0.8rem; color: #64748b; margin-right: 4px;">Quick Range:</span>
+        <button type="button" class="preset-pill active" data-preset="all">All Time</button>
+        <button type="button" class="preset-pill" data-preset="month">This Month</button>
+        <button type="button" class="preset-pill" data-preset="last30">Last 30 Days</button>
+        <button type="button" class="preset-pill" data-preset="year">This Year</button>
+      </div>
+
+      <!-- Validation Alert Banner -->
+      <div id="dateAlertBox" class="alert-banner">
+        <span>⚠️</span>
+        <span id="dateAlertMsg">Invalid date selection</span>
+      </div>
+    </div>
+
+    <!-- KPI Summary Cards (Revealed on Fetch) -->
+    <div id="kpiSection" class="kpi-grid" style="display: none;">
+      <div class="kpi-card">
+        <span class="kpi-label">TOTAL INCOME (CR)</span>
+        <span id="totalInflowDisplay" class="kpi-value kpi-inflow">0</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">TOTAL DEBIT (DR)</span>
+        <span id="totalOutflowDisplay" class="kpi-value kpi-outflow">0</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">NET BALANCE</span>
+        <span id="netBalanceDisplay" class="kpi-value kpi-balance">0</span>
+      </div>
+    </div>
+
+    <!-- Results Table Section (Revealed on Fetch) -->
+    <div id="tableSection" class="glass-panel" style="display: none; padding-bottom: 0;">
+      <div class="results-header">
+        <div style="display: flex; align-items: center; gap: 18px; flex-wrap: wrap;">
+          <div class="results-meta">
+            <span id="resultsPeriodText">Statement Period</span>
+            <span id="recordsCountDisplay" class="results-count">0 items</span>
+          </div>
+
+          <!-- Items Per Page Selector (Matches /transactions) -->
+          <div class="limit-box">
+            <span>Show</span>
+            <select id="limitSelect" class="custom-select">
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+            <span>per page</span>
+          </div>
+        </div>
+
+        <button id="downloadPdfBtn" class="download-pdf-btn">
+          <span>📥</span> Download PDF Statement
+        </button>
+      </div>
+
+      <div class="table-container">
+        <table class="statement-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">#</th>
+              <th style="width: 140px;">Date</th>
+              <th>Category</th>
+              <th style="text-align: right; width: 140px;">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="statementTableBody">
+            <!-- Dynamic Rows -->
+          </tbody>
+        </table>
+
+        <!-- Pagination Footer (Matches /transactions) -->
+        <div class="ledger-pagination-bar" id="paginationBar">
+          <div id="paginationInfo" style="font-size: 0.88rem; color: #94a3b8;">
+            Showing 0 of 0 transactions
+          </div>
+
+          <div style="display: flex; gap: 6px; align-items: center;" id="paginationButtons">
+            <!-- Dynamic Prev, 1, 2, 3, 4, 5, Next buttons -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptySection" class="glass-panel empty-state" style="display: none;">
+      <div class="empty-icon">📭</div>
+      <h3 style="color: #fff; margin-bottom: 6px;">No Transactions Found</h3>
+      <p style="font-size: 0.88rem; color: #94a3b8;">
+        There are no recorded expenses or incomes in the selected date range. Try widening your filter range.
+      </p>
+    </div>
+  </main>
+
+  <script type="module" src="js/statement.js?v=1.5"></script>
+</body>
+
+</html>

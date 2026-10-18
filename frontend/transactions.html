@@ -721,7 +721,7 @@
       <div class="kpi-card">
         <div class="kpi-icon-bubble kpi-bubble-inflow">↑</div>
         <div class="kpi-details">
-          <span class="kpi-tag">Total Inflow</span>
+          <span class="kpi-tag">Total Income (CR)</span>
           <span class="kpi-number" id="kpiIncome" style="color: #4ade80;">₹0</span>
         </div>
       </div>
@@ -729,7 +729,7 @@
       <div class="kpi-card">
         <div class="kpi-icon-bubble kpi-bubble-outflow">↓</div>
         <div class="kpi-details">
-          <span class="kpi-tag">Total Outflow</span>
+          <span class="kpi-tag">Total Debit (DR)</span>
           <span class="kpi-number" id="kpiExpense" style="color: #fb7185;">₹0</span>
         </div>
       </div>
@@ -763,8 +763,8 @@
 
         <div class="type-segment-control">
           <button class="type-tab-btn active" data-type="all" onclick="setTypeFilter('all')">All</button>
-          <button class="type-tab-btn" data-type="expense" onclick="setTypeFilter('expense')">Expenses</button>
-          <button class="type-tab-btn" data-type="income" onclick="setTypeFilter('income')">Inflow</button>
+          <button class="type-tab-btn" data-type="expense" onclick="setTypeFilter('expense')">Debit (DR)</button>
+          <button class="type-tab-btn" data-type="income" onclick="setTypeFilter('income')">Income (CR)</button>
         </div>
       </div>
 
@@ -899,7 +899,7 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-  <script type="module" src="js/transactions.js?v=3.2"></script>
+  <script type="module" src="js/transactions.js?v=3.3"></script>
 
 </body>
 

@@ -22,6 +22,7 @@ const routes = [
   'transactions',
   'analytics',
   'profile',
+  'statement',
   'forgot-password',
   'reset-password',
   'sitemap'

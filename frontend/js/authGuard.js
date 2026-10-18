@@ -1,4 +1,15 @@
-// GLOBAL SCOPE: Runs once on page load to immediately kick unauthenticated users back to login
+// GLOBAL SCOPE: Check if token was provided in URL query parameters (for cross-tab authenticated links/exports)
+try {
+  const urlParams = new URLSearchParams(window.location.search);
+  const queryToken = urlParams.get("token") || urlParams.get("access_token");
+  if (queryToken && queryToken.trim()) {
+    localStorage.setItem("token", queryToken.trim());
+  }
+} catch (e) {
+  console.warn("Could not parse URL auth token", e);
+}
+
+// Runs once on page load to immediately kick unauthenticated users back to login
 const token = localStorage.getItem("token");
 
 if (!token) {
