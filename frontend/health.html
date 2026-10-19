@@ -134,6 +134,7 @@
         transform: scale(0.6);
         opacity: 1;
       }
+
       100% {
         transform: scale(1.6);
         opacity: 0;
@@ -356,31 +357,36 @@
       width: 100%;
       border-collapse: collapse;
       text-align: left;
-      font-size: 0.88rem;
+      font-size: 0.84rem;
+      font-family: var(--font-mono), Consolas, monospace;
     }
 
     .atlas-table th {
-      background: rgba(15, 23, 42, 0.95);
-      padding: 14px 18px;
-      font-family: var(--font-display);
-      font-weight: 700;
+      background: #1e293b;
+      padding: 11px 16px;
+      font-family: var(--font-mono);
+      font-weight: 600;
       color: #94a3b8;
-      font-size: 0.8rem;
+      font-size: 0.77rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid #334155;
       white-space: nowrap;
     }
 
     .atlas-table td {
-      padding: 13px 18px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 10px 16px;
+      border: 1px solid #243247;
       color: #e2e8f0;
       white-space: nowrap;
     }
 
     .atlas-table tbody tr {
-      transition: background 0.18s ease;
+      transition: background 0.15s ease;
+    }
+
+    .atlas-table tbody tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.015);
     }
 
     .atlas-table tbody tr:hover {
@@ -388,18 +394,18 @@
     }
 
     .atlas-table tfoot td {
-      background: rgba(15, 23, 42, 0.95);
-      border-top: 1px solid rgba(255, 255, 255, 0.14);
+      background: #1e293b;
+      border: 1px solid #334155;
       font-weight: 700;
       color: #fff;
-      padding: 14px 18px;
+      padding: 11px 16px;
       white-space: nowrap;
     }
 
     .coll-name-cell {
       font-family: var(--font-mono);
       font-weight: 600;
-      color: #38bdf8;
+      color: #f1f5f9;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -410,14 +416,9 @@
     }
 
     .doc-pill {
-      background: rgba(34, 197, 94, 0.15);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-      color: #4ade80;
-      font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 999px;
       font-family: var(--font-mono);
-      display: inline-block;
+      font-weight: 600;
+      color: #e2e8f0;
     }
 
     /* Modules Section */
@@ -569,6 +570,170 @@
       color: #fff;
     }
 
+    /* Standard Industry Table & Schema Styling */
+    .coll-row-clickable {
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .coll-row-clickable:hover {
+      background: rgba(255, 255, 255, 0.035) !important;
+    }
+    .coll-row-clickable.active-row {
+      background: rgba(56, 189, 248, 0.09) !important;
+    }
+    .coll-row-clickable.active-row td:first-child {
+      border-left: 3px solid #38bdf8;
+    }
+
+    .btn-schema-select {
+      padding: 5px 12px;
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-schema-select:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: #38bdf8;
+      color: #fff;
+    }
+
+    /* Standard Industry Schema Table */
+    .schema-nav-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin: 14px 0 16px 0;
+    }
+    .schema-nav-tab {
+      padding: 7px 14px;
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .schema-nav-tab:hover {
+      background: #273549;
+      color: #f1f5f9;
+    }
+    .schema-nav-tab.active {
+      background: #334155;
+      color: #fff;
+      border-color: #64748b;
+      font-weight: 700;
+    }
+
+    .schema-meta-bar {
+      background: #0b1120;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 12px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+    }
+
+    .standard-table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      margin: 10px 0 24px 0;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      background: #0b1120;
+    }
+
+    .standard-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.83rem;
+      font-family: var(--font-mono), Consolas, monospace;
+    }
+
+    .standard-table th {
+      background: #1e293b;
+      color: #94a3b8;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 10px 14px;
+      border: 1px solid #334155;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .standard-table td {
+      padding: 9px 14px;
+      border: 1px solid #243247;
+      color: #e2e8f0;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    .standard-table tbody tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .standard-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .key-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      display: inline-block;
+      font-family: var(--font-mono);
+    }
+    .key-badge.pk { background: #334155; color: #fbbf24; border: 1px solid #475569; }
+    .key-badge.fk { background: #334155; color: #38bdf8; border: 1px solid #475569; }
+    .key-badge.ref { background: #334155; color: #4ade80; border: 1px solid #475569; }
+
+    .table-jump-link {
+      color: #38bdf8;
+      text-decoration: underline;
+      cursor: pointer;
+      font-weight: 600;
+      background: transparent;
+      border: none;
+      font-family: var(--font-mono);
+      font-size: 0.83rem;
+      padding: 0;
+    }
+    .table-jump-link:hover {
+      color: #7dd3fc;
+    }
+
+    .sub-section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin: 22px 0 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-display);
+    }
+
     /* Footer */
     .health-footer {
       text-align: center;
@@ -594,12 +759,15 @@
       .status-hero {
         padding: 20px;
       }
+
       .hero-title {
         font-size: 1.5rem;
       }
+
       .metrics-grid {
         grid-template-columns: 1fr;
       }
+
       .modules-grid {
         grid-template-columns: 1fr;
       }
@@ -619,7 +787,7 @@
           <span class="pulse-dot"></span>
           <span id="heroStatusText">All Systems Operational</span>
         </div>
-        <h1 class="hero-title">Infrastructure & System Health</h1>
+        <h1 class="hero-title">System Health</h1>
         <div class="hero-subtitle">
           <span>🕒 Last verified: <b id="lastCheckedText" style="color: #cbd5e1;">Just now</b></span>
           <span>⚡ Latency: <b id="latencyText" style="color: #4ade80;">-- ms</b></span>
@@ -656,7 +824,8 @@
 
         <div class="card-main-val">
           <span id="dbUsedMB">-- MB</span> <span class="sub-val" id="dbLimitMB">/ 512.00 MB</span>
-          <span id="dbPercentUsedBadge" style="font-size: 0.85rem; color: #4ade80; font-weight: 700; margin-left: 6px;">(--%)</span>
+          <span id="dbPercentUsedBadge"
+            style="font-size: 0.85rem; color: #4ade80; font-weight: 700; margin-left: 6px;">(--%)</span>
         </div>
 
         <div class="progress-track">
@@ -859,10 +1028,10 @@
       <div class="section-header">
         <div>
           <h2 class="section-title">
-            <span>📊</span> MongoDB Atlas Collections & Documents Inventory
+            <span>📊</span> MongoDB Atlas Collections & Schema Registry
           </h2>
-          <p class="section-desc">
-            Exact real-time breakdown per collection matching MongoDB Atlas (Documents count, Storage size, Data size, and Average object size).
+          <p class="section-desc" style="color: #94a3b8; font-size: 0.83rem; margin-top: 5px;">
+            💡 <b>Interactive Schema & ER Inspector:</b> Click on any collection row or <span style="color: #38bdf8; font-weight: 600;">"View Schema"</span> button to inspect its exact Schema Structure, BSON Data Types, Primary/Foreign Keys, and Inter-table ER Relationships.
           </p>
         </div>
         <span class="card-tag tag-online" id="atlasDbNameTag">DATABASE: expensetracker</span>
@@ -879,11 +1048,12 @@
               <th>Avg size</th>
               <th>Index size</th>
               <th>Share of data</th>
+              <th style="text-align: right;">Schema & Relations</th>
             </tr>
           </thead>
           <tbody id="atlasCollectionsBody">
             <tr>
-              <td colspan="7" style="text-align: center; padding: 24px; color: #94a3b8;">
+              <td colspan="8" style="text-align: center; padding: 24px; color: #94a3b8;">
                 Loading collections breakdown...
               </td>
             </tr>
@@ -891,6 +1061,108 @@
           <tfoot id="atlasCollectionsFoot">
             <!-- Populated dynamically -->
           </tfoot>
+        </table>
+      </div>
+    </section>
+
+    <!-- MongoDB Database Schema & Entity-Relationship (ER) Dictionary Section -->
+    <section class="section-card" id="schemaSection">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">
+            <span>📋</span> Database Table Schema & Entity Relationships
+          </h2>
+          <p class="section-desc" style="color: #94a3b8; font-size: 0.83rem; margin-top: 5px;">
+            Standard data dictionary showing exact column definitions, BSON types, constraints, and inter-table foreign key references.
+          </p>
+        </div>
+        <div style="font-family: var(--font-mono); font-size: 0.8rem; color: #94a3b8;">
+          Active Schema: <b style="color: #38bdf8;" id="activeTableNameBadge">expenses</b>
+        </div>
+      </div>
+
+      <!-- Quick Switcher Tabs for all Collections -->
+      <div class="schema-nav-tabs" id="schemaNavTabs">
+        <!-- Rendered dynamically for each collection -->
+      </div>
+
+      <!-- Table Metadata Header Bar -->
+      <div class="schema-meta-bar">
+        <div>
+          <span style="color: #94a3b8;">Table:</span> <b style="color: #f1f5f9;" id="metaTableName">expenses</b>
+          <span style="color: #475569; margin: 0 8px;">|</span>
+          <span style="color: #94a3b8;">Mongoose Model:</span> <span style="color: #cbd5e1;" id="metaModelName">Expense</span>
+          <span style="color: #475569; margin: 0 8px;">|</span>
+          <span style="color: #94a3b8;">Documents:</span> <span style="color: #e2e8f0;" id="metaRecordsCount">-- Docs</span>
+        </div>
+        <div style="color: #94a3b8; font-size: 0.78rem;" id="metaTableDesc">
+          Primary financial transaction ledger storing all user expense debits and category allocations.
+        </div>
+      </div>
+
+      <!-- 1. Column Structure Table -->
+      <div class="sub-section-title">
+        <span>📑</span> Columns & Data Types
+      </div>
+      <div class="standard-table-wrapper">
+        <table class="standard-table">
+          <thead>
+            <tr>
+              <th style="width: 15%;">Column / Field</th>
+              <th style="width: 11%;">Data Type</th>
+              <th style="width: 9%;">Nullable</th>
+              <th style="width: 8%;">Key</th>
+              <th style="width: 14%;">Default Value</th>
+              <th style="width: 15%;">Referenced Table</th>
+              <th style="width: 11%;">Referenced Column</th>
+              <th>Description & Integrity Rules</th>
+            </tr>
+          </thead>
+          <tbody id="schemaColumnsTbody">
+            <!-- Dynamically populated rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2. Inter-Table Entity Relationships Table -->
+      <div class="sub-section-title">
+        <span>🔗</span> Inter-Table Entity Relationships & Foreign Keys
+      </div>
+      <div class="standard-table-wrapper">
+        <table class="standard-table">
+          <thead>
+            <tr>
+              <th style="width: 14%;">Direction</th>
+              <th style="width: 14%;">Source Column</th>
+              <th style="width: 16%;">Target Table (Schema)</th>
+              <th style="width: 14%;">Target Column</th>
+              <th style="width: 14%;">Cardinality</th>
+              <th>Foreign Key / Relational Mapping Details</th>
+            </tr>
+          </thead>
+          <tbody id="schemaRelationsTbody">
+            <!-- Dynamically populated rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 3. Collection Indexes Table -->
+      <div class="sub-section-title">
+        <span>⚡</span> Indexes & Constraints
+      </div>
+      <div class="standard-table-wrapper" style="margin-bottom: 0;">
+        <table class="standard-table">
+          <thead>
+            <tr>
+              <th style="width: 28%;">Index Name</th>
+              <th style="width: 32%;">Indexed Keys / Columns</th>
+              <th style="width: 22%;">Index Purpose</th>
+              <th style="width: 18%;">Uniqueness</th>
+            </tr>
+          </thead>
+          <tbody id="schemaIndexesTbody">
+            <!-- Dynamically populated rows -->
+          </tbody>
         </table>
       </div>
     </section>
@@ -903,7 +1175,8 @@
             <span>📦</span> Installed Modules & Version Registry
           </h2>
           <p class="section-desc">
-            Complete inventory of all 19 production backend dependencies, dev tooling, frontend CDNs, and runtime engines.
+            Complete inventory of all 19 production backend dependencies, dev tooling, frontend CDNs, and runtime
+            engines.
           </p>
         </div>
         <span class="card-tag tag-info" id="modulesCountTag">25 Total Components</span>
@@ -950,6 +1223,207 @@
     let autoRefreshTimer = null;
     let autoRefreshActive = true;
     let currentRawData = null;
+    let currentActiveSchemaKey = 'expenses';
+    let currentActiveTab = 'structure';
+
+    // Comprehensive Client Schema & ER Registry fallback
+    const CLIENT_SCHEMAS = {
+      expenses: {
+        collection: 'expenses',
+        model: 'Expense',
+        icon: '💳',
+        description: 'Primary financial transaction ledger storing all user expense debits and category allocations.',
+        indexes: [
+          { name: '_id_', keys: { _id: 1 }, unique: true, type: 'Primary Key' },
+          { name: 'userId_1', keys: { userId: 1 }, unique: false, type: 'Foreign Key Index' },
+          { name: 'userId_1_date_-1', keys: { userId: 1, date: -1 }, unique: false, type: 'Compound Query Index' },
+          { name: 'userId_1_month_1_year_1', keys: { userId: 1, month: 1, year: 1 }, unique: false, type: 'Monthly Analytics Index' }
+        ],
+        fields: [
+          { name: '_id', type: 'ObjectId', required: true, unique: true, default: 'Auto BSON ObjectId', description: 'Unique primary key identifier for the transaction record.', isPrimaryKey: true },
+          { name: 'userId', type: 'ObjectId', required: true, unique: false, default: null, description: 'Foreign key referencing User who incurred and owns this expense.', relation: { targetCollection: 'users', targetModel: 'User', targetColumn: '_id', relationType: 'Many-to-One (N:1 Foreign Key)', description: 'Tenant isolation: Expense belongs to a specific User.' } },
+          { name: 'amount', type: 'Number', required: true, unique: false, default: null, description: 'Monetary transaction amount in Indian Rupees (₹). Must be > 0.' },
+          { name: 'category', type: 'String', required: true, unique: false, default: null, description: 'Classification name of expense (e.g. Food, Transport, Rent).', relation: { targetCollection: 'categories', targetModel: 'Category', targetColumn: 'name', relationType: 'Many-to-One (Logical Reference)', description: 'References categories.name to categorize spending and enforce monthly budgets.' } },
+          { name: 'date', type: 'Date', required: true, unique: false, default: null, description: 'Date and time on which the expense was incurred.' },
+          { name: 'description', type: 'String', required: false, unique: false, default: "''", description: 'Optional remark, merchant name, or notes describing the expenditure.' },
+          { name: 'isOverBudget', type: 'Boolean', required: false, unique: false, default: 'false', description: 'Automated flag set when this transaction causes category monthly budget to exceed limit.' },
+          { name: 'month', type: 'Number', required: false, unique: false, default: 'Derived (1-12)', description: 'Calendar month number for fast aggregation without date parsing.' },
+          { name: 'year', type: 'Number', required: false, unique: false, default: 'Derived (e.g. 2026)', description: 'Calendar year for fiscal reporting and yearly summaries.' },
+          { name: 'createdAt', type: 'Date', required: false, unique: false, default: 'Date.now()', description: 'Timestamp when record was initially created.' },
+          { name: 'updatedAt', type: 'Date', required: false, unique: false, default: 'Date.now()', description: 'Timestamp when record was last updated.' }
+        ],
+        relations: [
+          { direction: 'OUTGOING', sourceColumn: 'userId', targetCollection: 'users', targetModel: 'User', targetColumn: '_id', type: 'Many-to-One (N:1)', description: 'Every expense references users._id to isolate tenant transaction data.' },
+          { direction: 'OUTGOING', sourceColumn: 'category', targetCollection: 'categories', targetModel: 'Category', targetColumn: 'name', type: 'Many-to-One (Reference)', description: 'Matches category.name to pull emoji icons, colors, and budget limits.' }
+        ]
+      },
+      incomes: {
+        collection: 'incomes',
+        model: 'Income',
+        icon: '💰',
+        description: 'Income ledger tracking earnings, salaries, dividends, and other monetary deposits.',
+        indexes: [
+          { name: '_id_', keys: { _id: 1 }, unique: true, type: 'Primary Key' },
+          { name: 'userId_1', keys: { userId: 1 }, unique: false, type: 'Foreign Key Index' },
+          { name: 'userId_1_date_-1', keys: { userId: 1, date: -1 }, unique: false, type: 'Query Index' }
+        ],
+        fields: [
+          { name: '_id', type: 'ObjectId', required: true, unique: true, default: 'Auto BSON ObjectId', description: 'Unique primary key identifier for the income record.', isPrimaryKey: true },
+          { name: 'userId', type: 'ObjectId', required: true, unique: false, default: null, description: 'Foreign key referencing User who received and owns this income.', relation: { targetCollection: 'users', targetModel: 'User', targetColumn: '_id', relationType: 'Many-to-One (N:1 Foreign Key)', description: 'Incomes belong to a specific User. Multiple incomes link to one user._id.' } },
+          { name: 'source', type: 'String', required: true, unique: false, default: null, description: 'Source or payer of income (e.g. Salary, Freelance, Rental, Investment).' },
+          { name: 'amount', type: 'Number', required: true, unique: false, default: null, description: 'Monetary credited amount in Indian Rupees (₹).' },
+          { name: 'date', type: 'Date', required: true, unique: false, default: null, description: 'Date when funds were received or credited.' },
+          { name: 'month', type: 'Number', required: false, unique: false, default: 'Derived (1-12)', description: 'Calendar month number for cashflow calculations.' },
+          { name: 'year', type: 'Number', required: false, unique: false, default: 'Derived', description: 'Calendar year for annual income summaries.' },
+          { name: 'createdAt', type: 'Date', required: false, unique: false, default: 'Date.now()', description: 'Audit timestamp of record creation.' },
+          { name: 'updatedAt', type: 'Date', required: false, unique: false, default: 'Date.now()', description: 'Audit timestamp of last update.' }
+        ],
+        relations: [
+          { direction: 'OUTGOING', sourceColumn: 'userId', targetCollection: 'users', targetModel: 'User', targetColumn: '_id', type: 'Many-to-One (N:1)', description: 'Incomes belong to a single user account referencing users._id.' }
+        ]
+      },
+      categories: {
+        collection: 'categories',
+        model: 'Category',
+        icon: '🏷️',
+        description: 'Category dictionary defining system defaults and custom user spending tags with monthly budgets.',
+        indexes: [
+          { name: '_id_', keys: { _id: 1 }, unique: true, type: 'Primary Key' },
+          { name: 'userId_1_name_1', keys: { userId: 1, name: 1 }, unique: true, type: 'Compound Unique Index' }
+        ],
+        fields: [
+          { name: '_id', type: 'ObjectId', required: true, unique: true, default: 'Auto BSON ObjectId', description: 'Unique primary key identifier for the category.', isPrimaryKey: true },
+          { name: 'userId', type: 'ObjectId', required: false, unique: false, default: 'null (System Default)', description: 'References User who created custom category. null denotes global built-in system default.', relation: { targetCollection: 'users', targetModel: 'User', targetColumn: '_id', relationType: 'Many-to-One (N:1 Foreign Key, Optional)', description: 'Custom categories belong to user._id; system categories have userId: null.' } },
+          { name: 'name', type: 'String', required: true, unique: false, default: null, description: 'Name of the category (e.g. Food, Transport, Rent, Investment).' },
+          { name: 'icon', type: 'String', required: false, unique: false, default: "'🏷️'", description: 'Visual emoji icon representing the category in UI cards.' },
+          { name: 'color', type: 'String', required: false, unique: false, default: "'#38bdf8'", description: 'Hex color code used in Chart.js doughnut and bar charts.' },
+          { name: 'isSystem', type: 'Boolean', required: false, unique: false, default: 'false', description: 'Flag indicating whether category is a global system default category.' },
+          { name: 'isArchived', type: 'Boolean', required: false, unique: false, default: 'false', description: 'Soft-delete flag allowing user to hide deprecated categories without losing historical stats.' },
+          { name: 'monthlyBudget', type: 'Number', required: false, unique: false, default: '0', description: 'Target monthly spending cap in ₹ for budget warning alerts.' },
+          { name: 'hiddenBy', type: 'Array<ObjectId>', required: false, unique: false, default: '[]', description: 'Array of User ObjectIds who chose to hide this system category.', relation: { targetCollection: 'users', targetModel: 'User', targetColumn: '_id', relationType: 'Many-to-Many (N:M Reference Array)', description: 'Links multiple user._id values who opted out of seeing this category.' } },
+          { name: 'createdAt', type: 'Date', required: false, unique: false, default: 'Date.now()', description: 'Record creation timestamp.' },
+          { name: 'updatedAt', type: 'Date', required: false, unique: false, default: 'Date.now()', description: 'Record last modification timestamp.' }
+        ],
+        relations: [
+          { direction: 'OUTGOING', sourceColumn: 'userId', targetCollection: 'users', targetModel: 'User', targetColumn: '_id', type: 'Many-to-One (N:1, Nullable)', description: 'Custom categories link to user._id; null indicates global system default category.' },
+          { direction: 'OUTGOING', sourceColumn: 'hiddenBy', targetCollection: 'users', targetModel: 'User', targetColumn: '_id', type: 'Many-to-Many (N:M Array)', description: 'Stores user._id entries who hid this category.' },
+          { direction: 'INCOMING', sourceColumn: 'name', targetCollection: 'expenses', targetModel: 'Expense', targetColumn: 'category', type: 'One-to-Many (1:N)', description: 'expenses.category references categories.name to categorize spending.' },
+          { direction: 'INCOMING', sourceColumn: 'name', targetCollection: 'patches', targetModel: 'Patch', targetColumn: 'category', type: 'One-to-Many (1:N)', description: 'patches.category references categories.name for prefilled 1-click templates.' }
+        ]
+      },
+      users: {
+        collection: 'users',
+        model: 'User',
+        icon: '👤',
+        description: 'Central user authentication, credentials, profile metadata, and notification configuration.',
+        indexes: [
+          { name: '_id_', keys: { _id: 1 }, unique: true, type: 'Primary Key' },
+          { name: 'email_1', keys: { email: 1 }, unique: true, type: 'Unique Index' },
+          { name: 'phoneNumber_1', keys: { phoneNumber: 1 }, unique: true, sparse: true, type: 'Sparse Unique Index' }
+        ],
+        fields: [
+          { name: '_id', type: 'ObjectId', required: true, unique: true, default: 'Auto BSON ObjectId', description: 'Unique primary key identifier for the user account.', isPrimaryKey: true },
+          { name: 'name', type: 'String', required: true, unique: false, default: null, description: 'Full display name of the user.' },
+          { name: 'email', type: 'String', required: true, unique: true, default: null, description: 'Unique email address used for login authentication and email notifications.' },
+          { name: 'password', type: 'String', required: true, unique: false, default: null, description: 'One-way Bcrypt cryptographic hash of the user password.' },
+          { name: 'phoneNumber', type: 'String', required: false, unique: true, default: null, description: 'Optional phone number with country code for WhatsApp chatbot synchronization.' },
+          { name: 'avatar', type: 'String', required: false, unique: false, default: 'null', description: 'URL to Cloudinary-hosted profile avatar image.' },
+          { name: 'reminderSettings', type: 'Object', required: false, unique: false, default: '{ enabled: false, time: "21:00", timezone: "Asia/Kolkata" }', description: 'Daily reminder configuration object (cron time, timezone, active switch).' },
+          { name: 'pushSubscriptions', type: 'Array<Object>', required: false, unique: false, default: '[]', description: 'Web Push API browser endpoints and crypto keys for PWA notifications.' },
+          { name: 'resetPasswordToken', type: 'String', required: false, unique: false, default: 'null', description: 'Cryptographic SHA-256 token used for password reset verification.' },
+          { name: 'resetPasswordExpires', type: 'Date', required: false, unique: false, default: 'null', description: 'Expiry timestamp for active password reset token.' },
+          { name: 'createdAt', type: 'Date', required: false, unique: false, default: 'Date.now()', description: 'Timestamp when user registered account.' },
+          { name: 'updatedAt', type: 'Date', required: false, unique: false, default: 'Date.now()', description: 'Timestamp of last profile update.' }
+        ],
+        relations: [
+          { direction: 'INCOMING', sourceColumn: '_id', targetCollection: 'expenses', targetModel: 'Expense', targetColumn: 'userId', type: 'One-to-Many (1:N)', description: 'Primary tenant relation: One user has many expenses (expenses.userId -> users._id).' },
+          { direction: 'INCOMING', sourceColumn: '_id', targetCollection: 'incomes', targetModel: 'Income', targetColumn: 'userId', type: 'One-to-Many (1:N)', description: 'One user has many incomes (incomes.userId -> users._id).' },
+          { direction: 'INCOMING', sourceColumn: '_id', targetCollection: 'patches', targetModel: 'Patch', targetColumn: 'userId', type: 'One-to-Many (1:N)', description: 'One user has many fast-add expense templates (patches.userId -> users._id).' },
+          { direction: 'INCOMING', sourceColumn: '_id', targetCollection: 'categories', targetModel: 'Category', targetColumn: 'userId', type: 'One-to-Many (1:N)', description: 'One user has custom created categories (categories.userId -> users._id).' },
+          { direction: 'INCOMING', sourceColumn: '_id', targetCollection: 'sharedaccesses', targetModel: 'SharedAccess', targetColumn: 'granterId', type: 'One-to-Many (1:N)', description: 'User as primary owner granting account sharing (sharedaccesses.granterId -> users._id).' },
+          { direction: 'INCOMING', sourceColumn: '_id', targetCollection: 'sharedaccesses', targetModel: 'SharedAccess', targetColumn: 'granteeId', type: 'One-to-Many (1:N)', description: 'User as invited recipient of shared access (sharedaccesses.granteeId -> users._id).' },
+          { direction: 'INCOMING', sourceColumn: '_id', targetCollection: 'pendingexpenses', targetModel: 'PendingExpense', targetColumn: 'userId', type: 'One-to-Many (1:N)', description: 'Offline queue transactions pending sync (pendingexpenses.userId -> users._id).' }
+        ]
+      },
+      patches: {
+        collection: 'patches',
+        model: 'Patch',
+        icon: '⚡',
+        description: 'Quick-add transaction templates for 1-tap recurring logging (e.g. Daily Metro, Morning Coffee).',
+        indexes: [
+          { name: '_id_', keys: { _id: 1 }, unique: true, type: 'Primary Key' },
+          { name: 'userId_1_name_1', keys: { userId: 1, name: 1 }, unique: true, type: 'Compound Unique Index' },
+          { name: 'userId_1', keys: { userId: 1 }, unique: false, type: 'Foreign Key Index' }
+        ],
+        fields: [
+          { name: '_id', type: 'ObjectId', required: true, unique: true, default: 'Auto BSON ObjectId', description: 'Unique primary key identifier for the patch template.', isPrimaryKey: true },
+          { name: 'userId', type: 'ObjectId', required: true, unique: false, default: null, description: 'Foreign key referencing User who owns this quick-add template.', relation: { targetCollection: 'users', targetModel: 'User', targetColumn: '_id', relationType: 'Many-to-One (N:1 Foreign Key)', description: 'Patches belong to a specific User (patches.userId -> users._id).' } },
+          { name: 'name', type: 'String', required: true, unique: false, default: null, description: 'Template title displayed on button (e.g. "Tea & Snacks", "Auto Rickshaw"). Max 60 chars.' },
+          { name: 'amount', type: 'Number', required: true, unique: false, default: null, description: 'Pre-set transaction amount in INR. Min: 0.01.' },
+          { name: 'category', type: 'String', required: true, unique: false, default: null, description: 'Category name pre-selected for this shortcut.', relation: { targetCollection: 'categories', targetModel: 'Category', targetColumn: 'name', relationType: 'Many-to-One (Logical Reference)', description: 'Matches categories.name so applied patch inherits category icons and metrics.' } },
+          { name: 'description', type: 'String', required: false, unique: false, default: "''", description: 'Optional default description pre-filled in logged expense.' },
+          { name: 'createdAt', type: 'Date', required: false, unique: false, default: 'Date.now()', description: 'Creation timestamp.' },
+          { name: 'updatedAt', type: 'Date', required: false, unique: false, default: 'Date.now()', description: 'Last update timestamp.' }
+        ],
+        relations: [
+          { direction: 'OUTGOING', sourceColumn: 'userId', targetCollection: 'users', targetModel: 'User', targetColumn: '_id', type: 'Many-to-One (N:1)', description: 'Links quick-add template to user account (patches.userId -> users._id).' },
+          { direction: 'OUTGOING', sourceColumn: 'category', targetCollection: 'categories', targetModel: 'Category', targetColumn: 'name', type: 'Many-to-One (Reference)', description: 'References category name (patches.category -> categories.name).' }
+        ]
+      },
+      sharedaccesses: {
+        collection: 'sharedaccesses',
+        model: 'SharedAccess',
+        icon: '🤝',
+        description: 'Collaborative ledger sharing and permissions delegation between users (e.g. Family or Accountant access).',
+        indexes: [
+          { name: '_id_', keys: { _id: 1 }, unique: true, type: 'Primary Key' },
+          { name: 'granterId_1', keys: { granterId: 1 }, unique: false, type: 'Index' },
+          { name: 'granteeId_1', keys: { granteeId: 1 }, unique: false, type: 'Index' },
+          { name: 'granteeEmail_1', keys: { granteeEmail: 1 }, unique: false, type: 'Index' }
+        ],
+        fields: [
+          { name: '_id', type: 'ObjectId', required: true, unique: true, default: 'Auto BSON ObjectId', description: 'Unique primary key identifier for the access sharing grant.', isPrimaryKey: true },
+          { name: 'granterId', type: 'ObjectId', required: true, unique: false, default: null, description: 'Foreign key referencing primary account owner who shared access.', relation: { targetCollection: 'users', targetModel: 'User', targetColumn: '_id', relationType: 'Many-to-One (N:1 Foreign Key)', description: 'Owner account that granted ledger visibility (sharedaccesses.granterId -> users._id).' } },
+          { name: 'granteeId', type: 'ObjectId', required: false, unique: false, default: 'null (until claimed)', description: 'Foreign key referencing recipient user account once invitation is accepted.', relation: { targetCollection: 'users', targetModel: 'User', targetColumn: '_id', relationType: 'Many-to-One (N:1 Foreign Key, Nullable)', description: 'Invited user account linked upon signup or invitation acceptance.' } },
+          { name: 'granteeEmail', type: 'String', required: true, unique: false, default: null, description: 'Email address of person invited to access the ledger.' },
+          { name: 'accessLevel', type: 'String', required: true, unique: false, default: "'viewer'", description: "Permission level granted: 'viewer' (read-only charts & statements) or 'editor' (can add/edit)." },
+          { name: 'status', type: 'String', required: true, unique: false, default: "'pending'", description: "Invitation status: 'pending', 'accepted', or 'revoked'." },
+          { name: 'createdAt', type: 'Date', required: false, unique: false, default: 'Date.now()', description: 'Date invite was issued.' },
+          { name: 'updatedAt', type: 'Date', required: false, unique: false, default: 'Date.now()', description: 'Date invite status changed.' }
+        ],
+        relations: [
+          { direction: 'OUTGOING', sourceColumn: 'granterId', targetCollection: 'users', targetModel: 'User', targetColumn: '_id', type: 'Many-to-One (N:1)', description: 'Points to granter user account (sharedaccesses.granterId -> users._id).' },
+          { direction: 'OUTGOING', sourceColumn: 'granteeId', targetCollection: 'users', targetModel: 'User', targetColumn: '_id', type: 'Many-to-One (N:1, Nullable)', description: 'Points to grantee collaborator account (sharedaccesses.granteeId -> users._id).' }
+        ]
+      },
+      pendingexpenses: {
+        collection: 'pendingexpenses',
+        model: 'PendingExpense',
+        icon: '⏳',
+        description: 'PWA offline sync holding queue buffering transactions entered while device is disconnected.',
+        indexes: [
+          { name: '_id_', keys: { _id: 1 }, unique: true, type: 'Primary Key' },
+          { name: 'userId_1', keys: { userId: 1 }, unique: false, type: 'Foreign Key Index' }
+        ],
+        fields: [
+          { name: '_id', type: 'ObjectId', required: true, unique: true, default: 'Auto BSON ObjectId', description: 'Unique primary key identifier for staged offline expense.', isPrimaryKey: true },
+          { name: 'userId', type: 'ObjectId', required: true, unique: false, default: null, description: 'Foreign key referencing User who logged transaction offline.', relation: { targetCollection: 'users', targetModel: 'User', targetColumn: '_id', relationType: 'Many-to-One (N:1 Foreign Key)', description: 'Links offline transaction to user._id for tenant reconciliation.' } },
+          { name: 'amount', type: 'Number', required: true, unique: false, default: null, description: 'Staged expense amount in ₹.' },
+          { name: 'category', type: 'String', required: true, unique: false, default: null, description: 'Expense category name.', relation: { targetCollection: 'categories', targetModel: 'Category', targetColumn: 'name', relationType: 'Many-to-One (Logical Reference)', description: 'References categories.name to categorize offline record.' } },
+          { name: 'description', type: 'String', required: false, unique: false, default: "''", description: 'Optional note recorded offline.' },
+          { name: 'date', type: 'Date', required: true, unique: false, default: null, description: 'Original transaction timestamp when entered on device.' },
+          { name: 'month', type: 'Number', required: false, unique: false, default: null, description: 'Month index.' },
+          { name: 'year', type: 'Number', required: false, unique: false, default: null, description: 'Year index.' },
+          { name: 'status', type: 'String', required: true, unique: false, default: "'pending'", description: "Synchronization state: 'pending', 'synced', or 'failed'." },
+          { name: 'createdAt', type: 'Date', required: false, unique: false, default: 'Date.now()', description: 'Offline queue insertion timestamp.' },
+          { name: 'updatedAt', type: 'Date', required: false, unique: false, default: 'Date.now()', description: 'Last synchronization attempt timestamp.' }
+        ],
+        relations: [
+          { direction: 'OUTGOING', sourceColumn: 'userId', targetCollection: 'users', targetModel: 'User', targetColumn: '_id', type: 'Many-to-One (N:1)', description: 'Links pending sync to users._id.' },
+          { direction: 'OUTGOING', sourceColumn: 'category', targetCollection: 'categories', targetModel: 'Category', targetColumn: 'name', type: 'Many-to-One (Reference)', description: 'References categories.name.' }
+        ]
+      }
+    };
 
     async function fetchHealth() {
       const startTime = performance.now();
@@ -958,13 +1432,23 @@
         const endTime = performance.now();
         const latency = Math.round(endTime - startTime);
 
+        let data = null;
+        try {
+          data = await res.json();
+        } catch (jsonErr) {}
+
+        if (data && (res.ok || data.status)) {
+          currentRawData = data;
+          if (data.schemas) {
+            Object.assign(CLIENT_SCHEMAS, data.schemas);
+          }
+          renderHealthData(data, latency);
+          return;
+        }
+
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
         }
-
-        const data = await res.json();
-        currentRawData = data;
-        renderHealthData(data, latency);
       } catch (err) {
         console.error('Health fetch error:', err);
         renderError(err.message);
@@ -1049,13 +1533,15 @@
       pendingexpenses: '⏳'
     };
 
+    let currentSelectedTable = 'expenses';
+
     function renderCollectionsTable(collections, storage) {
       const tbody = document.getElementById('atlasCollectionsBody');
       const tfoot = document.getElementById('atlasCollectionsFoot');
       if (!tbody) return;
 
       if (!collections || collections.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 24px; color: #94a3b8;">No collection statistics available</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 24px; color: #94a3b8;">No collection statistics available</td></tr>`;
         return;
       }
 
@@ -1067,28 +1553,25 @@
       tbody.innerHTML = collections.map(c => {
         const icon = collectionIcons[c.name] || '📁';
         const pct = totalDataSize > 0 ? ((c.dataSize / totalDataSize) * 100).toFixed(1) : 0;
+        const isSelected = c.name === currentSelectedTable;
         return `
-          <tr>
+          <tr class="coll-row-clickable ${isSelected ? 'active-row' : ''}" onclick="selectCollectionSchema('${escapeHtml(c.name)}')" id="collRow_${escapeHtml(c.name)}" title="Click to view schema and relations for ${escapeHtml(c.name)}">
             <td>
               <div class="coll-name-cell">
                 <span>${icon}</span>
                 <span>${escapeHtml(c.name)}</span>
               </div>
             </td>
-            <td>
-              <span class="doc-pill">${Number(c.documents || 0).toLocaleString()}</span>
-            </td>
+            <td style="color: #f1f5f9; font-weight: 600;">${Number(c.documents || 0).toLocaleString()}</td>
             <td class="mono-cell" style="color: #cbd5e1;">${formatBytes(c.storageSize)}</td>
-            <td class="mono-cell" style="color: #38bdf8; font-weight: 600;">${formatBytes(c.dataSize)}</td>
+            <td class="mono-cell" style="color: #cbd5e1;">${formatBytes(c.dataSize)}</td>
             <td class="mono-cell" style="color: #94a3b8;">${formatBytes(c.avgObjSize)}</td>
-            <td class="mono-cell" style="color: #c084fc;">${formatBytes(c.totalIndexSize)}</td>
-            <td>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <div class="progress-track" style="width: 70px; margin: 0;">
-                  <div class="progress-bar" style="width: ${Math.min(pct, 100)}%;"></div>
-                </div>
-                <span style="font-family: var(--font-mono); font-size: 0.78rem; color: #94a3b8;">${pct}%</span>
-              </div>
+            <td class="mono-cell" style="color: #94a3b8;">${formatBytes(c.totalIndexSize)}</td>
+            <td class="mono-cell" style="color: #cbd5e1;">${pct}%</td>
+            <td style="text-align: right;">
+              <button class="btn-schema-select" onclick="event.stopPropagation(); selectCollectionSchema('${escapeHtml(c.name)}')">
+                View Schema ➔
+              </button>
             </td>
           </tr>
         `;
@@ -1099,15 +1582,200 @@
         tfoot.innerHTML = `
           <tr>
             <td><b>TOTAL (${collections.length} Collections)</b></td>
-            <td><span class="doc-pill" style="background: rgba(34, 197, 94, 0.25); color: #fff;">${totalDocs.toLocaleString()}</span></td>
-            <td class="mono-cell" style="color: #fff;">${formatBytes(totalStorageSize)}</td>
-            <td class="mono-cell" style="color: #38bdf8;">${formatBytes(totalDataSize)}</td>
-            <td class="mono-cell" style="color: #fff;">${formatBytes(overallAvg)}</td>
-            <td class="mono-cell" style="color: #c084fc;">${formatBytes(totalIndexSize)}</td>
-            <td class="mono-cell" style="color: #4ade80;">100.0%</td>
+            <td><b>${totalDocs.toLocaleString()}</b></td>
+            <td class="mono-cell">${formatBytes(totalStorageSize)}</td>
+            <td class="mono-cell">${formatBytes(totalDataSize)}</td>
+            <td class="mono-cell">${formatBytes(overallAvg)}</td>
+            <td class="mono-cell">${formatBytes(totalIndexSize)}</td>
+            <td class="mono-cell">100.0%</td>
+            <td style="text-align: right; color: #94a3b8; font-size: 0.78rem;">${collections.length} Schemas Loaded</td>
           </tr>
         `;
       }
+
+      renderSchemaNavTabs();
+      selectCollectionSchema(currentSelectedTable, false);
+    }
+
+    // Standard Industry Schema & Relationship Table Inspector
+    function renderSchemaNavTabs() {
+      const container = document.getElementById('schemaNavTabs');
+      if (!container) return;
+
+      const keys = Object.keys(CLIENT_SCHEMAS);
+      container.innerHTML = keys.map(k => {
+        const s = CLIENT_SCHEMAS[k];
+        const isActive = k === currentSelectedTable;
+        return `
+          <button class="schema-nav-tab ${isActive ? 'active' : ''}" onclick="selectCollectionSchema('${k}')">
+            <span>${s.icon || '📁'}</span>
+            <span>${escapeHtml(k)}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectCollectionSchema(tableName, shouldScroll = true) {
+      if (!tableName || !CLIENT_SCHEMAS[tableName]) tableName = 'expenses';
+      currentSelectedTable = tableName;
+      const schema = CLIENT_SCHEMAS[tableName];
+
+      // Update active nav tab
+      const tabs = document.querySelectorAll('.schema-nav-tab');
+      tabs.forEach(tab => {
+        const txt = tab.innerText.trim();
+        tab.classList.toggle('active', txt.includes(tableName));
+      });
+
+      // Update active row in collections table
+      document.querySelectorAll('.coll-row-clickable').forEach(row => {
+        row.classList.remove('active-row');
+      });
+      const activeRow = document.getElementById(`collRow_${tableName}`);
+      if (activeRow) activeRow.classList.add('active-row');
+
+      // Update metadata bar
+      let docCountStr = '--';
+      if (currentRawData && currentRawData.database && currentRawData.database.storage && currentRawData.database.storage.collectionsBreakdown) {
+        const found = currentRawData.database.storage.collectionsBreakdown.find(x => x.name === tableName);
+        if (found) {
+          docCountStr = `${Number(found.documents || 0).toLocaleString()} documents (${formatBytes(found.storageSize)} disk)`;
+        }
+      }
+
+      document.getElementById('activeTableNameBadge').innerText = schema.collection;
+      document.getElementById('metaTableName').innerText = schema.collection;
+      document.getElementById('metaModelName').innerText = schema.model;
+      document.getElementById('metaRecordsCount').innerText = docCountStr;
+      document.getElementById('metaTableDesc').innerText = schema.description || 'Database collection.';
+
+      // Render 1: Columns Table
+      renderStandardColumnsTable(schema);
+
+      // Render 2: Relationships Table
+      renderStandardRelationsTable(schema);
+
+      // Render 3: Indexes Table
+      renderStandardIndexesTable(schema);
+
+      // Smooth scroll if clicked
+      if (shouldScroll) {
+        const targetEl = document.getElementById('schemaSection');
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    }
+
+    function renderStandardColumnsTable(schema) {
+      const tbody = document.getElementById('schemaColumnsTbody');
+      if (!tbody) return;
+
+      const fields = schema.fields || [];
+      if (fields.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #94a3b8; padding: 18px;">No column definitions available</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = fields.map(f => {
+        let keyText = '—';
+        if (f.isPrimaryKey) {
+          keyText = '<span class="key-badge pk">PK</span>';
+        } else if (f.relation) {
+          keyText = '<span class="key-badge fk">FK</span>';
+        } else if (f.unique) {
+          keyText = '<span class="key-badge ref">UNIQUE</span>';
+        }
+
+        const nullableText = f.required ? 'NO' : 'YES';
+        const defaultText = (f.default !== null && f.default !== undefined) ? String(f.default) : 'NULL';
+
+        let refTableText = '—';
+        let refColText = '—';
+        if (f.relation) {
+          refTableText = `<button class="table-jump-link" onclick="selectCollectionSchema('${escapeHtml(f.relation.targetCollection)}')">${escapeHtml(f.relation.targetCollection)}</button>`;
+          refColText = `<code style="color: #38bdf8;">${escapeHtml(f.relation.targetColumn)}</code>`;
+        }
+
+        return `
+          <tr>
+            <td style="font-weight: 600; color: #f1f5f9;">${escapeHtml(f.name)}</td>
+            <td style="color: #94a3b8;">${escapeHtml(f.type || 'Mixed')}</td>
+            <td style="color: ${f.required ? '#cbd5e1' : '#64748b'};">${nullableText}</td>
+            <td>${keyText}</td>
+            <td style="color: #94a3b8; font-size: 0.78rem;">${escapeHtml(defaultText)}</td>
+            <td>${refTableText}</td>
+            <td>${refColText}</td>
+            <td style="color: #cbd5e1; font-size: 0.8rem; font-family: sans-serif; white-space: normal; line-height: 1.4;">${escapeHtml(f.description || '')}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderStandardRelationsTable(schema) {
+      const tbody = document.getElementById('schemaRelationsTbody');
+      if (!tbody) return;
+
+      const relations = schema.relations || [];
+      if (relations.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; color: #94a3b8; padding: 16px;">
+              No direct foreign key relationships configured for this collection.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = relations.map(r => {
+        const isOutgoing = r.direction === 'OUTGOING';
+        const dirLabel = isOutgoing ? 'OUTGOING (FK)' : 'INCOMING (REF)';
+        const sourceCol = isOutgoing ? r.sourceColumn : r.targetColumn;
+        const targetCol = isOutgoing ? r.targetColumn : r.sourceColumn;
+        const targetTable = r.targetCollection;
+
+        return `
+          <tr>
+            <td style="color: ${isOutgoing ? '#38bdf8' : '#4ade80'}; font-weight: 600; font-size: 0.78rem;">${dirLabel}</td>
+            <td style="color: #f1f5f9; font-weight: 600;">${escapeHtml(sourceCol)}</td>
+            <td>
+              <button class="table-jump-link" onclick="selectCollectionSchema('${escapeHtml(targetTable)}')">
+                ${escapeHtml(targetTable)}
+              </button>
+              <span style="color: #64748b; font-size: 0.76rem;">(${escapeHtml(r.targetModel)})</span>
+            </td>
+            <td style="color: #38bdf8;">${escapeHtml(targetCol)}</td>
+            <td style="color: #cbd5e1;">${escapeHtml(r.type)}</td>
+            <td style="color: #cbd5e1; font-size: 0.8rem; font-family: sans-serif; white-space: normal; line-height: 1.4;">
+              ${escapeHtml(r.description || '')}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderStandardIndexesTable(schema) {
+      const tbody = document.getElementById('schemaIndexesTbody');
+      if (!tbody) return;
+
+      const indexes = schema.indexes || [];
+      if (indexes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 16px;">No custom indexes defined</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = indexes.map(idx => {
+        const keysStr = JSON.stringify(idx.keys || {}).replace(/"/g, '').replace(/,/g, ', ');
+        return `
+          <tr>
+            <td style="color: #f1f5f9; font-weight: 600;">${escapeHtml(idx.name)}</td>
+            <td style="color: #38bdf8;">${escapeHtml(keysStr)}</td>
+            <td style="color: #cbd5e1;">${escapeHtml(idx.type || 'Standard B-Tree')}</td>
+            <td style="color: ${idx.unique ? '#fbbf24' : '#94a3b8'};">${idx.unique ? 'YES (Unique)' : 'NO (Standard)'}</td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function renderModules(modules = {}, runtimes = {}) {
@@ -1232,7 +1900,7 @@
       if (!currentRawData) return;
       navigator.clipboard.writeText(JSON.stringify(currentRawData, null, 2))
         .then(() => alert('JSON health payload copied to clipboard!'))
-        .catch(() => {});
+        .catch(() => { });
     }
 
     // Initialize

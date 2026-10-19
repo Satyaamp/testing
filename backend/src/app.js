@@ -14,6 +14,12 @@ app.use(express.static(path.join(__dirname, "../../frontend")));
 
 
 
+// Storage stats cache for MongoDB Atlas M0 (TTL: 20 seconds to prevent slow consecutive WAN roundtrips)
+let cachedStorageStats = null;
+let lastStorageStatsFetch = 0;
+const STATS_CACHE_TTL = 20000;
+const schemaMetadata = require('./utils/schemaMetadata');
+
 app.get('/health', async (req, res) => {
   const isHtml = req.headers.accept && req.headers.accept.includes('text/html') && req.query.format !== 'json';
 
@@ -52,10 +58,14 @@ app.get('/health', async (req, res) => {
     indexSizeMB: "0.00",
     collections: 0,
     documents: 0,
-    indexes: 0
+    indexes: 0,
+    collectionsBreakdown: []
   };
 
-  if (dbState === 1 && mongoose.connection.db) {
+  const now = Date.now();
+  if (cachedStorageStats && (now - lastStorageStatsFetch < STATS_CACHE_TTL)) {
+    storageStats = cachedStorageStats;
+  } else if (dbState === 1 && mongoose.connection.db) {
     try {
       const stats = await mongoose.connection.db.stats();
       const storageSize = stats.storageSize || 0;
@@ -67,6 +77,34 @@ app.get('/health', async (req, res) => {
       const freeMB = Math.max(0, limitMB - parseFloat(usedMB)).toFixed(2);
       const percentUsed = ((parseFloat(usedMB) / limitMB) * 100).toFixed(2);
 
+      // Collection-level statistics breakdown matching MongoDB Atlas view
+      const colls = await mongoose.connection.db.listCollections().toArray();
+      const collectionsList = await Promise.all(colls.map(async (c) => {
+        try {
+          const s = await mongoose.connection.db.command({ collStats: c.name });
+          return {
+            name: c.name,
+            documents: s.count || 0,
+            storageSize: s.storageSize || 0,
+            dataSize: s.size || 0,
+            avgObjSize: Math.round(s.avgObjSize || 0),
+            indexes: s.nindexes || 0,
+            totalIndexSize: s.totalIndexSize || 0
+          };
+        } catch (err) {
+          return {
+            name: c.name,
+            documents: 0,
+            storageSize: 0,
+            dataSize: 0,
+            avgObjSize: 0,
+            indexes: 0,
+            totalIndexSize: 0
+          };
+        }
+      }));
+      collectionsList.sort((a, b) => b.documents - a.documents);
+
       storageStats = {
         tier: "MongoDB Atlas M0 Free Tier",
         limitMB,
@@ -76,36 +114,22 @@ app.get('/health', async (req, res) => {
         dataSizeMB: (dataSize / (1024 * 1024)).toFixed(2),
         storageSizeMB: (storageSize / (1024 * 1024)).toFixed(2),
         indexSizeMB: (indexSize / (1024 * 1024)).toFixed(2),
-        collections: stats.collections || 0,
+        collections: stats.collections || collectionsList.length || 0,
         documents: stats.objects || 0,
         indexes: stats.indexes || 0,
-        collectionsBreakdown: []
+        collectionsBreakdown: collectionsList
       };
 
-      // Collection-level statistics breakdown matching MongoDB Atlas view
-      const colls = await mongoose.connection.db.listCollections().toArray();
-      const collectionsList = [];
-      for (const c of colls) {
-        try {
-          const s = await mongoose.connection.db.command({ collStats: c.name });
-          collectionsList.push({
-            name: c.name,
-            documents: s.count || 0,
-            storageSize: s.storageSize || 0,
-            dataSize: s.size || 0,
-            avgObjSize: Math.round(s.avgObjSize || 0),
-            indexes: s.nindexes || 0,
-            totalIndexSize: s.totalIndexSize || 0
-          });
-        } catch (err) {
-          // ignore collStats error for views
-        }
-      }
-      collectionsList.sort((a, b) => b.documents - a.documents);
-      storageStats.collectionsBreakdown = collectionsList;
+      cachedStorageStats = storageStats;
+      lastStorageStatsFetch = now;
     } catch (e) {
       console.warn("Could not fetch db.stats():", e.message);
+      if (cachedStorageStats) {
+        storageStats = cachedStorageStats;
+      }
     }
+  } else if (cachedStorageStats) {
+    storageStats = cachedStorageStats;
   }
 
   const healthData = {
@@ -124,6 +148,7 @@ app.get('/health', async (req, res) => {
       name: mongoose.connection.name || 'expensetracker',
       storage: storageStats
     },
+    schemas: schemaMetadata,
     system: {
       nodeVersion: process.version,
       platform: `${os.platform()} (${os.arch()})`,
@@ -160,7 +185,7 @@ app.get('/health', async (req, res) => {
     }
   };
 
-  res.status(healthData.status === 'OK' ? 200 : 503).json(healthData);
+  res.status(200).json(healthData);
 });
 
 // Fetch Categories dynamically (Backward-compatible fallback & User-aware)

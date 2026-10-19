@@ -246,14 +246,14 @@ export function applyPatchWithAnimation(patchId, itemElement) {
   // 4. Save Button Tactile Invitation Breathing Pulse (at 2150ms)
   setTimeout(() => {
     const saveBtn = document.querySelector('#expenseModal button[onclick="addExpense()"]') ||
-                    document.getElementById('saveExpenseBtn');
+      document.getElementById('saveExpenseBtn');
     if (saveBtn) {
       saveBtn.classList.remove('btn-save-patch-pulse');
       void saveBtn.offsetWidth;
       saveBtn.classList.add('btn-save-patch-pulse');
       setTimeout(() => saveBtn.classList.remove('btn-save-patch-pulse'), 2500);
     }
-    showToast(`⚡ ${patch.name} loaded! Click Save to confirm.`, 'info');
+    showToast(`Click Save to confirm.`, 'info');
   }, 2150);
 }
 
