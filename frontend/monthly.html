@@ -1161,7 +1161,13 @@
   <!-- ADD EXPENSE MODAL (For Daily View) -->
   <div id="expenseModal" class="modal hidden">
     <div class="modal-content glass-card">
-      <h3><span id="expenseModalTitle">Add Expense</span></h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="margin: 0;"><span id="expenseModalTitle">Add Expense</span></h3>
+        <a href="javascript:void(0)" id="monthlyPatchesLink" onclick="openPatchPickerModal()" class="my-patches-link"
+          title="Open My Patches to auto-fill form">
+          ⚡ My Patches
+        </a>
+      </div>
 
       <input type="number" id="expenseAmount" placeholder="Amount (₹)" />
       <input type="hidden" id="editExpenseId" />
@@ -1172,11 +1178,24 @@
       </select>
 
       <div class="date-wrapper" style="margin: 10px 0; text-align: left;">
-        <label for="expenseDate" style="display: block; font-size: 0.8rem; font-weight: 600; color: #94a3b8; margin-bottom: 4px;">📅 Expense Date</label>
+        <!-- <label for="expenseDate" style="display: block; font-size: 0.8rem; font-weight: 600; color: #94a3b8; margin-bottom: 4px;">📅 Expense Date</label> -->
         <input type="date" id="expenseDate" disabled
           style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; color-scheme: dark; cursor: not-allowed; opacity: 1; -webkit-text-fill-color: white;" />
       </div>
       <input type="text" id="expenseDesc" placeholder="Description (optional)" />
+
+      <div class="save-as-patch-row">
+        <input type="checkbox" id="saveAsPatchCheckbox" onchange="handleSaveAsPatchToggle(this)"
+          style="width: 15px; height: 15px; accent-color: #38bdf8; cursor: pointer;" />
+        <label for="saveAsPatchCheckbox">Save as Patch</label>
+      </div>
+
+      <div id="savePatchNameWrapper" style="display: none;">
+        <div class="save-patch-name-box">
+          <span class="save-patch-name-tag">Patch Name</span>
+          <input type="text" id="savePatchCustomName" class="save-patch-name-input" placeholder="Enter patch name" maxlength="50" />
+        </div>
+      </div>
 
       <div class="modal-actions">
         <button id="saveExpenseBtn" onclick="saveExpense()">Save</button>
@@ -1184,7 +1203,6 @@
       </div>
     </div>
   </div>
-
   <!-- ADD INCOME MODAL -->
   <div id="incomeModal" class="modal hidden">
     <div class="modal-content glass-card">
@@ -1194,7 +1212,9 @@
       <input type="text" id="incomeSource" placeholder="Source (e.g. Salary, Freelance)" />
 
       <div class="date-wrapper" style="margin: 10px 0; text-align: left;">
-        <label for="incomeDate" style="display: block; font-size: 0.8rem; font-weight: 600; color: #94a3b8; margin-bottom: 4px;">📅 Income Date</label>
+        <label for="incomeDate"
+          style="display: block; font-size: 0.8rem; font-weight: 600; color: #94a3b8; margin-bottom: 4px;">📅 Income
+          Date</label>
         <input type="date" id="incomeDate"
           style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: white; color-scheme: dark; cursor: pointer;" />
       </div>
@@ -1209,6 +1229,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="js/patches.js?v=1.0"></script>
   <script type="module" src="js/monthly.js?v=2.6"></script>
   <script>
     document.getElementById('downloadPdfBtn').addEventListener('click', function () {
@@ -1324,6 +1345,19 @@
 
     // Helper to open modal with correct date for Empty State or day selection
     window.openEmptyStateModal = function (specificDate) {
+      if (window.resetMonthlyExpenseForm) {
+        window.resetMonthlyExpenseForm();
+      } else {
+        const amt = document.getElementById('expenseAmount');
+        const desc = document.getElementById('expenseDesc');
+        const cat = document.getElementById('expenseCategory');
+        const editId = document.getElementById('editExpenseId');
+        if (amt) amt.value = '';
+        if (desc) desc.value = '';
+        if (cat) { cat.selectedIndex = 0; cat.value = ''; }
+        if (editId) editId.value = '';
+      }
+
       const modal = document.getElementById('expenseModal');
       const dateInput = document.getElementById('expenseDate');
       const title = document.getElementById('pageMonthTitle').innerText;
@@ -1369,6 +1403,20 @@
       document.getElementById('expenseModalTitle').innerText = "Add Expense";
       document.getElementById('editExpenseId').value = "";
       dateInput.style.cursor = 'pointer';
+      const patchesWrapper = document.getElementById("expensePatchesWrapper");
+      if (patchesWrapper) patchesWrapper.style.display = "";
+      const savePatchRow = document.querySelector(".save-as-patch-row");
+      if (savePatchRow) savePatchRow.style.display = "";
+      const patchCheckbox = document.getElementById("saveAsPatchCheckbox");
+      if (patchCheckbox) {
+        patchCheckbox.checked = false;
+        delete patchCheckbox.dataset.patchName;
+      }
+      const patchNameWrapper = document.getElementById("savePatchNameWrapper");
+      if (patchNameWrapper) patchNameWrapper.style.display = "none";
+      const patchCustomName = document.getElementById("savePatchCustomName");
+      if (patchCustomName) patchCustomName.value = "";
+      if (window.renderExpensePatches) window.renderExpensePatches();
       modal.classList.remove('hidden');
       document.body.classList.add('modal-open');
     }

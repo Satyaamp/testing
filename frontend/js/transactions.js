@@ -3,8 +3,17 @@ import { apiRequest } from './api.js';
 // Parse query params or fallback to current
 const urlParams = new URLSearchParams(window.location.search);
 const now = new Date();
-let targetYear = parseInt(urlParams.get("year")) || now.getFullYear();
-let targetMonth = parseInt(urlParams.get("month")) || (now.getMonth() + 1);
+const currentRealYear = now.getFullYear();
+const currentRealMonth = now.getMonth() + 1;
+
+let targetYear = parseInt(urlParams.get("year"), 10) || currentRealYear;
+let targetMonth = parseInt(urlParams.get("month"), 10) || currentRealMonth;
+
+// Disallow loading future months from URL query params
+if (targetYear > currentRealYear || (targetYear === currentRealYear && targetMonth > currentRealMonth)) {
+  targetYear = currentRealYear;
+  targetMonth = currentRealMonth;
+}
 
 // State
 let currentPage = 1;
@@ -28,12 +37,59 @@ const monthNames = [
   "July", "August", "September", "October", "November", "December"
 ];
 
+// Load user name into navbar header (First name before first space)
+async function loadUserNameHeader() {
+  const labelEl = document.getElementById('userNameHeader');
+  if (!labelEl) return;
+  let rawName = localStorage.getItem('userName') || '';
+  if (rawName) {
+    const firstName = rawName.trim().split(/\s+/)[0];
+    if (firstName) labelEl.textContent = firstName;
+  }
+  try {
+    const res = await apiRequest('/auth/me', 'GET', null, { skipLoader: true });
+    if (res?.data?.name) {
+      rawName = res.data.name;
+      localStorage.setItem('userName', rawName);
+      const firstName = rawName.trim().split(/\s+/)[0];
+      if (firstName) labelEl.textContent = firstName;
+    }
+  } catch (e) {
+    console.warn('Could not fetch user name:', e);
+  }
+}
+
+// Instant zero-lag render from localStorage
+loadUserNameHeader();
+
 // Initialize on DOM ready
 document.addEventListener("DOMContentLoaded", () => {
+  loadUserNameHeader();
   updatePageHeader();
   fetchTransactions();
   setupSearchListener();
 });
+
+// Update Month Step Buttons (Disable Next Month if viewing current or future month)
+function updateMonthNavButtons() {
+  const nextBtn = document.getElementById("nextMonthBtn");
+  if (!nextBtn) return;
+
+  const isCurrentOrFuture = (targetYear > currentRealYear) || 
+    (targetYear === currentRealYear && targetMonth >= currentRealMonth);
+
+  if (isCurrentOrFuture) {
+    nextBtn.disabled = true;
+    nextBtn.classList.add("disabled");
+    nextBtn.setAttribute("disabled", "disabled");
+    nextBtn.title = "Future months not available";
+  } else {
+    nextBtn.disabled = false;
+    nextBtn.classList.remove("disabled");
+    nextBtn.removeAttribute("disabled");
+    nextBtn.title = "Next Month";
+  }
+}
 
 // Update page title and header
 function updatePageHeader() {
@@ -55,13 +111,29 @@ function updatePageHeader() {
     const mStr = String(targetMonth).padStart(2, "0");
     const lastDay = new Date(targetYear, targetMonth, 0).getDate();
     dateFilterInput.min = `${targetYear}-${mStr}-01`;
-    dateFilterInput.max = `${targetYear}-${mStr}-${String(lastDay).padStart(2, "0")}`;
+    if (targetYear === currentRealYear && targetMonth === currentRealMonth) {
+      const todayDay = String(now.getDate()).padStart(2, "0");
+      dateFilterInput.max = `${targetYear}-${mStr}-${todayDay}`;
+    } else {
+      dateFilterInput.max = `${targetYear}-${mStr}-${String(lastDay).padStart(2, "0")}`;
+    }
     dateFilterInput.value = "";
   }
+
+  // Update navigation button active/disabled states
+  updateMonthNavButtons();
 }
 
 // Month stepping (Prev / Next month)
 window.stepMonth = function (delta) {
+  if (delta > 0) {
+    const isCurrentOrFuture = (targetYear > currentRealYear) || 
+      (targetYear === currentRealYear && targetMonth >= currentRealMonth);
+    if (isCurrentOrFuture) {
+      return; // Block future month navigation
+    }
+  }
+
   targetMonth += delta;
   if (targetMonth > 12) {
     targetMonth = 1;
@@ -69,6 +141,12 @@ window.stepMonth = function (delta) {
   } else if (targetMonth < 1) {
     targetMonth = 12;
     targetYear--;
+  }
+
+  // Safety clamp so user cannot navigate past current real month
+  if (targetYear > currentRealYear || (targetYear === currentRealYear && targetMonth > currentRealMonth)) {
+    targetYear = currentRealYear;
+    targetMonth = currentRealMonth;
   }
 
   // Update browser URL silently without reload

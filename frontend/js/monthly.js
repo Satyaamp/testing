@@ -2386,20 +2386,97 @@ async function populateCategorySelect() {
   }
 }
 
+window.resetMonthlyExpenseForm = function () {
+  const amtInput = document.getElementById("expenseAmount");
+  const descInput = document.getElementById("expenseDesc");
+  const catInput = document.getElementById("expenseCategory");
+  const editIdInput = document.getElementById("editExpenseId");
+  const dateInput = document.getElementById("expenseDate");
+  const patchCheckbox = document.getElementById("saveAsPatchCheckbox");
+  const patchNameWrapper = document.getElementById("savePatchNameWrapper");
+  const patchCustomName = document.getElementById("savePatchCustomName");
+  const titleEl = document.getElementById("expenseModalTitle");
+  const saveBtn = document.getElementById("saveExpenseBtn");
+
+  if (amtInput) {
+    amtInput.value = "";
+    amtInput.classList.remove("field-patch-glow");
+  }
+  if (descInput) {
+    descInput.value = "";
+    descInput.classList.remove("field-patch-glow");
+  }
+  if (catInput) {
+    catInput.selectedIndex = 0;
+    catInput.value = "";
+    catInput.disabled = false;
+    catInput.classList.remove("field-patch-glow");
+  }
+  if (editIdInput) editIdInput.value = "";
+  if (patchCheckbox) {
+    patchCheckbox.checked = false;
+    delete patchCheckbox.dataset.patchName;
+  }
+  if (patchNameWrapper) patchNameWrapper.style.display = "none";
+  if (patchCustomName) patchCustomName.value = "";
+
+  // Reset to current date (today) in local YYYY-MM-DD
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  const todayIso = `${year}-${month}-${day}`;
+  if (dateInput) {
+    dateInput.value = todayIso;
+    dateInput.disabled = false;
+    dateInput.style.cursor = "pointer";
+  }
+
+  if (titleEl) titleEl.innerText = "Add Expense";
+  if (saveBtn) {
+    saveBtn.innerText = "Save";
+    saveBtn.style.background = "";
+    saveBtn.style.color = "";
+    saveBtn.classList.remove("btn-save-patch-pulse");
+  }
+  if (window.clearActivePatch) window.clearActivePatch();
+};
+
 window.openAddExpenseModal = function (dateStr) {
   const modal = document.getElementById("expenseModal");
   const dateInput = document.getElementById("expenseDate");
 
   if (modal && dateInput) {
-    dateInput.value = dateStr; // Pre-fill selected date
+    window.resetMonthlyExpenseForm();
+
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    dateInput.value = (typeof dateStr === "string" && dateStr.trim()) ? dateStr.trim() : todayStr;
     modal.classList.remove("hidden");
     document.getElementById("expenseModalTitle").innerText = "Add Expense";
     document.getElementById("editExpenseId").value = "";
 
-    // Reset fields for Add (Enable all except date which is locked to selection)
+    // Reset fields for Add (Enable all except date which is locked to selection if provided)
     document.getElementById("expenseCategory").disabled = false;
     document.getElementById("expenseDesc").disabled = false;
-    dateInput.disabled = true;
+    dateInput.disabled = !!(typeof dateStr === "string" && dateStr.trim());
+
+    // Show patches row for Add Expense
+    const patchesWrapper = document.getElementById("expensePatchesWrapper");
+    if (patchesWrapper) patchesWrapper.style.display = "";
+    const savePatchRow = document.querySelector(".save-as-patch-row");
+    if (savePatchRow) savePatchRow.style.display = "";
+    const patchCheckbox = document.getElementById("saveAsPatchCheckbox");
+    if (patchCheckbox) {
+      patchCheckbox.checked = false;
+      delete patchCheckbox.dataset.patchName;
+    }
+    const patchNameWrapper = document.getElementById("savePatchNameWrapper");
+    if (patchNameWrapper) patchNameWrapper.style.display = "none";
+    const patchCustomName = document.getElementById("savePatchCustomName");
+    if (patchCustomName) patchCustomName.value = "";
+    if (window.renderExpensePatches) window.renderExpensePatches();
+
     if (document.getElementById("saveExpenseBtn")) {
       const btn = document.getElementById("saveExpenseBtn");
       btn.innerText = "Save";
@@ -2416,17 +2493,7 @@ window.closeExpenseModal = function () {
   if (modal) {
     modal.classList.add("hidden");
     document.body.classList.remove("modal-open");
-    // Reset fields
-    document.getElementById("expenseAmount").value = "";
-    document.getElementById("expenseDesc").value = "";
-    document.getElementById("expenseCategory").value = "";
-    document.getElementById("editExpenseId").value = "";
-    if (document.getElementById("saveExpenseBtn")) {
-      const btn = document.getElementById("saveExpenseBtn");
-      btn.innerText = "Save";
-      btn.style.background = ""; // Reset to default CSS
-      btn.style.color = "";
-    }
+    window.resetMonthlyExpenseForm();
   }
 };
 
@@ -2507,6 +2574,12 @@ window.openEditExpenseModal = function (id) {
   document.getElementById("editExpenseId").value = tx._id;
 
   document.getElementById("expenseModalTitle").innerText = "Edit Expense";
+  const patchesWrapper = document.getElementById("expensePatchesWrapper");
+  if (patchesWrapper) patchesWrapper.style.display = "none";
+  const savePatchRow = document.querySelector(".save-as-patch-row");
+  if (savePatchRow) savePatchRow.style.display = "none";
+  const patchNameWrapper = document.getElementById("savePatchNameWrapper");
+  if (patchNameWrapper) patchNameWrapper.style.display = "none";
   if (document.getElementById("saveExpenseBtn")) {
     const btn = document.getElementById("saveExpenseBtn");
     btn.innerText = "Update";
@@ -2552,6 +2625,14 @@ window.saveExpense = async function () {
     } else {
       // Create new expense
       await apiRequest("/expenses", "POST", { amount, category, date, description });
+      const saveAsPatch = document.getElementById("saveAsPatchCheckbox")?.checked;
+      if (saveAsPatch && window.saveCurrentAsPatch) {
+        const customPatchName = document.getElementById("savePatchCustomName")?.value?.trim()
+          || document.getElementById("saveAsPatchCheckbox")?.dataset?.patchName
+          || description
+          || category;
+        window.saveCurrentAsPatch(customPatchName, amount, category, description);
+      }
       showToast("Expense added successfully", "success");
     }
 

@@ -31,7 +31,7 @@ const fetchBtnText = document.getElementById("fetchBtnText");
 const fetchBtnIcon = document.getElementById("fetchBtnIcon");
 const dateAlertBox = document.getElementById("dateAlertBox");
 const dateAlertMsg = document.getElementById("dateAlertMsg");
-let earliestHistoricalDate = new Date();
+let earliestHistoricalDate = new Date("1990-01-01");
 
 const kpiSection = document.getElementById("kpiSection");
 const totalInflowDisplay = document.getElementById("totalInflowDisplay");
@@ -113,8 +113,8 @@ function showToast(message, type = "info") {
   }
 
   const bg = type === "success" ? "rgba(34, 197, 94, 0.94)" :
-             type === "error" ? "rgba(239, 68, 68, 0.94)" :
-             "rgba(14, 165, 233, 0.94)";
+    type === "error" ? "rgba(239, 68, 68, 0.94)" :
+      "rgba(14, 165, 233, 0.94)";
 
   Object.assign(toast.style, {
     position: "fixed",
@@ -191,6 +191,17 @@ async function initPage() {
     const meRes = await apiRequest("/auth/me", "GET", null, { skipLoader: true });
     currentUser = meRes?.data || {};
 
+    // Display dynamic user first name in navbar (before first space, matching patches page)
+    const userNameHeader = document.getElementById("userNameHeader");
+    if (userNameHeader) {
+      const rawName = currentUser.name || localStorage.getItem("userName") || "";
+      if (rawName) {
+        localStorage.setItem("userName", rawName);
+        const firstName = rawName.trim().split(/\s+/)[0];
+        userNameHeader.textContent = firstName;
+      }
+    }
+
     // Display verified session indicator in header
     const authBadge = document.getElementById("authSessionBadge");
     const authUserDisplay = document.getElementById("authUserDisplay");
@@ -222,72 +233,12 @@ async function initPage() {
       limitSelectEl.value = String(currentLimit);
     }
 
-    // Determine target date range
-    let targetStart = queryStart;
+    // Determine target date range (defaults to 1990-01-01 to avoid heavy queries for user's earliest transaction)
+    const defaultStartDate = "1990-01-01";
+    let targetStart = queryStart || defaultStartDate;
     let targetEnd = queryEnd || todayStr;
 
-    if (!targetStart) {
-      // 2. Fetch all historical transactions initially to determine true earliest date
-      const [expRes, incRes] = await Promise.all([
-        apiRequest("/expenses", "GET", null, { skipLoader: true }),
-        apiRequest("/income", "GET", null, { skipLoader: true })
-      ]);
-
-      const expenses = expRes?.data || [];
-      const incomes = incRes?.data || [];
-
-      const combined = [];
-      let totalExpense = 0;
-      let totalIncome = 0;
-
-      expenses.forEach(e => {
-        const amt = Number(e.amount || 0);
-        totalExpense += amt;
-        combined.push({
-          date: new Date(e.date),
-          type: "EXPENSE",
-          category: e.category || "General",
-          amount: amt
-        });
-      });
-
-      incomes.forEach(i => {
-        const amt = Number(i.amount || 0);
-        totalIncome += amt;
-        combined.push({
-          date: new Date(i.date),
-          type: "INCOME",
-          category: "Income",
-          amount: amt
-        });
-      });
-
-      // Chronological Sort: Oldest to Newest
-      combined.sort((a, b) => a.date - b.date);
-
-      if (combined.length > 0) {
-        earliestHistoricalDate = combined[0].date;
-      } else {
-        earliestHistoricalDate = userJoinDate;
-      }
-
-      targetStart = fmtISO(earliestHistoricalDate);
-      startDateInput.value = targetStart;
-      endDateInput.value = targetEnd;
-
-      currentTransactions = combined;
-      currentSummary = {
-        income: totalIncome,
-        expense: totalExpense,
-        balance: totalIncome - totalExpense
-      };
-
-      updateURLParams();
-      renderResults(targetStart, targetEnd);
-      return;
-    } else {
-      earliestHistoricalDate = new Date(targetStart);
-    }
+    earliestHistoricalDate = new Date(defaultStartDate);
 
     startDateInput.value = targetStart;
     endDateInput.value = targetEnd;
@@ -357,7 +308,8 @@ async function fetchStatementData() {
         date: new Date(e.date),
         type: "EXPENSE",
         category: e.category || "General",
-        amount: amt
+        amount: amt,
+        description: e.description || ""
       });
     });
 
@@ -368,7 +320,8 @@ async function fetchStatementData() {
         date: new Date(i.date),
         type: "INCOME",
         category: "Income", // Standardized to "Income" as requested
-        amount: amt
+        amount: amt,
+        description: i.source || i.description || ""
       });
     });
 
@@ -444,6 +397,7 @@ function renderTableRows() {
         <td style="font-weight: 500;">${fmtDate(tx.date)}</td>
         <td style="color: #f1f5f9;">${tx.category}</td>
         <td class="amount-cell ${amountClass}" style="color: ${amountColor} !important;">${formatINR(tx.amount)}</td>
+        <td style="color: #f1f5f9;">${tx.description || '-'}</td>  
       </tr>
     `;
   });
@@ -537,10 +491,10 @@ function setupPresets() {
       const today = new Date();
       const todayStr = fmtISO(today);
 
-      let targetStart = fmtISO(earliestHistoricalDate);
+      let targetStart = "1990-01-01";
 
       if (preset === "all") {
-        targetStart = fmtISO(earliestHistoricalDate);
+        targetStart = "1990-01-01";
       } else if (preset === "month") {
         const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
         targetStart = fmtISO(monthStart);
@@ -624,7 +578,7 @@ async function downloadStatementPDF() {
     doc.triangle(160, 297, 210, 297, 210, 240, "F");
 
     if (logoBase64) {
-      try { doc.addImage(logoBase64, "PNG", 85, 38, 40, 40); } catch {}
+      try { doc.addImage(logoBase64, "PNG", 85, 38, 40, 40); } catch { }
     }
 
     doc.setTextColor(255, 255, 255);
@@ -648,7 +602,7 @@ async function downloadStatementPDF() {
     doc.circle(105, avatarY, 26, "S");
 
     if (avatarBase64) {
-      try { doc.addImage(avatarBase64, "PNG", 81, avatarY - 24, 48, 48); } catch {}
+      try { doc.addImage(avatarBase64, "PNG", 81, avatarY - 24, 48, 48); } catch { }
     } else {
       doc.setFillColor(200, 200, 200);
       doc.circle(105, avatarY - 8, 8, "F");
@@ -687,7 +641,7 @@ async function downloadStatementPDF() {
     doc.rect(0, 0, 210, 32, "F");
 
     if (logoBase64) {
-      try { doc.addImage(logoBase64, "PNG", 14, 5, 22, 22); } catch {}
+      try { doc.addImage(logoBase64, "PNG", 14, 5, 22, 22); } catch { }
     }
 
     doc.setFont("helvetica", "bold");
@@ -802,6 +756,16 @@ async function downloadStatementPDF() {
    EVENT LISTENERS
 =================================================== */
 document.addEventListener("DOMContentLoaded", () => {
+  // Instant render from localStorage before async fetch completes
+  try {
+    const cached = localStorage.getItem("userName");
+    if (cached) {
+      const el = document.getElementById("userNameHeader");
+      const firstName = cached.trim().split(/\s+/)[0];
+      if (el && firstName) el.textContent = firstName;
+    }
+  } catch (e) { /* ignore */ }
+
   initPage();
   setupPresets();
 

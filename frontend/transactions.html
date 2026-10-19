@@ -114,10 +114,48 @@
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .month-step-btn:hover {
+    .month-step-btn:hover:not(:disabled) {
       background: rgba(255, 255, 255, 0.18);
       transform: scale(1.08);
       border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .month-step-btn:disabled,
+    .month-step-btn.disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+      border-color: rgba(255, 255, 255, 0.04);
+      background: rgba(255, 255, 255, 0.03);
+      color: rgba(255, 255, 255, 0.25);
+      pointer-events: none;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    .user-name-navbar {
+      font-size: 0.95rem;
+      color: #94a3b8;
+      font-weight: 500;
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .user-name-navbar b {
+      color: #e2e8f0;
+      font-weight: 600;
+    }
+
+    .user-name-navbar span {
+      color: #22c55e;
+      font-weight: 700;
+    }
+
+    @media (max-width: 640px) {
+      .user-name-navbar {
+        font-size: 0.85rem;
+      }
     }
 
     .hero-title {
@@ -673,6 +711,8 @@
       <span>Dhan₹ekha</span>
     </div>
 
+    <label class="user-name-navbar"><b>Hello, </b><span id="userNameHeader"></span></label>
+
     <!-- <div class="nav-actions">
       <button id="navMonthlyBtn" onclick="openTargetMonthlyDashboard()" class="nav-btn-monthly"
         title="Monthly Analytics">
@@ -700,9 +740,9 @@
     <header class="hero-header">
       <div class="hero-title-area">
         <div class="month-nav-group">
-          <button class="month-step-btn" onclick="stepMonth(-1)" title="Previous Month">❮</button>
+          <button class="month-step-btn" id="prevMonthBtn" onclick="stepMonth(-1)" title="Previous Month">❮</button>
           <h1 class="hero-title" id="periodName">Transactions</h1>
-          <button class="month-step-btn" onclick="stepMonth(1)" title="Next Month">❯</button>
+          <button class="month-step-btn" id="nextMonthBtn" onclick="stepMonth(1)" title="Next Month">❯</button>
         </div>
         <!-- <p class="hero-subtitle" id="periodSubtext">
           Detailed date-wise ledger with server-side pagination and instant CSV/PDF export.
@@ -899,7 +939,7 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-  <script type="module" src="js/transactions.js?v=3.3"></script>
+  <script type="module" src="js/transactions.js?v=3.4"></script>
 
 </body>
 

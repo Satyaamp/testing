@@ -1,4 +1,4 @@
-const CACHE_NAME = "dhanrekha-v79"; // UPDATE THIS VERSION ON EVERY DEPLOY TO FORCE REFRESH
+const CACHE_NAME = "dhanrekha-v97"; // UPDATE THIS VERSION ON EVERY DEPLOY TO FORCE REFRESH
 
 const STATIC_ASSETS = [
   "/",
@@ -7,6 +7,7 @@ const STATIC_ASSETS = [
   "/dashboard",
   "/monthly",
   "/yearly",
+  "/patches",
   "/profile",
   "/statement",
   "/forgot-password",
@@ -23,6 +24,7 @@ const STATIC_ASSETS = [
   "/js/signup.js",
   "/js/dashboard.js",
   "/js/monthly.js",
+  "/js/patches.js",
   "/js/statement.js",
 
   "/assets/logo1.png",

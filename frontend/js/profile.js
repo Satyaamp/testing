@@ -1,25 +1,11 @@
 import { apiRequest } from "./api.js";
 
-window.exportData = async function () {
+window.exportData = function () {
   try {
     const token = localStorage.getItem("token") || "";
     const today = new Date();
     const todayStr = today.toISOString().split("T")[0];
-
-    let startStr = "";
-    try {
-      const meRes = await apiRequest("/auth/me", "GET", null, { skipLoader: true });
-      if (meRes?.data?.createdAt) {
-        startStr = new Date(meRes.data.createdAt).toISOString().split("T")[0];
-      }
-    } catch (e) {
-      console.warn("Could not fetch user createdAt for export URL", e);
-    }
-
-    if (!startStr) {
-      const d = new Date(today.getFullYear(), 0, 1);
-      startStr = d.toISOString().split("T")[0];
-    }
+    const startStr = "1990-01-01";
 
     const queryParams = new URLSearchParams({
       startDate: startStr,

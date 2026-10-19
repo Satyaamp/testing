@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Dhan₹ekha – Recurring Patches</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#38bdf8">
+
+  <link rel="shortcut icon" href="assets/icons/dashboard.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="css/glass.css" />
+  <link rel="stylesheet" href="css/dashboard.css?v=3.5" />
+
+  <style>
+    :root {
+      --font-display: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --color-sky: #38bdf8;
+      --glass-bg: rgba(18, 24, 38, 0.72);
+      --glass-border: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.06) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+        #0a0e17;
+      color: #f1f5f9;
+      min-height: 100vh;
+      margin: 0;
+      padding-top: 80px;
+    }
+
+    .patches-page-container {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      margin: 20px 0 80px 0;
+      padding: 0 5%;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding-top: 65px !important;
+      }
+
+      .patches-page-container {
+        margin: 14px 0 50px 0;
+        padding: 0 16px;
+      }
+    }
+
+    .user-name-navbar {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.75);
+      user-select: none;
+    }
+
+    .user-name-navbar span {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* Top Action Header */
+    .patches-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .page-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.02em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      color: white;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+      min-width: 240px;
+      box-sizing: border-box;
+    }
+
+    .search-input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+
+    .btn-primary-add {
+      padding: 10px 18px;
+      background: #0284c7;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      min-height: 40px;
+      user-select: none;
+    }
+
+    .btn-primary-add:hover {
+      background: #0369a1;
+      border-color: #38bdf8;
+    }
+
+    .btn-primary-add:active {
+      transform: scale(0.97);
+    }
+
+    /* Table Glass Card */
+    .patches-table-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .patches-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    .patches-table th {
+      padding: 13px 18px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      white-space: nowrap;
+    }
+
+    .patches-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #f1f5f9;
+      vertical-align: middle;
+    }
+
+    .patches-table tbody tr {
+      transition: background-color 0.15s ease;
+    }
+
+    .patches-table tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.035);
+    }
+
+    .patches-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .patch-name-text {
+      font-weight: 600;
+      color: #fff;
+      display: inline-block;
+    }
+
+    .patch-cat-badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      white-space: nowrap;
+    }
+
+    .patch-amount-val {
+      font-weight: 700;
+      font-family: var(--font-display);
+      color: #38bdf8;
+      font-size: 1rem;
+      white-space: nowrap;
+    }
+
+    .patch-desc-text {
+      color: #94a3b8;
+      font-size: 0.84rem;
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .table-actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* =========================================
+       PAGINATION BAR (Matching Ledger Style)
+    ========================================= */
+    .patches-pagination-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 16px 20px;
+      background: rgba(15, 23, 42, 0.4);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .pagination-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .per-page-selector {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .per-page-select {
+      padding: 5px 10px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      color: #f1f5f9;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .per-page-select:focus {
+      border-color: #38bdf8;
+    }
+
+    .page-nav-btn {
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      color: #e2e8f0;
+      cursor: pointer;
+      font-size: 0.84rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      min-width: 34px;
+      text-align: center;
+      user-select: none;
+    }
+
+    .page-nav-btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .page-nav-btn:disabled {
+      opacity: 0.28;
+      cursor: not-allowed;
+    }
+
+    .page-nav-btn.active {
+      background: #22c55e !important;
+      color: #052e16 !important;
+      border-color: #22c55e !important;
+      box-shadow: 0 2px 10px rgba(34, 197, 94, 0.35);
+      font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+      .patches-header-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+
+      .header-actions {
+        flex-direction: row;
+        width: 100%;
+      }
+
+      .search-input {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .btn-primary-add {
+        white-space: nowrap;
+      }
+
+      .patches-table th,
+      .patches-table td {
+        padding: 12px 12px;
+        font-size: 0.86rem;
+      }
+
+      .patch-desc-text {
+        max-width: 140px;
+      }
+
+      .patches-pagination-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 14px;
+      }
+
+      .pagination-left {
+        justify-content: space-between;
+      }
+
+      #patchPaginationButtons {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Auth Guard -->
+  <script src="js/authGuard.js"></script>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar glass-card">
+    <div class="logo" onclick="location.href='dashboard'" style="cursor: pointer;">
+      <img src="assets/logo1.png" alt="Dhan₹ekha Logo" loading="lazy" />
+      <span>Dhan₹ekha</span>
+    </div>
+    <label class="user-name-navbar"><b>Hello, </b><span id="userNameHeader"></span></label>
+    <!-- <div class="nav-actions">
+      <button onclick="location.href='dashboard'" class="nav-btn" title="Back to Dashboard">
+        <span class="desktop-text">🏠 Dashboard</span>
+        <span class="mobile-icon">🏠</span>
+      </button>
+      <button onclick="location.href='monthly'" class="nav-btn-monthly" title="Monthly Overview">
+        <span class="desktop-text">📅 Monthly</span>
+        <span class="mobile-icon">📅</span>
+      </button>
+      <button onclick="location.href='transactions'" class="nav-btn-yearly" title="Transactions Ledger">
+        <span class="desktop-text">📊 Ledger</span>
+        <span class="mobile-icon">📊</span>
+      </button>
+      <button onclick="location.href='profile'" class="nav-btn-profile" title="Your Profile">
+        <span class="desktop-text">Profile</span>
+        <span class="mobile-icon">👤</span>
+      </button>
+    </div> -->
+  </nav>
+
+  <!-- Page Content -->
+  <main class="patches-page-container">
+
+    <!-- Top Action Header -->
+    <header class="patches-header-bar">
+      <h1 class="page-title">
+        <span style="color: #38bdf8;"></span> My Patches
+      </h1>
+      <div class="header-actions">
+        <input type="text" id="patchSearchInput" class="search-input" placeholder="🔍 Search patches..."
+          oninput="filterPatchesPageList()" />
+        <button type="button" class="btn-primary-add" onclick="openPatchFormModal()">
+          <span>+</span> Add Patch
+        </button>
+      </div>
+    </header>
+
+    <!-- Simple Table View Card -->
+    <section class="patches-table-card">
+      <div class="table-responsive">
+        <table class="patches-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Amount</th>
+              <th>Description</th>
+              <th style="text-align: right; width: 110px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="patchesTableBody">
+            <!-- Rendered dynamically via JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Footer Bar (Matching Screenshot) -->
+      <div class="patches-pagination-bar" id="patchPaginationBar">
+        <div class="pagination-left">
+          <div id="patchPaginationInfo" style="font-size: 0.88rem; color: #94a3b8;">
+            Showing 0 of 0 patches
+          </div>
+          <div class="per-page-selector">
+            <span>Show</span>
+            <select id="patchLimitSelect" class="per-page-select" onchange="window.changePatchLimit(this.value)">
+              <option value="10" selected>10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+            <span>per page</span>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 6px; align-items: center;" id="patchPaginationButtons">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Clean Add / Edit Patch Modal Dialog -->
+  <div id="patchFormModal" class="modal hidden" onclick="if(event.target === this) closePatchFormModal()">
+    <div class="modal-content glass-card" style="max-width: 480px; width: 92%; padding: 22px;">
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; margin-bottom: 16px;">
+        <h3 id="patchModalTitleText" style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #fff;">
+          Create Patch
+        </h3>
+        <button type="button" onclick="closePatchFormModal()"
+          style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: white; width: 30px; height: 30px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
+          title="Close">&times;</button>
+      </div>
+
+      <form id="patchModalForm" onsubmit="event.preventDefault(); submitPatchPageForm();">
+        <input type="hidden" id="patchModalId" value="" />
+
+        <div style="margin-bottom: 14px;">
+          <label for="patchModalName"
+            style="font-size: 0.8rem; font-weight: 600; color: #94a3b8; display: block; margin-bottom: 5px;">Patch Name
+            *</label>
+          <input type="text" id="patchModalName" placeholder="e.g. Daily Metro, Morning Chai, Broadband" maxlength="60"
+            required
+            style="width: 100%; padding: 11px 12px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: white; font-size: 0.9rem; outline: none; box-sizing: border-box;" />
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-bottom: 14px;">
+          <div style="flex: 1;">
+            <label for="patchModalAmount"
+              style="font-size: 0.8rem; font-weight: 600; color: #94a3b8; display: block; margin-bottom: 5px;">Amount
+              (₹) *</label>
+            <input type="number" id="patchModalAmount" placeholder="0.00" min="0.01" step="any" required
+              style="width: 100%; padding: 11px 12px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: white; font-size: 0.9rem; outline: none; box-sizing: border-box;" />
+          </div>
+          <div style="flex: 1.2;">
+            <label for="patchModalCategory"
+              style="font-size: 0.8rem; font-weight: 600; color: #94a3b8; display: block; margin-bottom: 5px;">Category
+              *</label>
+            <select id="patchModalCategory" required
+              style="width: 100%; padding: 11px 12px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: white; font-size: 0.9rem; outline: none; box-sizing: border-box;">
+              <option value="" disabled selected>Select Category</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <label for="patchModalDesc"
+            style="font-size: 0.8rem; font-weight: 600; color: #94a3b8; display: block; margin-bottom: 5px;">Description
+            (Optional)</label>
+          <input type="text" id="patchModalDesc" placeholder="e.g. Daily commute or snack note" maxlength="120"
+            style="width: 100%; padding: 11px 12px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: white; font-size: 0.9rem; outline: none; box-sizing: border-box;" />
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button type="submit" id="patchModalSubmitBtn" class="btn-primary-add"
+            style="flex: 1; justify-content: center; padding: 12px 18px; font-size: 0.9rem;">
+            Save Patch
+          </button>
+          <button type="button" onclick="closePatchFormModal()"
+            style="padding: 12px 18px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #cbd5e1; font-weight: 600; font-size: 0.9rem; cursor: pointer;">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="js/patches.js?v=2.0"></script>
+  <script type="module">
+    import { apiRequest, showToast } from './js/api.js';
+    import { loadUserPatches } from './js/patches.js';
+
+    let allPagePatches = [];
+    let currentFilteredPatches = [];
+    let currentPage = 1;
+    let pageSize = 10;
+
+    async function initPatchesPage() {
+      loadUserNameHeader();
+      await loadCategoriesDropdown();
+      await refreshPatches();
+    }
+
+    async function loadUserNameHeader() {
+      const labelEl = document.getElementById('userNameHeader');
+      if (!labelEl) return;
+
+      // Check localStorage first for instant rendering
+      let rawName = localStorage.getItem('userName') || '';
+      if (rawName) {
+        const firstName = rawName.trim().split(' ')[0];
+        if (firstName) labelEl.textContent = firstName;
+      }
+
+      // Fetch fresh profile from /auth/me
+      try {
+        const res = await apiRequest('/auth/me', 'GET', null, { skipLoader: true });
+        if (res && res.data && res.data.name) {
+          rawName = res.data.name;
+          localStorage.setItem('userName', rawName);
+          // Only show name before first space (e.g. "Satyam Kumar" -> "Satyam")
+          const firstName = rawName.trim().split(' ')[0];
+          if (firstName) labelEl.textContent = firstName;
+        }
+      } catch (e) {
+        console.warn('Could not fetch user name:', e);
+      }
+    }
+
+    // Call immediately for zero-lag display
+    loadUserNameHeader();
+
+    async function loadCategoriesDropdown() {
+      const select = document.getElementById('patchModalCategory');
+      if (!select) return;
+      try {
+        let res;
+        try {
+          res = await apiRequest('/categories');
+        } catch {
+          res = await apiRequest('/expenses/categories');
+        }
+        const cats = (res && res.data) ? res.data : [];
+        select.innerHTML = '<option value="" disabled selected>Select Category</option>';
+        cats.forEach(c => {
+          const name = typeof c === 'string' ? c : c.name;
+          const icon = (typeof c === 'object' && c.icon) ? `${c.icon} ` : '';
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = `${icon}${name}`;
+          select.appendChild(opt);
+        });
+      } catch (err) {
+        console.warn('Failed to load categories:', err);
+      }
+    }
+
+    async function refreshPatches() {
+      try {
+        const patches = await loadUserPatches(true);
+        allPagePatches = patches || [];
+        filterPatchesPageList();
+      } catch (err) {
+        console.error('Error fetching patches:', err);
+      }
+    }
+
+    function applyPaginationAndRender() {
+      const total = currentFilteredPatches.length;
+      const totalPages = Math.ceil(total / pageSize) || 1;
+
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const start = (currentPage - 1) * pageSize;
+      const end = Math.min(start + pageSize, total);
+      const pagedItems = currentFilteredPatches.slice(start, end);
+
+      // 1. Render Table Rows
+      renderPatchesTable(pagedItems, total);
+
+      // 2. Render Pagination Info (Matching Screenshot)
+      const infoEl = document.getElementById('patchPaginationInfo');
+      if (infoEl) {
+        if (total === 0) {
+          infoEl.innerText = 'Showing 0 of 0 patches';
+        } else {
+          infoEl.innerText = `Showing ${start + 1}–${end} of ${total} patches`;
+        }
+      }
+
+      // 3. Render Pagination Buttons
+      renderPaginationControls(totalPages);
+    }
+
+    function renderPatchesTable(pagedPatches, totalCount) {
+      const tbody = document.getElementById('patchesTableBody');
+      if (!tbody) return;
+
+      if (totalCount === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 48px 16px; color: #94a3b8;">
+              <div style="font-size: 2rem; margin-bottom: 8px;">⚡</div>
+              <p style="font-weight: 600; color: #e2e8f0; margin-bottom: 4px; font-size: 1rem;">No recurring patches found</p>
+              <p style="font-size: 0.82rem; margin-bottom: 16px; color: #94a3b8;">Create a patch for 1-tap repetitive expense logging.</p>
+              <button type="button" class="btn-primary-add" onclick="window.openPatchFormModal()">
+                + Add Patch
+              </button>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = pagedPatches.map(p => {
+        const desc = p.description && p.description.trim() ? p.description.trim() : '-';
+        return `
+          <tr>
+            <td><span class="patch-name-text">${escapeHtml(p.name)}</span></td>
+            <td><span class="patch-cat-badge">${escapeHtml(p.category)}</span></td>
+            <td><span class="patch-amount-val">₹${p.amount}</span></td>
+            <td><span class="patch-desc-text" title="${escapeHtml(desc)}">${escapeHtml(desc)}</span></td>
+            <td>
+              <div class="table-actions">
+                <button type="button" class="btn-icon-small" onclick="window.editPagePatch('${p._id}')" title="Edit Patch">✎</button>
+                <button type="button" class="btn-icon-small delete" onclick="window.deletePagePatch('${p._id}')" title="Delete Patch">✕</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderPaginationControls(totalPages) {
+      const container = document.getElementById('patchPaginationButtons');
+      if (!container) return;
+
+      if (currentFilteredPatches.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+
+      let html = '';
+
+      // Prev Button
+      html += `
+        <button class="page-nav-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="window.goToPatchPage(${currentPage - 1})">
+          ◀ Prev
+        </button>
+      `;
+
+      // Page Numbers calculation (exact green .active button style as in screenshot)
+      let pagesToShow = [];
+      if (totalPages <= 7) {
+        for (let i = 1; i <= totalPages; i++) pagesToShow.push(i);
+      } else {
+        pagesToShow.push(1);
+        let startP = Math.max(2, currentPage - 1);
+        let endP = Math.min(totalPages - 1, currentPage + 1);
+
+        if (startP > 2) pagesToShow.push('...');
+        for (let i = startP; i <= endP; i++) pagesToShow.push(i);
+        if (endP < totalPages - 1) pagesToShow.push('...');
+        pagesToShow.push(totalPages);
+      }
+
+      pagesToShow.forEach(p => {
+        if (p === '...') {
+          html += `<span style="color: #94a3b8; padding: 0 4px; font-size: 0.85rem;">...</span>`;
+        } else {
+          const activeClass = p === currentPage ? 'active' : '';
+          html += `
+            <button class="page-nav-btn ${activeClass}" onclick="window.goToPatchPage(${p})">
+              ${p}
+            </button>
+          `;
+        }
+      });
+
+      // Next Button
+      html += `
+        <button class="page-nav-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="window.goToPatchPage(${currentPage + 1})">
+          Next ▶
+        </button>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    window.goToPatchPage = function (page) {
+      currentPage = page;
+      applyPaginationAndRender();
+      document.querySelector('.patches-table-card')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    };
+
+    window.changePatchLimit = function (val) {
+      pageSize = parseInt(val, 10) || 10;
+      currentPage = 1;
+      applyPaginationAndRender();
+    };
+
+    window.filterPatchesPageList = function () {
+      const q = document.getElementById('patchSearchInput')?.value.trim().toLowerCase() || '';
+      if (!q) {
+        currentFilteredPatches = [...allPagePatches];
+      } else {
+        currentFilteredPatches = allPagePatches.filter(p =>
+          p.name.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          (p.description && p.description.toLowerCase().includes(q))
+        );
+      }
+      currentPage = 1;
+      applyPaginationAndRender();
+    };
+
+    window.openPatchFormModal = function (editId = null) {
+      const modal = document.getElementById('patchFormModal');
+      const form = document.getElementById('patchModalForm');
+      if (form) form.reset();
+
+      if (editId) {
+        const patch = allPagePatches.find(p => p._id === editId);
+        if (!patch) return;
+        document.getElementById('patchModalId').value = patch._id;
+        document.getElementById('patchModalName').value = patch.name;
+        document.getElementById('patchModalAmount').value = patch.amount;
+        document.getElementById('patchModalCategory').value = patch.category;
+        document.getElementById('patchModalDesc').value = patch.description || '';
+        document.getElementById('patchModalTitleText').innerText = 'Edit Patch';
+        document.getElementById('patchModalSubmitBtn').innerText = 'Update Patch';
+      } else {
+        document.getElementById('patchModalId').value = '';
+        document.getElementById('patchModalTitleText').innerText = 'Create Patch';
+        document.getElementById('patchModalSubmitBtn').innerText = 'Save Patch';
+      }
+
+      modal.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+      setTimeout(() => document.getElementById('patchModalName')?.focus(), 50);
+    };
+
+    window.closePatchFormModal = function () {
+      const modal = document.getElementById('patchFormModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+      }
+    };
+
+    window.submitPatchPageForm = async function () {
+      const editId = document.getElementById('patchModalId')?.value;
+      const name = document.getElementById('patchModalName')?.value.trim();
+      const amount = parseFloat(document.getElementById('patchModalAmount')?.value);
+      const category = document.getElementById('patchModalCategory')?.value;
+      const description = document.getElementById('patchModalDesc')?.value.trim() || '';
+
+      if (!name || isNaN(amount) || amount <= 0 || !category) {
+        showToast('Name, positive amount, and category are required', 'warning');
+        return;
+      }
+
+      const submitBtn = document.getElementById('patchModalSubmitBtn');
+      try {
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerText = editId ? 'Updating...' : 'Saving...';
+        }
+
+        if (editId) {
+          await apiRequest(`/patches/${editId}`, 'PUT', { name, amount, category, description });
+          showToast('Patch updated successfully', 'success');
+        } else {
+          await apiRequest('/patches', 'POST', { name, amount, category, description });
+          showToast('Patch created successfully', 'success');
+        }
+
+        closePatchFormModal();
+        await refreshPatches();
+      } catch (err) {
+        showToast(err.message || 'Failed to save patch', 'error');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = editId ? 'Update Patch' : 'Save Patch';
+        }
+      }
+    };
+
+    window.editPagePatch = function (id) {
+      window.openPatchFormModal(id);
+    };
+
+    window.deletePagePatch = async function (id) {
+      if (!confirm('Are you sure you want to delete this patch?')) return;
+      try {
+        await apiRequest(`/patches/${id}`, 'DELETE');
+        showToast('Patch deleted', 'success');
+        await refreshPatches();
+      } catch (err) {
+        showToast(err.message || 'Failed to delete patch', 'error');
+      }
+    };
+
+    window.focusPatchForm = function () {
+      window.openPatchFormModal();
+    };
+
+    // Close modal on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closePatchFormModal();
+    });
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPatchesPage);
+    } else {
+      initPatchesPage();
+    }
+  </script>
+</body>
+
+</html>

@@ -25,7 +25,9 @@ const routes = [
   'statement',
   'forgot-password',
   'reset-password',
-  'sitemap'
+  'patches',
+  'sitemap',
+  'health'
 ];
 
 routes.forEach(route => {

@@ -57,7 +57,7 @@
     /* Top Navbar */
     .navbar {
       height: 70px;
-      padding: 0 24px;
+      padding: 0 5%;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -92,6 +92,25 @@
       letter-spacing: -0.3px;
     }
 
+    .user-name-navbar {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.75);
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .user-name-navbar b {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .user-name-navbar span {
+      color: #fff;
+      font-weight: 600;
+    }
+
     .nav-actions {
       display: flex;
       align-items: center;
@@ -121,16 +140,27 @@
 
     /* Main Container */
     .container {
-      max-width: 1050px;
       width: 100%;
-      margin: 0 auto;
-      padding: 30px 20px 80px 20px;
+      max-width: 100%;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 24px 5% 80px 5%;
       flex: 1;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 16px 16px 60px 16px;
+      }
+
+      .navbar {
+        padding: 0 16px;
+      }
     }
 
     /* Page Header */
     .page-header {
-      margin-bottom: 26px;
+      margin-bottom: 20px;
     }
 
     .page-title {
@@ -141,12 +171,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-    }
-
-    .page-subtitle {
-      font-size: 0.92rem;
-      color: #94a3b8;
-      margin-top: 6px;
+      margin: 0;
     }
 
     .auth-badge {
@@ -647,24 +672,16 @@
       <img src="assets/logo1.png" alt="DhanRekha Logo" class="brand-logo" onerror="this.style.display='none'" />
       <span class="brand-name">DhanRekha</span>
     </a>
-    <div class="nav-actions">
-      <a href="/dashboard" class="nav-btn">📊 Dashboard</a>
-      <a href="/profile" class="nav-btn">👤 Profile</a>
-    </div>
+    <label class="user-name-navbar"><b>Hello, </b><span id="userNameHeader"></span></label>
   </nav>
 
   <!-- Main Content -->
   <main class="container">
     <div class="page-header">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
-        <div>
-          <h1 class="page-title">
-            <span>📄</span> Statement
-          </h1>
-          <p class="page-subtitle">
-            Filter transactions by date range, review, and download verified PDF report.
-          </p>
-        </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+        <h1 class="page-title" style="margin: 0;">
+          <span>📄</span> Statement
+        </h1>
         <div id="authSessionBadge" class="auth-badge" style="display: none;">
           <span class="auth-dot"></span>
           <span id="authUserDisplay">Authenticated Session</span>
@@ -754,10 +771,11 @@
         <table class="statement-table">
           <thead>
             <tr>
-              <th style="width: 50px;">#</th>
+              <th style="width: 50px;"># </th>
               <th style="width: 140px;">Date</th>
               <th>Category</th>
               <th style="text-align: right; width: 140px;">Amount</th>
+              <th>Description</th>
             </tr>
           </thead>
           <tbody id="statementTableBody">
@@ -788,7 +806,7 @@
     </div>
   </main>
 
-  <script type="module" src="js/statement.js?v=1.5"></script>
+  <script type="module" src="js/statement.js?v=1.7"></script>
 </body>
 
 </html>

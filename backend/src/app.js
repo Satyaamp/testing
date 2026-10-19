@@ -14,8 +14,153 @@ app.use(express.static(path.join(__dirname, "../../frontend")));
 
 
 
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', service: 'DhanRekha API' });
+app.get('/health', async (req, res) => {
+  const isHtml = req.headers.accept && req.headers.accept.includes('text/html') && req.query.format !== 'json';
+
+  if (isHtml) {
+    return res.sendFile(path.join(__dirname, '../../frontend/health.html'));
+  }
+
+  const mongoose = require('mongoose');
+  const os = require('os');
+  let pkg = {};
+  try {
+    pkg = require('../package.json');
+  } catch (e) {
+    pkg = {};
+  }
+
+  const uptimeSec = Math.floor(process.uptime());
+  const hours = Math.floor(uptimeSec / 3600);
+  const minutes = Math.floor((uptimeSec % 3600) / 60);
+  const seconds = uptimeSec % 60;
+  const uptimeFormatted = `${hours > 0 ? hours + 'h ' : ''}${minutes}m ${seconds}s`;
+
+  const mem = process.memoryUsage();
+  const dbState = mongoose.connection.readyState;
+  const dbStatusMap = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
+
+  // MongoDB Atlas M0 Free Tier Storage Diagnostics (512 MB storage quota)
+  let storageStats = {
+    tier: "MongoDB Atlas M0 Free Tier",
+    limitMB: 512,
+    usedMB: "0.00",
+    freeMB: "512.00",
+    percentUsed: "0.00",
+    dataSizeMB: "0.00",
+    storageSizeMB: "0.00",
+    indexSizeMB: "0.00",
+    collections: 0,
+    documents: 0,
+    indexes: 0
+  };
+
+  if (dbState === 1 && mongoose.connection.db) {
+    try {
+      const stats = await mongoose.connection.db.stats();
+      const storageSize = stats.storageSize || 0;
+      const indexSize = stats.indexSize || 0;
+      const dataSize = stats.dataSize || 0;
+      const totalUsedBytes = storageSize + indexSize;
+      const usedMB = (totalUsedBytes / (1024 * 1024)).toFixed(2);
+      const limitMB = 512;
+      const freeMB = Math.max(0, limitMB - parseFloat(usedMB)).toFixed(2);
+      const percentUsed = ((parseFloat(usedMB) / limitMB) * 100).toFixed(2);
+
+      storageStats = {
+        tier: "MongoDB Atlas M0 Free Tier",
+        limitMB,
+        usedMB,
+        freeMB,
+        percentUsed,
+        dataSizeMB: (dataSize / (1024 * 1024)).toFixed(2),
+        storageSizeMB: (storageSize / (1024 * 1024)).toFixed(2),
+        indexSizeMB: (indexSize / (1024 * 1024)).toFixed(2),
+        collections: stats.collections || 0,
+        documents: stats.objects || 0,
+        indexes: stats.indexes || 0,
+        collectionsBreakdown: []
+      };
+
+      // Collection-level statistics breakdown matching MongoDB Atlas view
+      const colls = await mongoose.connection.db.listCollections().toArray();
+      const collectionsList = [];
+      for (const c of colls) {
+        try {
+          const s = await mongoose.connection.db.command({ collStats: c.name });
+          collectionsList.push({
+            name: c.name,
+            documents: s.count || 0,
+            storageSize: s.storageSize || 0,
+            dataSize: s.size || 0,
+            avgObjSize: Math.round(s.avgObjSize || 0),
+            indexes: s.nindexes || 0,
+            totalIndexSize: s.totalIndexSize || 0
+          });
+        } catch (err) {
+          // ignore collStats error for views
+        }
+      }
+      collectionsList.sort((a, b) => b.documents - a.documents);
+      storageStats.collectionsBreakdown = collectionsList;
+    } catch (e) {
+      console.warn("Could not fetch db.stats():", e.message);
+    }
+  }
+
+  const healthData = {
+    status: dbState === 1 ? 'OK' : 'DEGRADED',
+    service: 'DhanRekha API',
+    appVersion: pkg.version || '1.0.0',
+    timestamp: new Date().toISOString(),
+    uptime: {
+      seconds: uptimeSec,
+      formatted: uptimeFormatted
+    },
+    database: {
+      status: dbStatusMap[dbState] || 'unknown',
+      readyState: dbState,
+      host: mongoose.connection.host || 'localhost',
+      name: mongoose.connection.name || 'expensetracker',
+      storage: storageStats
+    },
+    system: {
+      nodeVersion: process.version,
+      platform: `${os.platform()} (${os.arch()})`,
+      cpuCount: os.cpus().length,
+      pid: process.pid,
+      memory: {
+        rss: `${(mem.rss / 1024 / 1024).toFixed(1)} MB`,
+        heapUsed: `${(mem.heapUsed / 1024 / 1024).toFixed(1)} MB`,
+        heapTotal: `${(mem.heapTotal / 1024 / 1024).toFixed(1)} MB`,
+        heapPercent: Math.round((mem.heapUsed / mem.heapTotal) * 100)
+      },
+      runtimes: {
+        node: process.versions.node,
+        v8: process.versions.v8,
+        openssl: process.versions.openssl,
+        mongoose: mongoose.version,
+        express: pkg.dependencies?.express?.replace('^', '') || '4.19.2'
+      }
+    },
+    modules: {
+      backend: pkg.dependencies || {},
+      devDependencies: pkg.devDependencies || {},
+      frontend: {
+        "chart.js": "4.4.1 (Data Visualization)",
+        "jspdf": "2.5.1 (PDF Generation)",
+        "jspdf-autotable": "3.5.31 (PDF Table Rendering)",
+        "xlsx-js-style": "1.2.0 (Formatted Excel Reports)",
+        "service-worker": "dhanrekha-v97 (Progressive Web App)"
+      }
+    },
+    cron: {
+      reminderScheduler: 'active',
+      schedule: '0 21 * * * (Daily at 9:00 PM IST)'
+    }
+  };
+
+  res.status(healthData.status === 'OK' ? 200 : 503).json(healthData);
 });
 
 // Fetch Categories dynamically (Backward-compatible fallback & User-aware)
@@ -48,6 +193,7 @@ app.get('/api/expenses/categories', optionalAuth, async (req, res) => {
 
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/categories', require('./routes/category.routes'));
+app.use('/api/patches', require('./routes/patch.routes'));
 app.use('/api/expenses', require('./routes/expense.routes'));
 app.use('/api/income', require('./routes/income.routes'));
 app.use('/api/whatsapp', require('./routes/whatsapp.routes'));

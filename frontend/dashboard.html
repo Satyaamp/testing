@@ -146,18 +146,13 @@
 
     </div>
 
-    <!-- Desktop Date Range & Reminder & Voice (Center) -->
+    <!-- Desktop Date Range & Reminder (Center) -->
     <div class="navbar-center-group">
       <div id="navbarDateRange" class="navbar-date-range"></div>
       <button id="navReminderBtn" class="nav-reminder-btn" onclick="openReminderModal()"
         title="Daily Expense Reminders">
         <span>🔔</span>
         <span id="navReminderDot" class="reminder-active-dot"></span>
-      </button>
-      <button id="navVoiceBtn" class="nav-voice-header-btn" onclick="openVoiceModal()"
-        title="Voice Entry — Add expenses or income by voice">
-        <span class="voice-header-icon">🎙️</span>
-        <span class="voice-header-pulse"></span>
       </button>
     </div>
 
@@ -218,11 +213,6 @@
         <span>🔔</span>
         <span id="mobReminderDot" class="reminder-active-dot"></span>
       </button>
-      <button class="nav-voice-header-btn mobile-voice-inline-btn" onclick="openVoiceModal()"
-        title="Voice Entry — Add expenses or income by voice">
-        <span class="voice-header-icon">🎙️</span>
-        <span class="voice-header-pulse"></span>
-      </button>
     </div>
   </div>
 
@@ -251,7 +241,8 @@
           <span class="btn-icon">➕</span>
           <span class="btn-text">New Expense</span>
         </button>
-        <button type="button" class="action-btn-primary" onclick="openIncome()" title="Add or update monthly budget / income">
+        <button type="button" class="action-btn-primary" onclick="openIncome()"
+          title="Add or update monthly budget / income">
           <span class="btn-icon">➕</span>
           <span class="btn-text">Monthly Budget</span>
         </button>
@@ -259,13 +250,15 @@
 
       <!-- Secondary Utility Ribbon / Capsule Dock -->
       <div class="actions-utility-dock" role="navigation" aria-label="Quick Utilities">
-        <button type="button" class="utility-dock-btn dock-categories" onclick="openCategoryManager()" title="Manage & Create Custom Categories">
+        <button type="button" class="utility-dock-btn dock-categories" onclick="openCategoryManager()"
+          title="Manage & Create Custom Categories">
           <span class="dock-icon">⚙️</span>
           <span class="dock-label">Categories</span>
           <span class="dock-tag">Manage</span>
         </button>
         <div class="dock-separator" aria-hidden="true"></div>
-        <button type="button" class="utility-dock-btn dock-reports" onclick="openStatementTab()" title="Open Comprehensive Financial Statement & Reports in Authenticated Tab">
+        <button type="button" class="utility-dock-btn dock-reports" onclick="openStatementTab()"
+          title="Open Comprehensive Financial Statement & Reports in Authenticated Tab">
           <span class="dock-icon">📑</span>
           <span class="dock-label">Statement & Reports</span>
           <span class="dock-tag export-tag">Export ↗</span>
@@ -307,12 +300,12 @@
     <!-- Add Expense Modal -->
     <div id="expenseModal" class="modal hidden">
       <div class="modal-content glass-card" style="max-width: 440px; width: 92%;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
           <h3 style="margin: 0;">Add Expense</h3>
-          <button type="button" onclick="startVoiceForModal('expense')" class="modal-mic-quick-btn"
-            title="Speak to fill this expense in Hinglish or English">
-            <span>🎙️ Speak</span>
-          </button>
+          <a href="javascript:void(0)" onclick="openPatchPickerModal()" class="my-patches-link"
+            title="Open My Patches to auto-fill form">
+            ⚡ My Patches
+          </a>
         </div>
 
         <input type="number" id="expenseAmount" placeholder="Amount (₹)" />
@@ -338,6 +331,19 @@
         </div>
 
         <input type="text" id="expenseDesc" placeholder="Description (optional)" />
+
+        <div class="save-as-patch-row">
+          <input type="checkbox" id="saveAsPatchCheckbox" onchange="handleSaveAsPatchToggle(this)"
+            style="width: 15px; height: 15px; accent-color: #38bdf8; cursor: pointer;" />
+          <label for="saveAsPatchCheckbox">Save as Patch</label>
+        </div>
+
+        <div id="savePatchNameWrapper" style="display: none;">
+          <div class="save-patch-name-box">
+            <span class="save-patch-name-tag">Patch Name</span>
+            <input type="text" id="savePatchCustomName" class="save-patch-name-input" placeholder="Enter patch name" maxlength="50" />
+          </div>
+        </div>
 
         <div class="modal-actions">
           <button onclick="addExpense()">Save</button>
@@ -501,7 +507,6 @@
         </div>
       </div>
     </div>
-
     <!-- SCAN / PASTE MODAL -->
     <div id="scanModal" class="modal hidden">
       <div class="modal-content glass-card scan-modal-content">
@@ -538,10 +543,6 @@
                 </code>
               </div>
               <div style="display: flex; align-items: center; gap: 6px;">
-                <button type="button" onclick="startVoiceForBulkNotes()" class="modal-mic-quick-btn"
-                  title="Add expenses with your voice">
-                  <span>🎙️</span>
-                </button>
                 <button type="button" onclick="toggleFormatInfo(event)" title="Click for info on defaults"
                   style="background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); color: #93c5fd; width: 22px; height: 22px; border-radius: 50%; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; flex-shrink: 0;"
                   aria-label="Category information">
@@ -639,10 +640,6 @@
       <div class="modal-content glass-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <h3 style="margin: 0;">Add Income</h3>
-          <button type="button" onclick="startVoiceForModal('income')" class="modal-mic-quick-btn"
-            title="Speak to fill this income in Hinglish or English">
-            <span>🎙️ Speak</span>
-          </button>
         </div>
 
         <input type="number" id="incomeAmount" placeholder="Amount (₹)" />
@@ -656,138 +653,6 @@
           <button onclick="addIncome()">Save</button>
           <button class="cancel" onclick="closeIncome()">Cancel</button>
         </div>
-      </div>
-    </div>
-
-    <!-- Voice Transaction Entry & Confirmation Modal (Option 1) -->
-    <div id="voiceModal" class="modal hidden">
-      <div class="modal-content glass-card voice-modal-content">
-        <div class="modal-pull-handle"></div>
-
-        <!-- Section 1: Listening & Recording State -->
-        <div id="voiceListeningSection">
-          <div
-            style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; margin-bottom: 15px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 1.4rem;">🎙️</span>
-              <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #fff;">Voice Entry</h3>
-            </div>
-            <button type="button" onclick="closeVoiceModal()" class="voice-modal-close-btn"
-              title="Close">&times;</button>
-          </div>
-
-          <!-- Pulsing Mic Visualizer -->
-          <div class="voice-visualizer-container">
-            <div class="voice-mic-circle" id="voiceMicCircle" onclick="toggleVoiceRecognition()"
-              title="Click to start/stop speaking">
-              <span id="voiceMicIcon">🎤</span>
-              <div class="voice-pulse-ring"></div>
-            </div>
-            <div id="voiceStatusBadge" class="voice-status-badge">
-              <span class="status-dot"></span>
-              <span id="voiceStatusText">Tap microphone to start speaking</span>
-            </div>
-            <div class="voice-audio-waves" id="voiceAudioWaves">
-              <span></span><span></span><span></span><span></span><span></span>
-            </div>
-
-            <!-- Explicit Start / Stop Button -->
-            <div style="display: flex; justify-content: center; margin-top: 4px;">
-              <button id="voiceToggleBtn" type="button" onclick="toggleVoiceRecognition()"
-                style="background: linear-gradient(135deg, #0284c7, #2563eb); color: white; border: 1px solid rgba(255,255,255,0.25); padding: 10px 24px; border-radius: 50px; font-weight: 700; font-size: 0.92rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4); transition: all 0.2s;">
-                <span id="voiceToggleIcon">🎙️</span>
-                <span id="voiceToggleText">Start Speaking</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Live Transcript Area -->
-          <div style="margin: 14px 0 10px 0;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <label style="font-size: 0.8rem; font-weight: 600; color: #94a3b8;">Speech Transcript &amp; Notes:</label>
-              <span style="font-size: 0.72rem; color: #38bdf8; font-weight: 500;">English &amp; Hinglish
-                Supported</span>
-            </div>
-            <textarea id="voiceTranscriptInput" rows="2"
-              placeholder="Speak or enter details e.g., 'Chai 50, petrol 300, dinner 450'..."></textarea>
-          </div>
-
-          <!-- Speech Format Examples (Collapsible with Arrow Toggle) -->
-          <div style="margin-top: 4px;">
-            <button type="button" id="voiceTipsToggleBtn" class="voice-tips-toggle" onclick="toggleVoiceTips()">
-              <span style="display: flex; align-items: center; gap: 6px;">
-                <span>💡</span>
-                <span>Speech Format Examples</span>
-              </span>
-              <span id="voiceTipsArrow" class="arrow-icon">▼</span>
-            </button>
-            <div id="voiceTipsContent" class="voice-tips-card hidden">
-              <div style="font-weight: 600; color: #f1f5f9; font-size: 0.78rem; margin-bottom: 4px;">💡 Natural Speech
-                Examples:</div>
-              <div style="font-size: 0.74rem; color: #94a3b8; line-height: 1.45;">
-                • <em>"Chai 50, petrol 300 aur dinner 450"</em><br />
-                • <em>"Salary aayi 45000"</em> &nbsp;|&nbsp; <em>"500 sabzi and 60 doodh"</em><br />
-                • <em>"Spent 1200 on groceries yesterday"</em>
-              </div>
-            </div>
-          </div>
-
-          <div class="modal-actions" style="margin-top: 15px; display: flex; gap: 10px;">
-            <button id="voiceProcessBtn" onclick="processVoiceTranscript()"
-              style="background: #2563eb; color: white; flex: 2; padding: 11px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer;">
-              ⚡ Process &amp; Review
-            </button>
-            <button class="cancel" onclick="closeVoiceModal()"
-              style="flex: 1; padding: 11px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); color: white; cursor: pointer;">
-              Cancel
-            </button>
-          </div>
-        </div>
-
-        <!-- Section 2: Option 1 Multi-Item Review & Confirmation State -->
-        <div id="voiceReviewSection" class="hidden">
-          <div
-            style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; margin-bottom: 12px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 1.25rem;">📋</span>
-              <h3 style="margin: 0; font-size: 1.18rem; font-weight: 700; color: #fff;">Confirm Transactions</h3>
-            </div>
-            <span id="voiceItemCountBadge" class="voice-count-badge">0 Items</span>
-          </div>
-
-          <!-- Summary Strip -->
-          <div id="voiceSummaryStrip" class="voice-summary-strip">
-            <!-- Populated by JS -->
-          </div>
-
-          <!-- Review List Container -->
-          <div id="voiceItemsList" class="voice-items-list">
-            <!-- Populated dynamically by renderVoiceConfirmationList -->
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="modal-actions" style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
-            <button id="voiceSaveAllBtn" onclick="saveAllVoiceTransactions()"
-              style="background: #22c55e; color: white; font-weight: 700; padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.95rem; width: 100%;">
-              ✅ Save All Transactions
-            </button>
-            <div style="display: flex; gap: 8px; width: 100%;">
-              <button onclick="voiceSpeakAnother()"
-                style="background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); color: #7dd3fc; flex: 1; padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.84rem;">
-                🎙️ Speak Another
-              </button>
-              <button onclick="transferVoiceToBulkScan()"
-                style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white; flex: 1; padding: 10px; border-radius: 8px; font-weight: 500; cursor: pointer; font-size: 0.84rem;">
-                ✏️ Edit in Bulk Notes
-              </button>
-              <button class="cancel" onclick="closeVoiceModal()"
-                style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 10px 14px; border-radius: 8px; font-weight: 500; cursor: pointer; font-size: 0.84rem;">
-                ✕ Discard
-              </button>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
 
@@ -996,7 +861,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
-  <script type="module" src="js/dashboard.js?v=5.6"></script>
+  <script type="module" src="js/patches.js?v=1.0"></script>
+  <script type="module" src="js/dashboard.js?v=5.7"></script>
   <script type="module">
     import { apiRequest } from './js/api.js';
 
