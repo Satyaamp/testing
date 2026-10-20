@@ -10,6 +10,12 @@ const expenseSchema = new mongoose.Schema({
     trim: true
   },
   description: String,
+  source: {
+    type: String,
+    enum: ['dashboard', 'monthly', 'bulk', 'patch', 'whatsapp', 'manual'],
+    default: 'manual',
+    trim: true
+  },
   isOverBudget: { type: Boolean, default: false },
   month: Number,
   year: Number

@@ -152,6 +152,9 @@ export function applyPatchWithAnimation(patchId, itemElement) {
   const patch = userPatches.find(p => p._id === patchId);
   if (!patch) return;
 
+  // Track that this expense was populated via Patch
+  window._activeExpenseSource = 'patch';
+
   // Visual press on clicked item
   if (itemElement) {
     itemElement.classList.add('active');

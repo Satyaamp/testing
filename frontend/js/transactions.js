@@ -241,6 +241,28 @@ async function fetchTransactions() {
   }
 }
 
+// Helper to format origin badge
+function getSourceBadge(source) {
+  if (!source) return '';
+  const s = String(source).toLowerCase().trim();
+  if (s === 'patch') {
+    return `<span class="source-tag source-patch" title="Added via Recurring Patch">⚡ Patch</span>`;
+  }
+  if (s === 'bulk') {
+    return `<span class="source-tag source-bulk" title="Added via Bulk Scan / Paste">📄 Bulk</span>`;
+  }
+  if (s === 'monthly') {
+    return `<span class="source-tag source-monthly" title="Added from Monthly page">📅 Monthly</span>`;
+  }
+  if (s === 'whatsapp') {
+    return `<span class="source-tag source-whatsapp" title="Added via WhatsApp Bot">💬 WhatsApp</span>`;
+  }
+  if (s === 'dashboard') {
+    return `<span class="source-tag source-dashboard" title="Added from Dashboard">🖥️ Dashboard</span>`;
+  }
+  return '';
+}
+
 // Render Desktop Table Rows
 function renderTable(transactions) {
   const tableBody = document.getElementById("transactionsTableBody");
@@ -271,7 +293,10 @@ function renderTable(transactions) {
           ${isIncome ? `
             <span style="color: rgba(255,255,255,0.3); font-weight: 500; font-size: 0.95rem;">-</span>
           ` : `
-            <span class="category-tag">${tx.category}</span>
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <span class="category-tag">${tx.category}</span>
+              ${getSourceBadge(tx.source)}
+            </div>
           `}
         </td>
         <td>
@@ -321,11 +346,12 @@ function renderMobileCards(transactions) {
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px;">
-          <div>
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
             ${isIncome ? `
               <span class="category-tag" style="background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3);">Income</span>
             ` : `
               <span class="category-tag">${tx.category}</span>
+              ${getSourceBadge(tx.source)}
             `}
           </div>
           ${tx.isOverBudget ? `

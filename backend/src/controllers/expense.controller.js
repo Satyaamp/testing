@@ -113,7 +113,10 @@ exports.addBulkExpenses = async (req, res) => {
       // 1. Month/Year extraction
       // 2. Budget Validation (Throws error if exceeded)
       // 3. DB Insertion
-      const saved = await service.createExpense(req.user.id, item);
+      const saved = await service.createExpense(req.user.id, {
+        ...item,
+        source: item.source || 'bulk'
+      });
       results.added.push(saved);
     } catch (error) {
       results.failed.push({

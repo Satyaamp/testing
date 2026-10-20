@@ -2443,6 +2443,7 @@ window.resetMonthlyExpenseForm = function () {
 };
 
 window.openAddExpenseModal = function (dateStr) {
+  window._activeExpenseSource = null;
   const modal = document.getElementById("expenseModal");
   const dateInput = document.getElementById("expenseDate");
 
@@ -2489,6 +2490,7 @@ window.openAddExpenseModal = function (dateStr) {
 };
 
 window.closeExpenseModal = function () {
+  window._activeExpenseSource = null;
   const modal = document.getElementById("expenseModal");
   if (modal) {
     modal.classList.add("hidden");
@@ -2617,14 +2619,17 @@ window.saveExpense = async function () {
       saveBtn.innerText = "Saving...";
     }
 
+    const expenseSource = window._activeExpenseSource || 'monthly';
+    window._activeExpenseSource = null;
+
     if (editId) {
       // Delete old and create new to ensure budget validation is applied
       await apiRequest(`/expenses/${editId}`, "DELETE");
-      await apiRequest("/expenses", "POST", { amount, category, date, description });
+      await apiRequest("/expenses", "POST", { amount, category, date, description, source: expenseSource });
       showToast("Expense updated successfully", "success");
     } else {
       // Create new expense
-      await apiRequest("/expenses", "POST", { amount, category, date, description });
+      await apiRequest("/expenses", "POST", { amount, category, date, description, source: expenseSource });
       const saveAsPatch = document.getElementById("saveAsPatchCheckbox")?.checked;
       if (saveAsPatch && window.saveCurrentAsPatch) {
         const customPatchName = document.getElementById("savePatchCustomName")?.value?.trim()
@@ -2772,7 +2777,8 @@ async function executeCopy(tx, targetDate) {
       amount: tx.amount,
       category: tx.category,
       date: targetDate,
-      description: tx.description
+      description: tx.description,
+      source: 'monthly'
     });
 
     document.getElementById("copyConfirmModal").classList.add("hidden");
@@ -2832,7 +2838,8 @@ window.executeCarryForward = async function () {
       amount: amount,
       category: category,
       date: expenseDate,
-      description: `Balance forward (To ${nextMonthName})`
+      description: `Balance forward (To ${nextMonthName})`,
+      source: 'monthly'
     });
 
     // 2. Income in Next Month (1st Day)

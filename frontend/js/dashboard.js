@@ -702,6 +702,7 @@ window.resetExpenseForm = function () {
 };
 
 window.openExpense = function () {
+  window._activeExpenseSource = null;
   const modal = document.getElementById("expenseModal");
   const dateInput = document.getElementById("expenseDate");
   const todayIso = getTodayIsoString();
@@ -721,6 +722,7 @@ window.openExpense = function () {
 };
 
 window.closeExpense = function () {
+  window._activeExpenseSource = null;
   const modal = document.getElementById("expenseModal");
   if (modal) {
     modal.classList.add("hidden");
@@ -753,12 +755,16 @@ window.addExpense = async function () {
     return;
   }
 
+  const expenseSource = window._activeExpenseSource || 'dashboard';
+  window._activeExpenseSource = null;
+
   try {
     await apiRequest("/expenses", "POST", {
       amount,
       category,
       date,
-      description
+      description,
+      source: expenseSource
     });
 
     // If "Save as a recurring Patch" was checked, auto-create patch
@@ -1290,7 +1296,8 @@ window.confirmScanUpload = async function () {
   }
 
   try {
-    const res = await apiRequest("/expenses/bulk", "POST", scannedExpensesData);
+    const payload = scannedExpensesData.map(item => ({ ...item, source: 'bulk' }));
+    const res = await apiRequest("/expenses/bulk", "POST", payload);
     const addedCount = res.results?.added?.length || 0;
     const failedCount = res.results?.failed?.length || 0;
 

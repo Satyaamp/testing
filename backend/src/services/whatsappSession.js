@@ -423,6 +423,7 @@ exports.processMessage = async (from, messageBody) => {
                     if (session.type === 'expense') {
                         const newExpense = new Expense({
                             ...session.data,
+                            source: 'whatsapp',
                             userId: user._id,
                             date: new Date(),
                             month: new Date().getMonth() + 1,

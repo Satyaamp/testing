@@ -39,6 +39,7 @@ exports.createExpense = async (userId, data) => {
 
   const expense = await Expense.create({
     ...data,
+    source: data.source || 'dashboard',
     amount,
     isOverBudget,
     userId,
@@ -77,7 +78,7 @@ exports.getWeekly = async (userId, startDate, endDate) => {
     date: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
   })
     .sort({ date: -1, _id: -1 })   // latest first
-    .limit(3);            // ✅ only 3 transactions
+    .limit(3);
 };
 
 
@@ -372,6 +373,7 @@ exports.getPaginatedTransactions = async (userId, query = {}) => {
       amount: e.amount,
       date: e.date,
       description: e.description || '-',
+      source: e.source || 'manual',
       isOverBudget: !!e.isOverBudget,
       year: e.year,
       month: e.month
