@@ -37,6 +37,8 @@ const kpiSection = document.getElementById("kpiSection");
 const totalInflowDisplay = document.getElementById("totalInflowDisplay");
 const totalOutflowDisplay = document.getElementById("totalOutflowDisplay");
 const netBalanceDisplay = document.getElementById("netBalanceDisplay");
+const totalInflowCountDisplay = document.getElementById("totalInflowCountDisplay");
+const totalOutflowCountDisplay = document.getElementById("totalOutflowCountDisplay");
 
 const tableSection = document.getElementById("tableSection");
 const resultsPeriodText = document.getElementById("resultsPeriodText");
@@ -244,7 +246,19 @@ async function initPage() {
     endDateInput.value = targetEnd;
 
     updateURLParams();
-    await fetchStatementData();
+
+    // Do NOT load all data at once on tab click / initial load.
+    // Only serve from server when user explicitly clicks "Fetch Statement" (or explicitly provides autoFetch=true).
+    const autoFetch = urlParams.get("autoFetch") === "true";
+    if (autoFetch) {
+      await fetchStatementData();
+    } else {
+      const initialPlaceholder = document.getElementById("initialFetchPlaceholder");
+      if (initialPlaceholder) initialPlaceholder.style.display = "block";
+      if (kpiSection) kpiSection.style.display = "none";
+      if (tableSection) tableSection.style.display = "none";
+      if (emptySection) emptySection.style.display = "none";
+    }
 
   } catch (err) {
     console.error("Init Error:", err);
@@ -284,6 +298,10 @@ async function fetchStatementData() {
   const startDate = startDateInput.value;
   const endDate = endDateInput.value;
 
+  const initialPlaceholder = document.getElementById("initialFetchPlaceholder");
+  if (initialPlaceholder) initialPlaceholder.style.display = "none";
+  if (emptySection) emptySection.style.display = "none";
+
   fetchBtn.disabled = true;
   fetchBtnText.innerText = "Fetching Records...";
   fetchBtnIcon.innerHTML = `<span class="spinner"></span>`;
@@ -301,9 +319,13 @@ async function fetchStatementData() {
     let totalExpense = 0;
     let totalIncome = 0;
 
+    let expenseCount = 0;
+    let incomeCount = 0;
+
     expenses.forEach(e => {
       const amt = Number(e.amount || 0);
       totalExpense += amt;
+      expenseCount++;
       combined.push({
         date: new Date(e.date),
         type: "EXPENSE",
@@ -316,6 +338,7 @@ async function fetchStatementData() {
     incomes.forEach(i => {
       const amt = Number(i.amount || 0);
       totalIncome += amt;
+      incomeCount++;
       combined.push({
         date: new Date(i.date),
         type: "INCOME",
@@ -333,7 +356,10 @@ async function fetchStatementData() {
     currentSummary = {
       income: totalIncome,
       expense: totalExpense,
-      balance: totalIncome - totalExpense
+      balance: totalIncome - totalExpense,
+      expenseCount: expenseCount,
+      incomeCount: incomeCount,
+      totalCount: currentTransactions.length,
     };
 
     renderResults(startDate, endDate);
@@ -353,11 +379,13 @@ async function fetchStatementData() {
    RENDER RESULTS (KPI, TABLE & PAGINATION)
 =================================================== */
 function renderResults(startDate, endDate) {
-  const { income, expense, balance } = currentSummary;
+  const { income, expense, balance, expenseCount, incomeCount } = currentSummary;
 
   // 1. Update KPI Section
   totalInflowDisplay.innerText = formatINR(income);
+  totalInflowCountDisplay.innerText = `${incomeCount} items`;
   totalOutflowDisplay.innerText = formatINR(expense);
+  totalOutflowCountDisplay.innerText = `${expenseCount} items`;
   netBalanceDisplay.innerText = `${balance >= 0 ? '+' : '-'}${formatINR(Math.abs(balance))}`;
   netBalanceDisplay.className = `kpi-value ${balance >= 0 ? 'kpi-inflow' : 'kpi-outflow'}`;
   kpiSection.style.display = "grid";
@@ -511,7 +539,13 @@ function setupPresets() {
       currentPage = 1;
 
       validateDates();
-      fetchStatementData();
+      updateURLParams();
+
+      // If user has already loaded transactions, refresh the view for the new preset.
+      // Otherwise keep in ready state and let user click 'Fetch Statement'.
+      if (currentTransactions.length > 0) {
+        fetchStatementData();
+      }
     });
   });
 }

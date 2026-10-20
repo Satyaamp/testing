@@ -278,13 +278,25 @@ exports.getPaginatedTransactions = async (userId, query = {}) => {
   const expMatch = { userId: uid };
   const incMatch = { userId: uid };
 
-  if (year) {
-    expMatch.year = parseInt(year);
-    incMatch.year = parseInt(year);
-  }
-  if (month) {
-    expMatch.month = parseInt(month);
-    incMatch.month = parseInt(month);
+  if (query.startDate || query.endDate) {
+    const range = {};
+    if (query.startDate) range.$gte = new Date(query.startDate);
+    if (query.endDate) {
+      const end = new Date(query.endDate);
+      end.setHours(23, 59, 59, 999);
+      range.$lte = end;
+    }
+    expMatch.date = range;
+    incMatch.date = range;
+  } else {
+    if (year) {
+      expMatch.year = parseInt(year);
+      incMatch.year = parseInt(year);
+    }
+    if (month) {
+      expMatch.month = parseInt(month);
+      incMatch.month = parseInt(month);
+    }
   }
 
   // 1. Fetch Month KPIs (unfiltered by text/type, for overall banner)
@@ -415,7 +427,9 @@ exports.getPaginatedTransactions = async (userId, query = {}) => {
       totalIncome: Number(monthIncome.toFixed(2)),
       totalExpense: Number(monthExpense.toFixed(2)),
       balance: Number((monthIncome - monthExpense).toFixed(2)),
-      totalTransactions: totalMonthCount
+      totalTransactions: totalMonthCount,
+      incomeCount: allMonthInc.length,
+      expenseCount: allMonthExp.length
     },
     categories: distinctCategories
   };
@@ -513,7 +527,8 @@ exports.getAllExpenses = async (userId, startDate, endDate) => {
   }
 
   return Expense.find(query)
-    .sort({ date: -1, _id: -1 }); // latest first
+    .sort({ date: -1, _id: -1 })
+    .lean(); // latest first with zero hydration overhead
 
 };
 

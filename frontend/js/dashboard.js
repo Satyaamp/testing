@@ -238,25 +238,42 @@ async function populateCategorySelect(selectedCategoryName = "") {
 window.switchCategoryTab = function (tab) {
   const listTab = document.getElementById("catTabList");
   const formTab = document.getElementById("catTabForm");
-  const listBtn = document.getElementById("catTabListBtn");
-  const formBtn = document.getElementById("catTabFormBtn");
+  const toggleIcon = document.getElementById("catToggleFormIcon");
+  const toggleText = document.getElementById("catToggleFormText");
 
   if (!listTab || !formTab) return;
 
   if (tab === "form") {
     listTab.style.display = "none";
     formTab.style.display = "flex";
-    if (listBtn) listBtn.classList.remove("active");
-    if (formBtn) formBtn.classList.add("active");
+    if (toggleIcon) toggleIcon.innerText = "←";
+    if (toggleText) toggleText.innerText = "List";
     setTimeout(() => {
       document.getElementById("catNameInput")?.focus();
     }, 120);
   } else {
     formTab.style.display = "none";
     listTab.style.display = "flex";
-    if (formBtn) formBtn.classList.remove("active");
-    if (listBtn) listBtn.classList.add("active");
+    if (toggleIcon) toggleIcon.innerText = "➕";
+    if (toggleText) toggleText.innerText = "Add";
   }
+};
+
+window.toggleCategoryForm = function () {
+  const formTab = document.getElementById("catTabForm");
+  const isFormVisible = formTab && formTab.style.display !== "none";
+  if (isFormVisible) {
+    resetCategoryForm();
+    switchCategoryTab("list");
+  } else {
+    resetCategoryForm();
+    switchCategoryTab("form");
+  }
+};
+
+window.cancelEditCategory = function () {
+  resetCategoryForm();
+  switchCategoryTab("list");
 };
 
 window.openCategoryManager = function (focusAdd = false) {
@@ -316,7 +333,12 @@ window.selectCatColor = function (color, swatchEl) {
   const picker = document.getElementById("catColorPicker");
   if (picker) picker.value = color;
 
-  document.querySelectorAll(".color-swatch-chip").forEach(el => el.classList.remove("active"));
+  document.querySelectorAll(".color-swatch-chip").forEach(el => {
+    el.classList.remove("active");
+    if (!swatchEl && color && (el.style.backgroundColor === color || el.getAttribute("data-color") === color)) {
+      el.classList.add("active");
+    }
+  });
   if (swatchEl) {
     swatchEl.classList.add("active");
   }
@@ -339,6 +361,16 @@ window.resetCategoryForm = function () {
   selectCatColor("#38bdf8");
 };
 
+window.activeCategoryFilter = 'all';
+
+window.setCategoryFilter = function (filter, btn) {
+  window.activeCategoryFilter = filter;
+  document.querySelectorAll(".cat-filter-chip").forEach(el => el.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  const query = (document.getElementById("catSearchInput")?.value || "").toLowerCase().trim();
+  renderCategoryManagerList(query);
+};
+
 window.filterCategoryManagerList = function () {
   const query = (document.getElementById("catSearchInput")?.value || "").toLowerCase().trim();
   renderCategoryManagerList(query);
@@ -347,25 +379,39 @@ window.filterCategoryManagerList = function () {
 window.renderCategoryManagerList = function (searchQuery = "") {
   const listEl = document.getElementById("categoryManagerList");
   const tabCount = document.getElementById("catTabCount");
+  const summaryText = document.getElementById("catSummaryText");
   if (!listEl) return;
 
-  if (tabCount) tabCount.innerText = fullCategoryList.length;
+  const totalCount = fullCategoryList.length;
+  const customCount = fullCategoryList.filter(c => typeof c === 'object' && !c.isSystem).length;
+  const defaultCount = totalCount - customCount;
 
-  let displayList = fullCategoryList;
-  if (searchQuery) {
-    displayList = fullCategoryList.filter(c => {
+  if (tabCount) tabCount.innerText = totalCount;
+  if (summaryText) {
+    summaryText.innerText = `${totalCount} categories (${customCount} custom, ${defaultCount} default)`;
+  }
+
+  const activeFilter = window.activeCategoryFilter || 'all';
+
+  let displayList = fullCategoryList.filter(c => {
+    const isCustom = typeof c === 'object' && !c.isSystem;
+    if (activeFilter === 'custom' && !isCustom) return false;
+    if (activeFilter === 'default' && isCustom) return false;
+
+    if (searchQuery) {
       const name = typeof c === 'string' ? c : c.name;
       return name.toLowerCase().includes(searchQuery);
-    });
-  }
+    }
+    return true;
+  });
 
   if (displayList.length === 0) {
     listEl.innerHTML = `
-      <div style="text-align: center; padding: 30px 10px; color: #94a3b8; font-size: 0.88rem;">
-        No categories match your search.
+      <div style="text-align: center; padding: 28px 12px; color: #94a3b8; font-size: 0.85rem;">
+        No categories found${searchQuery ? ` matching "${searchQuery}"` : ''}.
         <br>
         <button type="button" onclick="switchCategoryTab('form')" style="margin-top: 10px; padding: 6px 14px; border-radius: 8px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #7dd3fc; cursor: pointer; font-size: 0.8rem; font-weight: 600;">
-          + Create "${searchQuery}"
+          + Create New Category
         </button>
       </div>
     `;
@@ -381,25 +427,44 @@ window.renderCategoryManagerList = function (searchQuery = "") {
 
     return `
       <div class="category-row-card">
-        <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
-          <span style="font-size: 1.25rem;">${catIcon}</span>
-          <div style="min-width: 0;">
-            <div style="font-weight: 600; color: #fff; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-              ${catName}
-            </div>
+        <div class="cat-row-left">
+          <div class="cat-row-icon-badge" style="background-color: ${catColor}18; border-color: ${catColor}35;">
+            <span>${catIcon}</span>
           </div>
-          <span class="${isCustom ? 'cat-badge-custom' : 'cat-badge-system'}">
-            ${isCustom ? 'Custom' : 'Default'}
-          </span>
-          <span style="width: 10px; height: 10px; border-radius: 50%; background-color: ${catColor}; display: inline-block;" title="Color: ${catColor}"></span>
+          <div class="cat-row-name-wrap">
+            <span class="cat-row-name" title="${catName}">${catName}</span>
+            <span class="${isCustom ? 'cat-badge-custom' : 'cat-badge-system'}">
+              ${isCustom ? 'Custom' : 'Default'}
+            </span>
+          </div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 6px;">
+        <div class="cat-row-right">
+          <span class="cat-color-dot" style="background-color: ${catColor};" title="Theme: ${catColor}"></span>
           ${isCustom ? `
-            <button type="button" onclick="editCategory('${catId}')" class="btn-icon-small" title="Edit Category">✎</button>
-            <button type="button" onclick="deleteCategory('${catId}', '${catName.replace(/'/g, "\\'")}')" class="btn-icon-small delete" title="Delete Category">✕</button>
+            <div class="cat-action-group">
+              <button type="button" onclick="editCategory('${catId}')" class="cat-btn-action edit" title="Edit Category" aria-label="Edit ${catName}">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+              <button type="button" onclick="deleteCategory('${catId}', '${catName.replace(/'/g, "\\'")}')" class="cat-btn-action delete" title="Delete Category" aria-label="Delete ${catName}">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+              </button>
+            </div>
           ` : `
-          
+            <span class="cat-system-lock-icon" title="Default System Category (Protected)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </span>
           `}
         </div>
       </div>

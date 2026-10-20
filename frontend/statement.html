@@ -420,7 +420,7 @@
     }
 
     .results-count {
-      background: rgba(34, 197, 94, 0.15);
+      /* background: rgba(34, 197, 94, 0.15); */
       color: #86efac;
       padding: 3px 10px;
       border-radius: 12px;
@@ -645,6 +645,21 @@
       display: inline-block;
     }
 
+    .kpi-countCR {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: #22c55e;
+      ;
+    }
+
+    .kpi-countDR {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: #f43f5e;
+    }
+
     @keyframes spin {
       to {
         transform: rotate(360deg);
@@ -729,15 +744,21 @@
       <div class="kpi-card">
         <span class="kpi-label">TOTAL INCOME (CR)</span>
         <span id="totalInflowDisplay" class="kpi-value kpi-inflow">0</span>
+        <span id="totalInflowCountDisplay" class="kpi-countCR">0 transactions</span>
       </div>
+
       <div class="kpi-card">
         <span class="kpi-label">TOTAL DEBIT (DR)</span>
         <span id="totalOutflowDisplay" class="kpi-value kpi-outflow">0</span>
+        <span id="totalOutflowCountDisplay" class="kpi-countDR">0 transactions</span>
       </div>
+
       <div class="kpi-card">
         <span class="kpi-label">NET BALANCE</span>
         <span id="netBalanceDisplay" class="kpi-value kpi-balance">0</span>
+        <span id="recordsCountDisplay" class="results-count">0 items</span>
       </div>
+
     </div>
 
     <!-- Results Table Section (Revealed on Fetch) -->
@@ -746,7 +767,7 @@
         <div style="display: flex; align-items: center; gap: 18px; flex-wrap: wrap;">
           <div class="results-meta">
             <span id="resultsPeriodText">Statement Period</span>
-            <span id="recordsCountDisplay" class="results-count">0 items</span>
+
           </div>
 
           <!-- Items Per Page Selector (Matches /transactions) -->
@@ -801,12 +822,12 @@
       <div class="empty-icon">📭</div>
       <h3 style="color: #fff; margin-bottom: 6px;">No Transactions Found</h3>
       <p style="font-size: 0.88rem; color: #94a3b8;">
-        There are no recorded expenses or incomes in the selected date range. Try widening your filter range.
+        There are no any transactions found in the selected date range.
       </p>
     </div>
   </main>
 
-  <script type="module" src="js/statement.js?v=1.7"></script>
+  <script type="module" src="js/statement.js?v=1.8"></script>
 </body>
 
 </html>

@@ -763,6 +763,7 @@
         <div class="kpi-details">
           <span class="kpi-tag">Total Income (CR)</span>
           <span class="kpi-number" id="kpiIncome" style="color: #4ade80;">₹0</span>
+          <!-- <span id="kpiIncomeCountSub" style="font-size: 0.78rem; color: #4ade80; font-weight: 600; opacity: 0.9; margin-top: 2px;">0 CR</span> -->
         </div>
       </div>
 
@@ -771,6 +772,7 @@
         <div class="kpi-details">
           <span class="kpi-tag">Total Debit (DR)</span>
           <span class="kpi-number" id="kpiExpense" style="color: #fb7185;">₹0</span>
+          <!-- <span id="kpiExpenseCountSub" style="font-size: 0.78rem; color: #fb7185; font-weight: 600; opacity: 0.9; margin-top: 2px;">0 DR</span> -->
         </div>
       </div>
 
@@ -779,6 +781,7 @@
         <div class="kpi-details">
           <span class="kpi-tag">Net Purse</span>
           <span class="kpi-number" id="kpiBalance">₹0</span>
+          <!-- <span id="kpiBalanceSub" style="font-size: 0.78rem; color: #94a3b8; font-weight: 500; margin-top: 2px;">CR – DR Balance</span> -->
         </div>
       </div>
 
@@ -786,7 +789,20 @@
         <div class="kpi-icon-bubble kpi-bubble-count">📋</div>
         <div class="kpi-details">
           <span class="kpi-tag">Total Records</span>
-          <span class="kpi-number" id="kpiCount" style="color: #c084fc;">0</span>
+          <span class="kpi-number" id="kpiCount" style="color: #c084fc;">0 txns</span>
+          <div class="kpi-sub-counts" id="kpiSubCounts"
+            style="display: flex; gap: 8px; align-items: center; margin-top: 2px; font-size: 0.78rem; font-weight: 600;">
+            <span
+              style="color: #4ade80; background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.28); padding: 2px 7px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;"
+              title="Credit / Income Count">
+              <span style="font-size: 0.65rem;">▲</span> <span id="kpiCrCount">0</span> CR
+            </span>
+            <span
+              style="color: #fb7185; background: rgba(244, 63, 94, 0.12); border: 1px solid rgba(244, 63, 94, 0.28); padding: 2px 7px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;"
+              title="Debit / Expense Count">
+              <span style="font-size: 0.65rem;">▼</span> <span id="kpiDrCount">0</span> DR
+            </span>
+          </div>
         </div>
       </div>
     </section>
@@ -939,7 +955,7 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-  <script type="module" src="js/transactions.js?v=3.4"></script>
+  <script type="module" src="js/transactions.js?v=3.5"></script>
 
 </body>
 

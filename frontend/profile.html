@@ -325,6 +325,93 @@
       }
     }
 
+    /* SLIDER FOR TRANSACTION STAT CARD */
+    @keyframes statPop {
+      0% {
+        transform: scale(0.92);
+        opacity: 0.6;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .stat-card-slider {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .stat-slider-nav {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      z-index: 5;
+    }
+
+    .stat-slider-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: rgba(255, 255, 255, 0.85);
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.62rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .stat-slider-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+      border-color: rgba(255, 255, 255, 0.4);
+      color: #fff;
+      transform: scale(1.1);
+    }
+
+    .stat-slider-btn:active {
+      transform: scale(0.92);
+    }
+
+    .stat-type-pill {
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      line-height: 1.3;
+    }
+
+    .stat-dots {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .stat-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .stat-dot.active {
+      width: 12px;
+      border-radius: 3px;
+      background: var(--accent-color, #3b82f6);
+    }
+
     /* SPINNER FOR STATS */
     @keyframes spin {
       0% {
@@ -756,23 +843,54 @@
 
         <!-- Fintech Stats Section -->
         <div class="stats-grid">
-          <div class="stat-card" style="--accent-color: #ef4444;">
-            <div class="stat-icon-box">
+          <div class="stat-card stat-card-slider" id="amountCard" style="--accent-color: #fb7185;"
+            onclick="window.slideAmountStat(1);"
+            title="Click or use ❮ ❯ to slide between Total Spent, Total Income, and Net Balance">
+            <!-- Slide Controls (< >) -->
+            <div class="stat-slider-nav" onclick="event.stopPropagation();">
+              <button type="button" class="stat-slider-btn" onclick="window.slideAmountStat(-1);"
+                title="Previous amount view">❮</button>
+              <button type="button" class="stat-slider-btn" onclick="window.slideAmountStat(1);"
+                title="Next amount view">❯</button>
+            </div>
+
+            <div class="stat-icon-box" id="statAmountIconBox">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="5" width="20" height="14" rx="2" />
                 <line x1="2" y1="10" x2="22" y2="10" />
               </svg>
             </div>
-            <div class="stat-content">
-              <span class="stat-value" id="statTotalSpent">
-                <div class="small-spinner"></div>
-              </span>
-              <span class="stat-label">Total Spent</span>
+            <div class="stat-content" style="flex: 1; min-width: 0;">
+              <div>
+                <span class="stat-value" id="statTotalSpent">
+                  <div class="small-spinner"></div>
+                </span>
+              </div>
+              <div
+                style="display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-top: 1px;">
+                <span class="stat-label" id="statAmountLabel">Total Spent</span>
+                <div class="stat-dots" id="statAmountDots" onclick="event.stopPropagation();">
+                  <span class="stat-dot active" onclick="window.setAmountStatMode(0);" title="Total Spent"></span>
+                  <span class="stat-dot" onclick="window.setAmountStatMode(1);" title="Total Income"></span>
+                  <span class="stat-dot" onclick="window.setAmountStatMode(2);" title="Net Balance"></span>
+                </div>
+              </div>
+              <div id="statAmountSubtext" style="display: none;"></div>
             </div>
           </div>
-          <div class="stat-card" style="--accent-color: #3b82f6;">
-            <div class="stat-icon-box">
+          <div class="stat-card stat-card-slider" id="txCountCard" style="--accent-color: #38bdf8;"
+            onclick="window.slideTxStat(1);"
+            title="Click or use ❮ ❯ to slide between Total, Debit, and Credit counts">
+            <!-- Slide Controls (< >) -->
+            <div class="stat-slider-nav" onclick="event.stopPropagation();">
+              <button type="button" class="stat-slider-btn" onclick="window.slideTxStat(-1);"
+                title="Previous count view">❮</button>
+              <button type="button" class="stat-slider-btn" onclick="window.slideTxStat(1);"
+                title="Next count view">❯</button>
+            </div>
+
+            <div class="stat-icon-box" id="statTxIconBox">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -782,11 +900,24 @@
                 <polyline points="10 9 9 9 8 9"></polyline>
               </svg>
             </div>
-            <div class="stat-content">
-              <span class="stat-value" id="statTxCount">
-                <div class="small-spinner"></div>
-              </span>
-              <span class="stat-label">Transactions</span>
+            <div class="stat-content" style="flex: 1; min-width: 0;">
+              <div>
+                <span class="stat-value" id="statTxCount">
+                  <div class="small-spinner"></div>
+                </span>
+              </div>
+              <div
+                style="display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-top: 1px;">
+                <span class="stat-label" id="statTxLabel">Transactions</span>
+                <div class="stat-dots" id="statTxDots" onclick="event.stopPropagation();">
+                  <span class="stat-dot active" onclick="window.setTxStatMode(0);" title="All Transactions"></span>
+                  <span class="stat-dot" onclick="window.setTxStatMode(1);" title="Debit (DR) Count"></span>
+                  <span class="stat-dot" onclick="window.setTxStatMode(2);" title="Credit (CR) Count"></span>
+                </div>
+              </div>
+              <div id="statTxSubtext"
+                style="font-size: 0.72rem; margin-top: 3px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: rgba(255,255,255,0.7);">
+              </div>
             </div>
           </div>
           <div class="stat-card" style="--accent-color: #f59e0b;">
@@ -893,7 +1024,7 @@
   <!-- jsPDF & AutoTable Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-  <script type="module" src="js/profile.js?v=2.7"></script>
+  <script type="module" src="js/profile.js?v=2.8"></script>
   <script>
     function logout() {
       localStorage.removeItem("token");
@@ -905,6 +1036,215 @@
     import { apiRequest, APP_VERSION } from './js/api.js';
 
     document.getElementById('appVersionDisplay').innerText = `App Version: ${APP_VERSION}`;
+
+    let currentTxMode = 0; // 0 = Total, 1 = DR, 2 = CR
+
+    window.setTxStatMode = function (mode) {
+      currentTxMode = mode;
+      renderTxStatMode();
+    };
+
+    window.slideTxStat = function (dir) {
+      currentTxMode = (currentTxMode + dir + 3) % 3;
+      renderTxStatMode();
+    };
+
+    function renderTxStatMode() {
+      const data = window.txStatData;
+      if (!data) return;
+
+      const countEl = document.getElementById('statTxCount');
+      const labelEl = document.getElementById('statTxLabel');
+      const subtextEl = document.getElementById('statTxSubtext');
+      const cardEl = document.getElementById('txCountCard');
+      const iconBoxEl = document.getElementById('statTxIconBox');
+      const dots = document.querySelectorAll('#statTxDots .stat-dot');
+
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === currentTxMode);
+      });
+
+      if (countEl) {
+        countEl.style.animation = 'none';
+        countEl.offsetHeight;
+        countEl.style.animation = 'statPop 0.22s ease';
+      }
+
+      if (currentTxMode === 0) {
+        // Total Mode
+        if (cardEl) cardEl.style.setProperty('--accent-color', '#38bdf8');
+        if (countEl) {
+          countEl.innerText = data.totalCount;
+          countEl.style.color = '#fff';
+        }
+        if (labelEl) labelEl.innerText = 'Transactions';
+        if (subtextEl) {
+          subtextEl.innerHTML = `<span style="color: #4ade80;">${data.crCount} CR</span> <span style="color: rgba(255,255,255,0.25);">•</span> <span style="color: #fb7185;">${data.drCount} DR</span>`;
+        }
+        if (iconBoxEl) {
+          iconBoxEl.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          `;
+        }
+      } else if (currentTxMode === 1) {
+        // DR (Debit / Expense) Mode
+        if (cardEl) cardEl.style.setProperty('--accent-color', '#fb7185');
+        if (countEl) {
+          countEl.innerText = data.drCount;
+          countEl.style.color = '#fb7185';
+        }
+        if (labelEl) labelEl.innerText = 'Debit Txns';
+        if (subtextEl) {
+          subtextEl.innerHTML = `<span style="color: #fb7185;">${data.drCount} of ${data.totalCount} Total</span>`;
+        }
+        if (iconBoxEl) {
+          iconBoxEl.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <polyline points="19 12 12 19 5 12"></polyline>
+            </svg>
+          `;
+        }
+      } else if (currentTxMode === 2) {
+        // CR (Credit / Income) Mode
+        if (cardEl) cardEl.style.setProperty('--accent-color', '#4ade80');
+        if (countEl) {
+          countEl.innerText = data.crCount;
+          countEl.style.color = '#4ade80';
+        }
+        if (labelEl) labelEl.innerText = 'Credit Txns';
+        if (subtextEl) {
+          subtextEl.innerHTML = `<span style="color: #4ade80;">${data.crCount} of ${data.totalCount} Total</span>`;
+        }
+        if (iconBoxEl) {
+          iconBoxEl.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="19" x2="12" y2="5"></line>
+              <polyline points="5 12 12 5 19 12"></polyline>
+            </svg>
+          `;
+        }
+      }
+    }
+    let currentAmountMode = 0; // 0 = Total Spent (DR), 1 = Total Income (CR), 2 = Net Balance
+
+    window.setAmountStatMode = function (mode) {
+      currentAmountMode = mode;
+      renderAmountStatMode();
+    };
+
+    window.slideAmountStat = function (dir) {
+      currentAmountMode = (currentAmountMode + dir + 3) % 3;
+      renderAmountStatMode();
+    };
+
+    function renderAmountStatMode() {
+      const data = window.txStatData;
+      if (!data) return;
+
+      const spentEl = document.getElementById('statTotalSpent');
+      const labelEl = document.getElementById('statAmountLabel');
+      const subtextEl = document.getElementById('statAmountSubtext');
+      const cardEl = document.getElementById('amountCard');
+      const iconBoxEl = document.getElementById('statAmountIconBox');
+      const dots = document.querySelectorAll('#statAmountDots .stat-dot');
+
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === currentAmountMode);
+      });
+
+      if (spentEl) {
+        spentEl.style.animation = 'none';
+        spentEl.offsetHeight;
+        spentEl.style.animation = 'statPop 0.22s ease';
+      }
+
+      const netBalance = data.totalIncome - data.totalSpent;
+
+      if (currentAmountMode === 0) {
+        // DR (Total Spent)
+        if (cardEl) cardEl.style.setProperty('--accent-color', '#fb7185');
+        if (spentEl) {
+          spentEl.innerText = `₹${Number(data.totalSpent.toFixed(2)).toLocaleString('en-IN')}`;
+          spentEl.style.color = '#fff';
+        }
+        if (labelEl) labelEl.innerText = 'Total Spent';
+        if (subtextEl) {
+          subtextEl.innerHTML = '';
+          subtextEl.style.display = 'none';
+        }
+        if (iconBoxEl) {
+          iconBoxEl.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="5" width="20" height="14" rx="2" />
+              <line x1="2" y1="10" x2="22" y2="10" />
+            </svg>
+          `;
+        }
+      } else if (currentAmountMode === 1) {
+        // CR (Total Income)
+        if (cardEl) cardEl.style.setProperty('--accent-color', '#4ade80');
+        if (spentEl) {
+          spentEl.innerText = `₹${Number(data.totalIncome.toFixed(2)).toLocaleString('en-IN')}`;
+          spentEl.style.color = '#4ade80';
+        }
+        if (labelEl) labelEl.innerText = 'Total Income';
+        if (subtextEl) {
+          subtextEl.innerHTML = '';
+          subtextEl.style.display = 'none';
+        }
+        if (iconBoxEl) {
+          iconBoxEl.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 3h12"></path>
+              <path d="M6 8h12"></path>
+              <path d="m6 13 8.5 8"></path>
+              <path d="M6 13h3"></path>
+              <path d="M9 13c6.667 0 6.667-10 0-10"></path>
+            </svg>
+          `;
+        }
+      } else if (currentAmountMode === 2) {
+        // Net Balance
+        const isPos = netBalance >= 0;
+        const color = isPos ? '#38bdf8' : '#fb7185';
+        if (cardEl) cardEl.style.setProperty('--accent-color', color);
+        if (spentEl) {
+          const absNet = Math.abs(netBalance);
+          const formattedNet = Number(absNet.toFixed(2)).toLocaleString('en-IN');
+          spentEl.innerText = `${isPos ? '+' : '-'}₹${formattedNet}`;
+          spentEl.style.color = color;
+        }
+        if (labelEl) labelEl.innerText = 'Net Balance';
+        if (subtextEl) {
+          subtextEl.innerHTML = '';
+          subtextEl.style.display = 'none';
+        }
+        if (iconBoxEl) {
+          iconBoxEl.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 3h12"></path>
+              <path d="M6 8h12"></path>
+              <path d="m6 13 8.5 8"></path>
+              <path d="M6 13h3"></path>
+              <path d="M9 13c6.667 0 6.667-10 0-10"></path>
+            </svg>
+          `;
+        }
+      }
+    }
 
     async function loadProfileStats() {
       const btn = document.getElementById('refreshStatsBtn');
@@ -999,20 +1339,40 @@
       }
 
       try {
-        // Fetch all expenses to calculate stats
-        const res = await apiRequest('/expenses', 'GET', null, { skipLoader: true });
-        const expenses = res.data || [];
+        // Fetch both expenses and incomes in parallel to calculate stats
+        const [expRes, incRes] = await Promise.all([
+          apiRequest('/expenses', 'GET', null, { skipLoader: true }),
+          apiRequest('/income', 'GET', null, { skipLoader: true })
+        ]);
+        const expenses = expRes?.data || [];
+        const incomes = incRes?.data || [];
 
-        // 1. Total Spent
-        const totalSpent = expenses.reduce((sum, tx) => sum + Number(tx.amount), 0);
+        // 1. Total Spent & Total Income
+        const totalSpent = expenses.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
+        const totalIncome = incomes.reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
 
-        // 2. Transaction Count
-        const txCount = expenses.length;
+        // 2. Transaction Counts (DR, CR, Total)
+        const drCount = expenses.length;
+        const crCount = incomes.length;
+        const totalCount = drCount + crCount;
 
-        // 3. Months Active
-        const uniqueMonths = new Set(expenses.map(tx => {
-          return new Date(tx.date).toISOString().slice(0, 7); // YYYY-MM
-        }));
+        // Save state for slider (< >)
+        window.txStatData = {
+          drCount,
+          crCount,
+          totalCount,
+          totalSpent,
+          totalIncome
+        };
+
+        renderTxStatMode();
+        renderAmountStatMode();
+
+        // 3. Months Active (unique months active across expenses & incomes)
+        const uniqueMonths = new Set([
+          ...expenses.map(tx => new Date(tx.date).toISOString().slice(0, 7)),
+          ...incomes.map(tx => new Date(tx.date).toISOString().slice(0, 7))
+        ].filter(Boolean));
         const monthsActive = uniqueMonths.size || 0;
 
         // 4. Average Monthly Spending
@@ -1034,47 +1394,62 @@
 
         // 6. Last Active
         let lastActive = "N/A";
-        if (expenses.length > 0) {
-          const lastDate = new Date(Math.max(...expenses.map(e => new Date(e.date))));
+        const allTimestamps = [
+          ...expenses.map(e => new Date(e.date).getTime()),
+          ...incomes.map(i => new Date(i.date).getTime())
+        ].filter(t => !isNaN(t));
+
+        if (allTimestamps.length > 0) {
+          const lastDate = new Date(Math.max(...allTimestamps));
           const diffDays = Math.floor((new Date() - lastDate) / (1000 * 60 * 60 * 24));
           lastActive = diffDays === 0 ? "Today" : (diffDays === 1 ? "Yesterday" : `${diffDays} days ago`);
         }
 
-        // 7. Recent Activity Timeline (Proper LIFO: newest date first, tie-break by creation order)
-        const sortedExpenses = [...expenses].sort((a, b) => {
+        // 7. Recent Activity Timeline (Unified LIFO: newest date first, tie-break by creation order)
+        const unifiedRecent = [
+          ...expenses.map(e => ({ ...e, isIncome: false })),
+          ...incomes.map(i => ({ ...i, isIncome: true, category: 'Income', description: i.source || 'Income' }))
+        ];
+
+        const sortedRecent = unifiedRecent.sort((a, b) => {
           const dateA = new Date(a.date).getTime();
           const dateB = new Date(b.date).getTime();
           if (dateB !== dateA) return dateB - dateA;
 
-          // Tie-breaker for same-day transactions: newest inserted first
           const timeB = b.createdAt ? new Date(b.createdAt).getTime() : (b._id ? parseInt(String(b._id).substring(0, 8), 16) : 0);
           const timeA = a.createdAt ? new Date(a.createdAt).getTime() : (a._id ? parseInt(String(a._id).substring(0, 8), 16) : 0);
           return timeB - timeA;
         }).slice(0, 5);
+
         const timelineContainer = document.getElementById('activityTimeline');
 
-        if (sortedExpenses.length === 0) {
+        if (sortedRecent.length === 0) {
           timelineContainer.innerHTML = '<div style="opacity: 0.5; padding: 10px;">No recent activity found.</div>';
           timelineContainer.style.borderLeft = 'none';
         } else {
           timelineContainer.style.borderLeft = '2px solid rgba(255, 255, 255, 0.1)';
-          timelineContainer.innerHTML = sortedExpenses.map(tx => `
+          timelineContainer.innerHTML = sortedRecent.map(tx => {
+            const isInc = tx.isIncome;
+            const amtColor = isInc ? '#4ade80' : '#fb7185';
+            const dotColor = isInc ? '#4ade80' : '#10b981';
+            const sign = isInc ? '+' : '-';
+            return `
             <div class="timeline-item">
-              <div class="timeline-dot"></div>
+              <div class="timeline-dot" style="background: ${dotColor}; box-shadow: 0 0 6px ${isInc ? 'rgba(74,222,128,0.5)' : 'rgba(16,185,129,0.4)'};"></div>
               <div class="timeline-content">
                 <span class="t-date">${new Date(tx.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                 <div class="t-row">
                   <span class="t-desc">${tx.description || tx.category}</span>
-                  <span class="t-amount">-₹${Number(tx.amount).toLocaleString('en-IN')}</span>
+                  <span class="t-amount" style="color: ${amtColor}; font-weight: 600;">${sign}₹${Number(tx.amount).toLocaleString('en-IN')}</span>
                 </div>
               </div>
             </div>
-          `).join('');
+          `;
+          }).join('');
         }
 
         // Update UI
         document.getElementById('statTotalSpent').innerText = `₹${totalSpent.toLocaleString('en-IN')}`;
-        document.getElementById('statTxCount').innerText = txCount;
         document.getElementById('statMonthsActive').innerText = monthsActive;
         document.getElementById('statAvgMonthly').innerText = `₹${Math.round(avgMonthly).toLocaleString('en-IN')}`;
         document.getElementById('statTopCategory').innerText = topCategory;

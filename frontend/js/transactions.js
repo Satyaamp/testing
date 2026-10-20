@@ -75,7 +75,7 @@ function updateMonthNavButtons() {
   const nextBtn = document.getElementById("nextMonthBtn");
   if (!nextBtn) return;
 
-  const isCurrentOrFuture = (targetYear > currentRealYear) || 
+  const isCurrentOrFuture = (targetYear > currentRealYear) ||
     (targetYear === currentRealYear && targetMonth >= currentRealMonth);
 
   if (isCurrentOrFuture) {
@@ -127,7 +127,7 @@ function updatePageHeader() {
 // Month stepping (Prev / Next month)
 window.stepMonth = function (delta) {
   if (delta > 0) {
-    const isCurrentOrFuture = (targetYear > currentRealYear) || 
+    const isCurrentOrFuture = (targetYear > currentRealYear) ||
       (targetYear === currentRealYear && targetMonth >= currentRealMonth);
     if (isCurrentOrFuture) {
       return; // Block future month navigation
@@ -352,6 +352,11 @@ function renderKpis(kpis) {
   const balEl = document.getElementById("kpiBalance");
   const countEl = document.getElementById("kpiCount");
 
+  const crCountEl = document.getElementById("kpiCrCount");
+  const drCountEl = document.getElementById("kpiDrCount");
+  const incSubEl = document.getElementById("kpiIncomeCountSub");
+  const expSubEl = document.getElementById("kpiExpenseCountSub");
+
   if (incEl) incEl.innerText = `₹${formatINR(kpis.totalIncome)}`;
   if (expEl) expEl.innerText = `₹${formatINR(kpis.totalExpense)}`;
   if (balEl) {
@@ -360,6 +365,14 @@ function renderKpis(kpis) {
     balEl.style.color = isNeg ? "#fb7185" : "#4ade80";
   }
   if (countEl) countEl.innerText = `${kpis.totalTransactions} txns`;
+
+  const crCount = kpis.incomeCount !== undefined ? kpis.incomeCount : 0;
+  const drCount = kpis.expenseCount !== undefined ? kpis.expenseCount : 0;
+
+  if (crCountEl) crCountEl.innerText = crCount;
+  if (drCountEl) drCountEl.innerText = drCount;
+  if (incSubEl) incSubEl.innerText = `${crCount} CR ${crCount === 1 ? 'record' : 'records'}`;
+  if (expSubEl) expSubEl.innerText = `${drCount} DR ${drCount === 1 ? 'record' : 'records'}`;
 }
 
 // Populate Categories Select (Strictly genuine expense categories)
@@ -618,8 +631,8 @@ window.downloadExcel = async function () {
       [`Period: ${monthName} ${targetYear}   |   Generated On: ${new Date().toLocaleString('en-IN')}`],
       [],
       ["--- FINANCIAL SUMMARY ---"],
-      ["", "Total Income (CR) (INR)", "Total Debit (DR) (INR)", "Net Balance (INR)", "Total Records", ""],
-      ["", Number(kpis.totalIncome || 0), Number(kpis.totalExpense || 0), Number(kpis.balance || 0), items.length, ""],
+      ["", "Total Income (CR) (INR)", "Total Debit (DR) (INR)", "Net Balance (INR)", "Total Records", "CR Records", "DR Records"],
+      ["", Number(kpis.totalIncome || 0), Number(kpis.totalExpense || 0), Number(kpis.balance || 0), items.length, Number(kpis.incomeCount || 0), Number(kpis.expenseCount || 0)],
       [],
       ["--- TRANSACTION LEDGER ---"],
       ["Date", "Type", "Category", "Description / Source", "Amount (INR)", "Status"]
@@ -968,7 +981,7 @@ window.downloadPDF = async function () {
     // Summary Stripe
     doc.setFontSize(9.5);
     doc.setTextColor(30, 41, 59);
-    doc.text(`Income (CR): INR ${formatINR(kpis.totalIncome || 0)}   |   Debit (DR): INR ${formatINR(kpis.totalExpense || 0)}   |   Net: INR ${formatINR(kpis.balance || 0)}   |   Total: ${items.length} records`, 14, 40);
+    doc.text(`Income (CR): INR ${formatINR(kpis.totalIncome || 0)} (${kpis.incomeCount || 0} CR)   |   Debit (DR): INR ${formatINR(kpis.totalExpense || 0)} (${kpis.expenseCount || 0} DR)   |   Net: INR ${formatINR(kpis.balance || 0)}   |   Total: ${items.length} records`, 14, 40);
 
     // Table Rows
     const tableData = items.map(t => {

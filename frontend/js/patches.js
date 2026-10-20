@@ -586,9 +586,13 @@ window.handleSaveAsPatchToggle = handleSaveAsPatchToggle;
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     ensurePatchPickerDOM();
-    loadUserPatches();
+    if (window.location.pathname.includes('patches')) {
+      loadUserPatches();
+    }
   });
 } else {
   ensurePatchPickerDOM();
-  loadUserPatches();
+  if (window.location.pathname.includes('patches')) {
+    loadUserPatches();
+  }
 }
